@@ -1,0 +1,14 @@
+mnt/
+*.EFI
+.DS_Store
+*.img
+*.bin
+*.swp
+*.dSYM
+*.vdi
+*.txt
+cc_cache.gen.mk
+
+GPATH
+GRTAGS
+GTAGS

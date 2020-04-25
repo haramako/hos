@@ -7,6 +7,7 @@ COMMON_SRCS=
 KERNEL_SRCS= $(COMMON_SRCS) \
              asm.S \
 			 main.c \
+			newlib_support.c
 
 KERNEL_OBJS= $(addsuffix .o, $(basename $(KERNEL_SRCS)))
 KERNEL_DEPS= $(addsuffix .d, $(basename $(KERNEL_SRCS)))
@@ -27,8 +28,8 @@ CFLAGS_KERNEL= \
 			   -target x86_64-unknown-none-elf \
 			   -fno-stack-protector -fno-exceptions -fshort-wchar \
 	           -mno-red-zone -mcmodel=large \
-			   -mno-red-zone \
-			   -nostdlib -nostdinc\
+			   -nostdlib \
+				 -D__ELF__ -D_LDBL_EQ_DBL \
 			   -I$(LIBCXX_FOR_KERNEL_INC_PATH) \
 			   $(CLANG_WARNINGS) $(C_STD)
 

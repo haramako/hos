@@ -43,9 +43,10 @@ app/% : .FORCE
 	make -C $(dir $@)
 
 files : src/LIUMOS.ELF .FORCE
+	-rm -rf mnt
 	mkdir -p mnt/
-	-rm -rf mnt/*
 	cp -a efi/* mnt
+	cp -a dist/* mnt
 	cp src/LIUMOS.ELF mnt/LIUMOS.ELF
 
 run_nopmem : files .FORCE

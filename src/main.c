@@ -1,5 +1,7 @@
-#include "stdint.h"
+#include <stdint.h>
 #include "asm.h"
+
+typedef int bool;
 
 typedef struct LiumOS {
 	int n;
@@ -7,7 +9,8 @@ typedef struct LiumOS {
 
 uint16_t port_;
 
-void serial_init(uint16_t port) {
+void serial_init(uint16_t port)
+{
   // https://wiki.osdev.org/Serial_Ports
   port_ = port;
   WriteIOPort8(port_ + 1, 0x00);  // Disable all interrupts
@@ -20,9 +23,21 @@ void serial_init(uint16_t port) {
   WriteIOPort8(port_ + 4, 0x0B);  // IRQs enabled, RTS/DSR set
 }
 
-int KernelEntry(LiumOS* liumos_passed)
+bool serial_is_transmit_empty(void) {
+	return ReadIOPort8(port_ + 5) & 0x20;
+}
+
+void serial_send_char(char c) {
+	while (!serial_is_transmit_empty());
+	WriteIOPort8(port_, c);
+}
+
+
+void KernelEntry(LiumOS* liumos_passed)
 {
-	while(1);
+	serial_init(0x2f8);
 	
-	return 0;
+	while(1){
+		serial_send_char('a');
+	}
 }

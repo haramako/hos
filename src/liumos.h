@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.h"
 #include "asm.h"
 //#include "sys_constant.h"
 
@@ -10,8 +11,6 @@ const uint64_t kLAPICRegisterAreaByteSize = 0x0000000000100000ULL;
 const uint64_t kKernelBaseAddr = 0xFFFFFFFF00000000ULL;
 
 const uint64_t kKernelStackPagesForEachProcess = 2;
-
-#define PACKED __attribute__((__packed__))
 
 // Dummy LuimOS class decralations
 typedef void EFIFile;

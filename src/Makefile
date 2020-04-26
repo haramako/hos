@@ -7,7 +7,8 @@ COMMON_SRCS=
 KERNEL_SRCS= $(COMMON_SRCS) \
              asm.S \
 			 main.c \
-			newlib_support.c
+			newlib_support.c \
+			serial.c
 
 KERNEL_OBJS= $(addsuffix .o, $(basename $(KERNEL_SRCS)))
 KERNEL_DEPS= $(addsuffix .d, $(basename $(KERNEL_SRCS)))

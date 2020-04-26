@@ -1,16 +1,12 @@
 #pragma once
 
-#include <stdint.h>
-typedef uintptr_t size_t;
-//#include "generic.h"
+#include "common.h"
 
- #if 0
- #if 0
+#if 0
 namespace CPUIDIndex {
 constexpr uint32_t kXTopology = 0x0B;
 constexpr uint32_t kMaxAddr = 0x80000008;
 }  // namespace CPUIDIndex
-#endif
 
 const uint32_t kCPUID01H_EDXBitAPIC = (1 << 9);
 const uint32_t kCPUID01H_ECXBitx2APIC = (1 << 21);
@@ -22,10 +18,7 @@ const uint64_t kLocalAPICBaseBitx2APICEnabled = (1 << 10);
 
 const uint64_t kRFlagsInterruptEnable = (1ULL << 9);
 
-#define packed_struct struct __attribute__((__packed__))
-#define packed_union union __attribute__((__packed__))
-
-struct __attribute__((__packed__)) CPUFeatureSet {
+struct PACKED CPUFeatureSet {
   uint64_t max_phy_addr;
   uint64_t phy_addr_mask;               // = (1ULL << max_phy_addr) - 1
   uint64_t kernel_phys_page_map_begin;  // = ~((1ULL << (max_phy_addr - 1) - 1))
@@ -38,19 +31,19 @@ struct __attribute__((__packed__)) CPUFeatureSet {
   char brand_string[48];
 };
 
-packed_struct CPUID {
+struct PACKED CPUID {
   uint32_t eax;
   uint32_t ebx;
   uint32_t ecx;
   uint32_t edx;
 };
 
-packed_struct GDTR {
+struct PACKED GDTR {
   uint16_t limit;
   uint64_t* base;
 };
 
-packed_struct GeneralRegisterContext {
+struct PACKED GeneralRegisterContext {
   uint64_t rax;
   uint64_t rdx;
   uint64_t rbx;
@@ -71,7 +64,7 @@ packed_struct GeneralRegisterContext {
 };
 static_assert(sizeof(GeneralRegisterContext) == (16 - 1) * 8);
 
-packed_struct InterruptContext {
+struct PACKED InterruptContext {
   uint64_t rip;
   uint64_t cs;
   uint64_t rflags;
@@ -80,13 +73,13 @@ packed_struct InterruptContext {
 };
 static_assert(sizeof(InterruptContext) == 40);
 
-packed_struct CPUContext {
+struct PACKED CPUContext {
   uint64_t cr3;
   GeneralRegisterContext greg;
   InterruptContext int_ctx;
 };
 
-packed_struct InterruptInfo {
+struct PACKED InterruptInfo {
   GeneralRegisterContext greg;
   uint64_t error_code;
   InterruptContext int_ctx;
@@ -98,7 +91,7 @@ enum class IDTType {
   kTrapGate = 0xF,
 };
 
-packed_struct IDTGateDescriptor {
+struct PACKED IDTGateDescriptor {
   uint16_t offset_low;
   uint16_t segment_descriptor;
   unsigned interrupt_stack_table : 3;
@@ -112,12 +105,12 @@ packed_struct IDTGateDescriptor {
   uint32_t reserved2;
 };
 
-packed_struct IDTR {
+struct PACKED IDTR {
   uint16_t limit;
   IDTGateDescriptor* base;
 };
 
-packed_struct IA32_EFER_BITS {
+struct PACKED IA32_EFER_BITS {
   unsigned syscall_enable : 1;
   unsigned reserved0 : 7;
   unsigned LME : 1;
@@ -126,26 +119,26 @@ packed_struct IA32_EFER_BITS {
   unsigned NXE : 1;
 };
 
-packed_struct IA32_EFER {
+struct PACKED IA32_EFER {
   union {
     uint64_t data;
     IA32_EFER_BITS bits;
   };
 };
 
-packed_struct IA32_MaxPhyAddr_BITS {
+struct PACKED IA32_MaxPhyAddr_BITS {
   uint8_t physical_address_bits;
   uint8_t linear_address_bits;
 };
 
-packed_struct IA32_MaxPhyAddr {
+struct PACKED IA32_MaxPhyAddr {
   union {
     uint64_t data;
     IA32_MaxPhyAddr_BITS bits;
   };
 };
 
-packed_struct IA_CR3_BITS {
+struct PACKED IA_CR3_BITS {
   uint64_t ignored0 : 3;
   uint64_t PWT : 1;
   uint64_t PCD : 1;
@@ -153,7 +146,7 @@ packed_struct IA_CR3_BITS {
   uint64_t pml4_addr : 52;
 };
 
-packed_struct IA_TSS64 {
+struct PACKED IA_TSS64 {
   uint32_t reserved0;
   uint64_t rsp[3];
   uint64_t ist[9];

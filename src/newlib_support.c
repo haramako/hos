@@ -1,18 +1,11 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-//#include "generic.h"
-//#include "liumos.h"
+#include "mem.h"
 
-caddr_t sbrk(int diff) {
-	#if 0
-  Process& proc = liumos->scheduler->GetCurrentProcess();
-  ExecutionContext& ctx = proc.GetExecutionContext();
-  ctx.ExpandHeap(diff);
-  return (caddr_t)ctx.GetHeapEndVirtAddr();
-  #else
-  return (caddr_t)0x30;
-  #endif
+caddr_t sbrk(int diff)
+{
+	return (caddr_t)mem_sbrk(diff);
 }
 
 static void Panic(const char* msg)

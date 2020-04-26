@@ -2,7 +2,21 @@
 
 #include "asm.h"
 
-void serial_init(Serial *s, uint16_t port)
+static Serial com_[2];
+
+void serial_init()
+{
+	serial_new(&com_[0], 0x3f8);
+	serial_new(&com_[1], 0x2f8);
+}
+
+Serial* serial_get_port(int serial_num)
+{
+	return &com_[serial_num];
+}
+
+
+void serial_new(Serial *s, uint16_t port)
 {
   // https://wiki.osdev.org/Serial_Ports
   s->port = port;

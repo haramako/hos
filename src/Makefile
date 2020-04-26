@@ -4,13 +4,16 @@ include ../common.mk
 
 COMMON_SRCS= 
 
-KERNEL_SRCS= $(COMMON_SRCS) \
-	        asm.S \
-			console.c \
-			efi.c \
-			main.c \
-			newlib_support.c \
-			serial.c
+KERNEL_SRCS= \
+	$(COMMON_SRCS) \
+	asm.S \
+	console.c \
+	efi.c \
+	main.c \
+	mem.c \
+	newlib_support.c \
+	physical_memory.c \
+	serial.c
 
 KERNEL_OBJS= $(addsuffix .o, $(basename $(KERNEL_SRCS)))
 KERNEL_DEPS= $(addsuffix .d, $(basename $(KERNEL_SRCS)))

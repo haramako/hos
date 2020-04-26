@@ -67,7 +67,12 @@ typedef enum {
 typedef struct EFI_RuntimeServices {
     char _buf_rs1[24];
     uint64_t _buf_rs2[4];
-    uint64_t _buf_rs3[2];
+	
+	int (*set_virtual_address_map)(UINTN memory_map_size,
+									UINTN descriptor_size,
+									UINTN descriptor_version,
+									void *virtual_map);
+	void (*convert_pointer)(); // dummy
     uint64_t _buf_rs4[3];
     uint64_t _buf_rs5;
     void (*reset_system)(ResetType,

@@ -2,16 +2,15 @@ default: LIUMOS.ELF
 
 include ../common.mk
 
-COMMON_SRCS= 
-
 KERNEL_SRCS= \
-	$(COMMON_SRCS) \
 	asm.S \
 	console.c \
 	efi.c \
+	gdt.c \
 	main.c \
 	mem.c \
 	newlib_support.c \
+	newlib_func.c \
 	physical_memory.c \
 	serial.c
 
@@ -21,9 +20,11 @@ OVMF=ovmf/bios64.bin
 QEMU=qemu-system-x86_64
 
 CLANG_WARNINGS = \
-				 -Wall -Wpedantic -Wextra -Wconditional-uninitialized -Wshorten-64-to-32 \
-				 -Werror \
-				 -Wno-keyword-macro -Wno-unused-variable -Wno-unused-parameter
+	-Wall -Wpedantic -Wextra -Wconditional-uninitialized -Wshorten-64-to-32 \
+	-Werror \
+	-Wno-keyword-macro \
+	-Wno-unused-variable -Wno-unused-parameter -Wno-unused-function \
+    -Wno-gnu-binary-literal
 C_STD = -std=c11
 CXX_STD = -std=c++17
 
@@ -39,21 +40,6 @@ CFLAGS_KERNEL= \
 			   -I$(LIBCXX_FOR_KERNEL_INC_PATH) \
 			   $(CLANG_WARNINGS) $(C_STD)
 
-# -Wno-gnu-include-next: avoid warning from third_party/newlib-cygwin_dest/include/limits.h:132:3
-CXXFLAGS_KERNEL= \
-				 -target x86_64-unknown-none-elf \
-				 -fno-stack-protector -fno-exceptions -fshort-wchar -fno-rtti \
-				 -mno-red-zone -mcmodel=large \
-				 -nostdlibinc \
-				 -D__ELF__ -D_LDBL_EQ_DBL \
-				 -I$(LIBCXX_FOR_KERNEL_INC_PATH) \
-				 -I../third_party_root/include/ \
-				 -I$(CLANG_SYSTEM_INC_PATH) \
-				 $(CLANG_WARNINGS) \
-				 -Wno-gnu-include-next \
-				 $(CXX_STD)
-
-
 LDFLAGS_KERNEL= \
 				-L$(LIBCXX_FOR_KERNEL_LIB_PATH) -lm \
 				-L../third_party_root/lib -lc \
@@ -62,10 +48,6 @@ LDFLAGS_KERNEL= \
 CXXFLAGS_FOR_TEST= \
 				   $(CLANG_WARNINGS) $(CXX_STD) -g -stdlib=libc++ \
 				   -DLIUMOS_TEST
-
-OSX_STD_HEADER_INCLUDE_FLAGS= \
-							  -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include \
-							  -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
 
 FONTMAKER=../tools/fontmaker
 
@@ -87,15 +69,13 @@ test_sheet : sheet_test.cc sheet.cc Makefile
 # Kernel rules
 
 %.o : %.c Makefile
-	$(LLVM_CC) $(CFLAGS_KERNEL) \
-		-g -c -o $*.o $*.c
+	$(LLVM_CC) $(CFLAGS_KERNEL) -g -c -o $*.o $*.c
 %.d : %.c Makefile
-	@$(LLVM_CXX) $(CXXFLAGS_KERNEL) -MD -MF $@ -c -o $*.o $*.c >/dev/null 2>&1
+	@$(LLVM_CC) $(CFLAGS_KERNEL) -MD -MF $@ -c -o $*.o $*.c >/dev/null 2>&1
 	@echo 'DEP $@'
 
 %.o : %.S Makefile
-	$(LLVM_CC) $(CXXFLAGS_KERNEL) \
-		-c -o $*.o $*.S
+	$(LLVM_CC) $(CFLAGS_KERNEL) -c -o $*.o $*.S
 %.d : %.S Makefile
 	@touch $@ # generate dummy
 	@echo 'DEP $@'

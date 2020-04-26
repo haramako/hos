@@ -37,12 +37,14 @@ struct PACKED CPUID {
   uint32_t ecx;
   uint32_t edx;
 };
+#endif
 
-struct PACKED GDTR {
+typedef struct PACKED GDTR {
   uint16_t limit;
   uint64_t* base;
-};
+} GDTR;
 
+#if 0
 struct PACKED GeneralRegisterContext {
   uint64_t rax;
   uint64_t rdx;
@@ -146,15 +148,18 @@ struct PACKED IA_CR3_BITS {
   uint64_t pml4_addr : 52;
 };
 
-struct PACKED IA_TSS64 {
+#endif
+
+typedef struct PACKED IA_TSS64 {
   uint32_t reserved0;
   uint64_t rsp[3];
   uint64_t ist[9];
   uint16_t reserved1;
   uint16_t io_map_base_addr_ofs;
-};
+} IA_TSS64;
 static_assert(sizeof(IA_TSS64) == 104);
 
+#if 0
 enum class MSRIndex : uint32_t {
   kLocalAPICBase = 0x1b,
   kx2APICEndOfInterrupt = 0x80b,
@@ -165,7 +170,6 @@ enum class MSRIndex : uint32_t {
   kFSBase = 0xC0000100,
   kKernelGSBase = 0xC0000102,
 };
-
 #endif
 
 #if 0
@@ -178,9 +182,9 @@ __attribute__((ms_abi)) uint64_t ReadMSR(MSRIndex);
 __attribute__((ms_abi)) void WriteMSR(MSRIndex, uint64_t);
 #endif
 
-#if 0
 __attribute__((ms_abi)) void ReadGDTR(GDTR*);
 __attribute__((ms_abi)) void WriteGDTR(GDTR*);
+#if 0
 __attribute__((ms_abi)) void ReadIDTR(IDTR*);
 __attribute__((ms_abi)) void WriteIDTR(IDTR*);
 #endif

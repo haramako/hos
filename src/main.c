@@ -8,6 +8,44 @@
 
 LiumOS *liumos_;
 
+void KernelEntry(LiumOS* liumos_passed);
+
+static void test_malloc_()
+{
+	int *a = (int*)malloc(4);
+	int *b = (int*)malloc(4);
+	free(a);
+	int *c = (int*)malloc(4);
+	int n = 99;
+	
+
+	klog("a = %p\nb= %p\nc= %p", (void*)a, (void*)b, c);
+
+	klog("KernelEntry %016llx", KernelEntry);
+	klog("liumos_     %016llx", liumos_);
+	klog("n   _       %016llx", &n);
+}
+
+static void test_virtual_memory_map_()
+{
+	EFI_RuntimeServices *runtime_services = liumos_->loader_info.efi->system_table->runtime_services;
+	EFI_MemoryMap *mm = liumos_->efi_memory_map;
+	int res = runtime_services->set_virtual_address_map(sizeof(mm->buf), mm->descriptor_size, mm->key, (void*)mm->buf);
+	klog("res = %d", res);
+	efi_memory_map_print(liumos_->efi_memory_map);
+}
+
+static void test_memory_map_()
+{
+	efi_memory_map_print(liumos_->efi_memory_map);
+}
+
+static void test_reset_()
+{
+	EFI_RuntimeServices *runtime_services = liumos_->loader_info.efi->system_table->runtime_services;
+	runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
+}
+
 void KernelEntry(LiumOS* liumos_passed)
 {
 	liumos_ = liumos_passed;
@@ -25,23 +63,8 @@ void KernelEntry(LiumOS* liumos_passed)
 
 	// Now you can use malloc/free.
 
-	int *a = (int*)malloc(4);
-	int *b = (int*)malloc(4);
-	free(a);
-	int *c = (int*)malloc(4);
-	int n = 99;
-	
+	//test_memory_map_();
 
-	klog("a = %p\nb= %p\nc= %p", (void*)a, (void*)b, c);
-
-	klog("KernelEntry %016llx", KernelEntry);
-	klog("liumos_     %016llx", liumos_);
-	klog("n   _       %016llx", &n);
-
-	efi_memory_map_print(liumos_->efi_memory_map);
-
-	//EFI_RuntimeServices *runtime_services = liumos_->loader_info.efi->system_table->runtime_services;
-	//runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
-
+	klog("Kernel OK!");
 	Die();
 }

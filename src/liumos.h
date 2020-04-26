@@ -6,13 +6,13 @@
 #include "efi.h"
 //#include "sys_constant.h"
 
-const uint64_t kLAPICRegisterAreaPhysBase = 0x00000000FEE00000ULL;
-const uint64_t kLAPICRegisterAreaVirtBase = 0xFFFFFFFFFEE00000ULL;
-const uint64_t kLAPICRegisterAreaByteSize = 0x0000000000100000ULL;
+#define kLAPICRegisterAreaPhysBase 0x00000000FEE00000ULL
+#define kLAPICRegisterAreaVirtBase 0xFFFFFFFFFEE00000ULL
+#define kLAPICRegisterAreaByteSize 0x0000000000100000ULL
 
-const uint64_t kKernelBaseAddr = 0xFFFFFFFF00000000ULL;
+#define kKernelBaseAddr 0xFFFFFFFF00000000ULL
 
-const uint64_t kKernelStackPagesForEachProcess = 2;
+#define kKernelStackPagesForEachProcess 2
 
 // Dummy LuimOS class decralations
 typedef void EFIFile;

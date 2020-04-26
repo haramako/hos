@@ -41,8 +41,9 @@ typedef struct EFI_MemoryDescriptor {
 } EFI_MemoryDescriptor;
 
 EFI_MemoryDescriptor* efi_memory_map_get_descriptor(EFI_MemoryMap *mm, int idx);
+void efi_memory_map_print(EFI_MemoryMap *mm);
 
-void efi_memory_descriptor_print(EFI_MemoryDescriptor *md);
+void efi_memory_descriptor_print(EFI_MemoryDescriptor *md, int index);
 
 // Dummy decralations
 typedef void* Handle;

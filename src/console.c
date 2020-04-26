@@ -33,9 +33,11 @@ void console_printf(const char *fmt, ...)
 
 void console_printfn(const char *fmt, ...)
 {
+	char buf[CONSOLE_BUF_SIZE];
 	va_list vargs;
 	va_start(vargs, fmt);
-	console_printf(fmt, vargs);
+	vsnprintf(buf, sizeof(buf), fmt, vargs);
+	console_write(buf);
 	console_write("\n");
 	va_end(vargs);
 }

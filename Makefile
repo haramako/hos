@@ -14,7 +14,7 @@ QEMU_ARGS=\
 					 -bios $(OVMF) \
 					 -machine q35 -cpu qemu64 -smp 4 \
 					 -monitor telnet:127.0.0.1:$(PORT_MONITOR),server,nowait \
-					 -m 8G,slots=2,maxmem=10G \
+					 -m 2G,slots=2,maxmem=10G \
 					 -drive format=raw,file=fat:rw:mnt -net none \
 					 -serial tcp::1234,server,nowait \
 					 -serial stdio \

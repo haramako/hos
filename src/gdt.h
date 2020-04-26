@@ -40,19 +40,9 @@ typedef struct PACKED GDT_TSS64Entry {
 	uint8_t base_mid_high;
 	uint32_t base_high;
 	uint32_t reserved;
-#if 0
-		void SetBaseAddr(void* base_addr) {
-			uint64_t base_addr_int = reinterpret_cast<uint64_t>(base_addr);
-			base_low = base_addr_int & 0xffff;
-			base_mid_low = (base_addr_int >> 16) & 0xff;
-			base_mid_high = (base_addr_int >> 24) & 0xff;
-			base_high = (base_addr_int >> 32) & 0xffffffffUL;
-		};
-		void SetLimit(uint16_t limit) { limit_low = limit; };
-#endif
 } GDT_TSS64Entry;
 
-static_assert(sizeof(GDT_TSS64Entry) == 16);
+static_assert(sizeof(GDT_TSS64Entry) == 16, "Invalid GDT_TSS64Entry size");
 
 typedef struct PACKED GDTDescriptors {
     uint64_t null_segment;

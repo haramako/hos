@@ -157,7 +157,7 @@ typedef struct PACKED IA_TSS64 {
   uint16_t reserved1;
   uint16_t io_map_base_addr_ofs;
 } IA_TSS64;
-static_assert(sizeof(IA_TSS64) == 104);
+static_assert(sizeof(IA_TSS64) == 104, "Invalid IA_TSS64 size");
 
 #if 0
 enum class MSRIndex : uint32_t {

@@ -2,6 +2,7 @@
 
 #include "asm.h"
 #include "console.h"
+#include "gdt.h"
 #include "mem.h"
 #include "physical_memory.h"
 #include "serial.h"
@@ -57,13 +58,18 @@ void KernelEntry(LiumOS* liumos_passed)
 
 	klog("\n=======================");
 	klog("Kernel start");
-	
+
 	physical_memory_init(liumos_->efi_memory_map);
 	mem_init();
 
 	// Now you can use malloc/free.
 
-	//test_memory_map_();
+	const int stack_pages = 1024;
+	uintptr_t stack = physical_memory_alloc(stack_pages);
+	uintptr_t ist = physical_memory_alloc(stack_pages);
+	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
+
+	gdt_print();
 
 	klog("Kernel OK!");
 	Die();

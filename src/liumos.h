@@ -1,7 +1,9 @@
 #pragma once
 
 #include "common.h"
+
 #include "asm.h"
+#include "efi.h"
 //#include "sys_constant.h"
 
 const uint64_t kLAPICRegisterAreaPhysBase = 0x00000000FEE00000ULL;
@@ -14,7 +16,6 @@ const uint64_t kKernelStackPagesForEachProcess = 2;
 
 // Dummy LuimOS class decralations
 typedef void EFIFile;
-typedef void EFI;
 typedef void ACPI_RSDT;
 typedef void ACPI_NFIT;
 typedef void ACPI_MADT;
@@ -31,7 +32,6 @@ typedef void CPUFeatureSet;
 typedef void PhysicalPageAllocator;
 typedef void KernelVirtualHeapAllocator;
 typedef void HPET;
-typedef void EFI_MemoryMap;
 typedef void IA_PML4;
 typedef void Scheduler;
 typedef void ProcessController;
@@ -84,4 +84,4 @@ typedef struct PACKED LiumOS {
   bool is_multi_task_enabled;
 } LiumOS;
 
-extern LiumOS* liumos;
+extern LiumOS* liumos_;

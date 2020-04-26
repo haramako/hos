@@ -5,8 +5,10 @@ include ../common.mk
 COMMON_SRCS= 
 
 KERNEL_SRCS= $(COMMON_SRCS) \
-             asm.S \
-			 main.c \
+	        asm.S \
+			console.c \
+			efi.c \
+			main.c \
 			newlib_support.c \
 			serial.c
 

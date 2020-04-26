@@ -11,7 +11,7 @@ caddr_t sbrk(int diff) {
   ctx.ExpandHeap(diff);
   return (caddr_t)ctx.GetHeapEndVirtAddr();
   #else
-  return 0;
+  return (caddr_t)0x30;
   #endif
 }
 

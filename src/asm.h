@@ -193,9 +193,7 @@ __attribute__((ms_abi)) void WriteIOPort32(uint16_t addr, uint32_t data);
 __attribute__((ms_abi)) void StoreIntFlag(void);
 __attribute__((ms_abi)) void StoreIntFlagAndHalt(void);
 __attribute__((ms_abi)) void ClearIntFlag(void);
-#if 0
-[[noreturn]] __attribute__((ms_abi)) void Die(void);
-#endif
+__attribute__((noreturn)) __attribute__((ms_abi)) void Die(void);
 __attribute__((ms_abi)) uint16_t ReadCSSelector(void);
 __attribute__((ms_abi)) uint16_t ReadSSSelector(void);
 __attribute__((ms_abi)) void WriteCSSelector(uint16_t);

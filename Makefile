@@ -3,20 +3,22 @@ default: src/BOOTX64.EFI
 include common.mk
 
 OVMF=ovmf/bios64.bin
+
+ifeq ($(OS),Windows_NT)
 QEMU="C:\Program Files\qemu\qemu-system-x86_64"
+else
+QEMU=qemu-system-x86_64
+endif
+
 QEMU_ARGS=\
 					 -bios $(OVMF) \
-					 -machine q35,nvdimm -cpu qemu64 -smp 4 \
+					 -machine q35 -cpu qemu64 -smp 4 \
 					 -monitor telnet:127.0.0.1:$(PORT_MONITOR),server,nowait \
 					 -m 8G,slots=2,maxmem=10G \
 					 -drive format=raw,file=fat:rw:mnt -net none \
 					 -serial tcp::1234,server,nowait \
 					 -serial stdio \
                      -device qemu-xhci -device usb-mouse -device usb-kbd
-
-
-QEMU_ARGS_PMEM=\
-                                        $(QEMU_ARGS) 
 
 VNC_PASSWORD=a
 PORT_MONITOR=1240
@@ -49,9 +51,6 @@ files : src/LIUMOS.ELF .FORCE
 	cp -a dist/* mnt
 	cp src/LIUMOS.ELF mnt/LIUMOS.ELF
 
-run_nopmem : files .FORCE
-	$(QEMU) $(QEMU_ARGS)
-
 LLDB_ARGS = -o 'settings set interpreter.prompt-on-quit false' \
 			-o 'process launch' \
 			-o 'process handle -s false SIGUSR1 SIGUSR2'
@@ -60,7 +59,10 @@ run_xhci_gdb : files .FORCE
 	lldb $(LLDB_ARGS) -- $(QEMU) $(QEMU_ARGS_XHCI) $(QEMU_ARGS)
 
 run :
-	$(QEMU) $(QEMU_ARGS_PMEM)
+	$(QEMU) $(QEMU_ARGS)
+
+runc :
+	$(QEMU) $(QEMU_ARGS) -nographic
 
 run_gdb : files pmem.img .FORCE
 	$(QEMU) $(QEMU_ARGS_PMEM) -gdb tcp::1192 -S || reset

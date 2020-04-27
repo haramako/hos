@@ -84,4 +84,4 @@ typedef struct PACKED LiumOS {
   bool is_multi_task_enabled;
 } LiumOS;
 
-extern LiumOS* liumos_;
+extern LiumOS* g_liumos;

@@ -9,7 +9,7 @@
 #include "serial.h"
 #include "interrupt.h"
 
-LiumOS *liumos_;
+LiumOS *g_liumos;
 
 void KernelEntry(LiumOS* liumos_passed);
 
@@ -25,33 +25,33 @@ static void test_malloc_()
 	klog("a = %p\nb= %p\nc= %p", (void*)a, (void*)b, c);
 
 	klog("KernelEntry %016llx", KernelEntry);
-	klog("liumos_     %016llx", liumos_);
+	klog("g_liumos     %016llx", g_liumos);
 	klog("n   _       %016llx", &n);
 }
 
 static void test_virtual_memory_map_()
 {
-	EFI_RuntimeServices *runtime_services = liumos_->loader_info.efi->system_table->runtime_services;
-	EFI_MemoryMap *mm = liumos_->efi_memory_map;
+	EFI_RuntimeServices *runtime_services = g_liumos->loader_info.efi->system_table->runtime_services;
+	EFI_MemoryMap *mm = g_liumos->efi_memory_map;
 	int res = runtime_services->set_virtual_address_map(sizeof(mm->buf), mm->descriptor_size, mm->key, (void*)mm->buf);
 	klog("res = %d", res);
-	efi_memory_map_print(liumos_->efi_memory_map);
+	efi_memory_map_print(g_liumos->efi_memory_map);
 }
 
 static void test_memory_map_()
 {
-	efi_memory_map_print(liumos_->efi_memory_map);
+	efi_memory_map_print(g_liumos->efi_memory_map);
 }
 
 static void test_reset_()
 {
-	EFI_RuntimeServices *runtime_services = liumos_->loader_info.efi->system_table->runtime_services;
+	EFI_RuntimeServices *runtime_services = g_liumos->loader_info.efi->system_table->runtime_services;
 	runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
 }
 
 void KernelEntry(LiumOS* liumos_passed)
 {
-	liumos_ = liumos_passed;
+	g_liumos = liumos_passed;
 
 	serial_init();
 	console_init(serial_get_port(1));
@@ -63,7 +63,7 @@ void KernelEntry(LiumOS* liumos_passed)
 	kinfo("=======================");
 	kinfo("Kernel start");
 
-	physical_memory_init(liumos_->efi_memory_map);
+	physical_memory_init(g_liumos->efi_memory_map);
 	mem_init();
 
 	// Now you can use malloc/free.
@@ -76,11 +76,11 @@ void KernelEntry(LiumOS* liumos_passed)
 
 	// Now ready to interrupt.
 
-	hpet_init((HPET_RegisterSpace*)liumos_->acpi.hpet->base_address.address);
+	hpet_init((HPET_RegisterSpace*)g_liumos->acpi.hpet->base_address.address);
 	hpet_set_timer_ns(
       0, 1000,
       kUsePeriodicMode | kEnable);
-	liumos_->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
+	g_liumos->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
 
 	// Now ready to HPET
 

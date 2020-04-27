@@ -131,7 +131,7 @@ clean_third_party :
 
 
 format :
-	clang-format -i *.cc *.h
+	clang-format -i *.c *.h
 
 commit :
 	make -C .. commit

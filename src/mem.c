@@ -6,8 +6,7 @@ uintptr_t heap_start_;
 uintptr_t heap_sbrk_;
 uintptr_t heap_end_;
 
-void mem_init()
-{
+void mem_init() {
 	ktrace("Initialize kernel heap.");
 	const int num = 2048;
 	uintptr_t block = physical_memory_alloc(num);
@@ -17,8 +16,7 @@ void mem_init()
 	ktrace("heap = %016llx~%016llx", heap_start_, heap_end_);
 }
 
-uintptr_t mem_sbrk(int diff)
-{
+uintptr_t mem_sbrk(int diff) {
 	heap_sbrk_ += diff;
 	return heap_sbrk_;
 }

@@ -15,6 +15,6 @@ typedef struct PhysicalMemory {
 	FreeBlock blocks[PHYSICAL_MEMORY_BLOCK_LEN];
 } PhysicalMemory;
 
-PhysicalMemory* physical_memory_instance();
+PhysicalMemory *physical_memory_instance();
 void physical_memory_init(EFI_MemoryMap *memory_map);
 uintptr_t physical_memory_alloc(uintptr_t pages);

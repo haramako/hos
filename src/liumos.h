@@ -2,9 +2,9 @@
 
 #include "common.h"
 
-#include "asm.h"
 #include "acpi.h"
 #include "apic.h"
+#include "asm.h"
 #include "efi.h"
 #include "hpet.h"
 //#include "sys_constant.h"
@@ -39,48 +39,48 @@ typedef void Process;
 
 // @liumos.c
 typedef struct PACKED LoaderInfo {
-  struct {
-    EFIFile* logo_ppm;
-    EFIFile* hello_bin;
-    EFIFile* pi_bin;
-    EFIFile* liumos_elf;
-    EFIFile* liumos_ppm;
-  } files;
-  EFI* efi;
+	struct {
+		EFIFile *logo_ppm;
+		EFIFile *hello_bin;
+		EFIFile *pi_bin;
+		EFIFile *liumos_elf;
+		EFIFile *liumos_ppm;
+	} files;
+	EFI *efi;
 } LoaderInfo;
 
 #define kNumOfPMEMManagers 4
 
 typedef struct PACKED LiumOS {
-  struct {
-    ACPI_RSDT* rsdt;
-    ACPI_NFIT* nfit;
-    ACPI_MADT* madt;
-    ACPI_HPET* hpet;
-    ACPI_SRAT* srat;
-    ACPI_SLIT* slit;
-    ACPI_FADT* fadt;
-  } acpi;
-  LoaderInfo loader_info;
-  PersistentMemoryManager* pmem[kNumOfPMEMManagers];
-  Sheet* vram_sheet;
-  Sheet* screen_sheet;
-  Console* main_console;
-  KeyboardController* keyboard_ctrl;
-  LocalAPIC* bsp_local_apic;
-  CPUFeatureSet* cpu_features;
-  PhysicalPageAllocator* dram_allocator;
-  KernelVirtualHeapAllocator* kernel_heap_allocator;
-  HPET* hpet;
-  EFI_MemoryMap* efi_memory_map;
-  IA_PML4* kernel_pml4;
-  Scheduler* scheduler;
-  ProcessController* proc_ctrl;
-  IDT* idt;
-  Process* root_process;
-  Process* sub_process;
-  uint64_t time_slice_count;
-  bool is_multi_task_enabled;
+	struct {
+		ACPI_RSDT *rsdt;
+		ACPI_NFIT *nfit;
+		ACPI_MADT *madt;
+		ACPI_HPET *hpet;
+		ACPI_SRAT *srat;
+		ACPI_SLIT *slit;
+		ACPI_FADT *fadt;
+	} acpi;
+	LoaderInfo loader_info;
+	PersistentMemoryManager *pmem[kNumOfPMEMManagers];
+	Sheet *vram_sheet;
+	Sheet *screen_sheet;
+	Console *main_console;
+	KeyboardController *keyboard_ctrl;
+	LocalAPIC *bsp_local_apic;
+	CPUFeatureSet *cpu_features;
+	PhysicalPageAllocator *dram_allocator;
+	KernelVirtualHeapAllocator *kernel_heap_allocator;
+	HPET *hpet;
+	EFI_MemoryMap *efi_memory_map;
+	IA_PML4 *kernel_pml4;
+	Scheduler *scheduler;
+	ProcessController *proc_ctrl;
+	IDT *idt;
+	Process *root_process;
+	Process *sub_process;
+	uint64_t time_slice_count;
+	bool is_multi_task_enabled;
 } LiumOS;
 
-extern LiumOS* g_liumos;
+extern LiumOS *g_liumos;

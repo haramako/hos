@@ -45,12 +45,12 @@ typedef struct PACKED GDT_TSS64Entry {
 static_assert(sizeof(GDT_TSS64Entry) == 16, "Invalid GDT_TSS64Entry size");
 
 typedef struct PACKED GDTDescriptors {
-    uint64_t null_segment;
-    uint64_t kernel_code_segment;
-    uint64_t kernel_data_segment;
-    uint64_t user_code_segment_32;
-    uint64_t user_data_segment;
-    uint64_t user_code_segment_64;
+	uint64_t null_segment;
+	uint64_t kernel_code_segment;
+	uint64_t kernel_data_segment;
+	uint64_t user_code_segment_32;
+	uint64_t user_data_segment;
+	uint64_t user_code_segment_64;
 	GDT_TSS64Entry task_state_segment;
 } GDTDescriptors;
 

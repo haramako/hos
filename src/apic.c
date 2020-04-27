@@ -29,7 +29,7 @@ void apic_new(LocalAPIC *a)
 		base_msr = ReadMSR(MSRIndex_kLocalAPICBase);
 	}
 
-#if 0
+#if 0 // no virtual memory.
 	a->base_addr = (base_msr & GetPhysAddrMask()) & ~0xfffULL;
 	a->kernel_virt_base_addr = liumos->kernel_heap_allocator->MapPages<uint64_t>(
 																			   base_addr_, ByteSizeToPageSize(kRegisterAreaSize),
@@ -114,13 +114,19 @@ void apic_print()
 	klog("  Version: %d", apic_read_reg(a, 0x30));
 	klog("  EOI: %d", apic_read_reg(a, 0xb0));
 	klog("  Error: %d", apic_read_reg(a, 0x280));
+
 	
+	uint32_t reg1 = ioapic_read_reg_(a, 0x01);
+	int num_irq = reg1 >> 16;
+		
 	klog("IO APIC info");
+	klog("  ID: %d", ioapic_read_reg_(a, 0x00));
+	klog("  Version: %d", reg1 & 0xff);
+	klog("  Num IRQ: %d", num_irq);
+	klog("  Priority: %d", ioapic_read_reg_(a, 0x02) >> 24);
 	klog("  IRQ:");
-	for(int i=0; i<0x20; i++){
+	for(int i=0; i<num_irq; i++){
 		int64_t v = ioapic_read_redirect_(a, i);
-		if( v != 0 ){
-			klog("    %02d: %016llx", i, v);
-		}
+		klog("    %02x: %016llx", i, v);
 	}
 }

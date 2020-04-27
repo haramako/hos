@@ -28,26 +28,28 @@ void apic_new(LocalAPIC *a)
 		base_msr = ReadMSR(MSRIndex_kLocalAPICBase);
 	}
 
-	#if 0
+#if 0
 	a->base_addr = (base_msr & GetPhysAddrMask()) & ~0xfffULL;
 	a->kernel_virt_base_addr = liumos->kernel_heap_allocator->MapPages<uint64_t>(
 																			   base_addr_, ByteSizeToPageSize(kRegisterAreaSize),
 																			   kPageAttrPresent | kPageAttrWritable | kPageAttrWriteThrough |
 																			   kPageAttrCacheDisable);
-	#endif
-
+#else
+	a->base_addr = base_msr;
+	a->kernel_virt_base_addr = (uint64_t)a->base_addr;
+#endif
+	a->is_x2apic = (base_msr & (1 << 10));
+	
+	CPUID cpuid;
+	ReadCPUID(&cpuid, CPUIDIndex_kXTopology, 0);
+	a->id = cpuid.edx;
+	
 	ktrace("LocalAPIC at 0x%016llx", a->base_addr);
 	ktrace(" is mapped at 0x%016llx", a->kernel_virt_base_addr);
-	a->is_x2apic = (base_msr & (1 << 10));
-	ktrace(" in kernel.\nmode: %s", (a->is_x2apic ? "x2APIC" : "xAPIC"));
-
-	#if 0
-	CPUID cpuid;
-	ReadCPUID(&cpuid, CPUIDIndex::kXTopology, 0);
-	id_ = cpuid.edx;
-	PutStringAndHex(" id", id_);
-	liumos->bsp_local_apic = this;
-	#endif
+	ktrace(" in kernel. mode: %s", (a->is_x2apic ? "x2APIC" : "xAPIC"));
+	ktrace(" id %d", a->id);
+	
+	g_liumos->bsp_local_apic = a;
 }
 
 void apic_send_end_of_interrupt(LocalAPIC *a)
@@ -95,8 +97,9 @@ static void set_interrupt_redirection_(LocalAPIC *a,
 	write_io_apic_redirect_table_register_(a, from_irq_num, redirect_table);
 }
 
-void apic_init(uint64_t local_apic_id)
+void apic_init()
 {
-	set_interrupt_redirection_(&g_apic, local_apic_id, 2, 0x20);  // HPET
-	set_interrupt_redirection_(&g_apic, local_apic_id, 1, 0x21);  // KBC
+	apic_new(&g_apic);
+	set_interrupt_redirection_(&g_apic, g_apic.id, 2, 0x20);  // HPET
+	set_interrupt_redirection_(&g_apic, g_apic.id, 1, 0x21);  // KBC
 }

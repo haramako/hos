@@ -11,7 +11,7 @@ typedef struct PACKED LocalAPIC {
   bool is_x2apic;
 } LocalAPIC;
 
-void apic_init(uint64_t local_apic_id);
+void apic_init();
 void apic_new(LocalAPIC *a);
 inline uint32_t apic_get_id(LocalAPIC *a) { return a->id; }
 inline bool apic_is_x2(LocalAPIC *a) { return a->is_x2apic; }

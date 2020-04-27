@@ -167,9 +167,7 @@ typedef uint64_t MSRIndex;
 #define MSRIndex_kKernelGSBase 0xC0000102p
 
 __attribute__((ms_abi)) void Sleep(void);
-#if 0
 __attribute__((ms_abi)) void ReadCPUID(CPUID*, uint32_t eax, uint32_t ecx);
-#endif
 
 __attribute__((ms_abi)) uint64_t ReadMSR(MSRIndex);
 __attribute__((ms_abi)) void WriteMSR(MSRIndex, uint64_t);

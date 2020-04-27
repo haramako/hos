@@ -71,6 +71,8 @@ void kernel_entry(LiumOS* liumos_passed)
 
 	// Now you can use malloc/free.
 
+	apic_init();
+
 	const int stack_pages = 1024;
 	uintptr_t stack = physical_memory_alloc(stack_pages);
 	uintptr_t ist = physical_memory_alloc(stack_pages);

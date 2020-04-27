@@ -8,6 +8,7 @@ static void physical_memory_add_page(uintptr_t physical_start, size_t pages);
 
 void physical_memory_init(EFI_MemoryMap *memory_map)
 {
+	ktrace("Initialize physical memory.");
 	pm_.block_len = 0;
 	
 	int len = efi_memory_map_get_count(memory_map);

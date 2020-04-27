@@ -54,11 +54,13 @@ void KernelEntry(LiumOS* liumos_passed)
 
 	serial_init();
 	console_init(serial_get_port(1));
+	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 	
 	// Now you can use console_*().
 
-	klog("\n=======================");
-	klog("Kernel start");
+	console_write("\n");
+	kinfo("=======================");
+	kinfo("Kernel start");
 
 	physical_memory_init(liumos_->efi_memory_map);
 	mem_init();
@@ -71,8 +73,12 @@ void KernelEntry(LiumOS* liumos_passed)
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
 	interrupt_init();
 
-	gdt_print();
+	//gdt_print();
 
-	klog("Kernel OK!");
+	ktrace("TRACE");
+	kinfo("INFO");
+	kwarn("WARN");
+
+	kinfo("Kernel OK!");
 	Die();
 }

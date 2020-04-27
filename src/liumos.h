@@ -4,6 +4,7 @@
 
 #include "asm.h"
 #include "acpi.h"
+#include "apic.h"
 #include "efi.h"
 #include "hpet.h"
 //#include "sys_constant.h"
@@ -28,8 +29,6 @@ typedef void PersistentMemoryManager;
 typedef void Sheet;
 typedef void Console;
 typedef void KeyboardController;
-typedef void LocalAPIC;
-typedef void CPUFeatureSet;
 typedef void PhysicalPageAllocator;
 typedef void KernelVirtualHeapAllocator;
 typedef void IA_PML4;

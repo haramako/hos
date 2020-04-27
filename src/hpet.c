@@ -3,9 +3,11 @@
 #include "asm.h"
 #include "console.h"
 
-//namespace GeneralConfigBits {
-const uint64_t HPET_GC_ENABLE = 1 << 0;
-const uint64_t HPET_USE_LEGACY_REPLACEMENT_ROUTING = 1 << 1;
+// HPET General Configuration
+typedef enum HPET_GC {
+	HPET_GC_ENABLE = 1 << 0,
+	HPET_GC_USE_LEGACY_REPLACEMENT_ROUTING = 1 << 1,
+} HPET_GC;
 
 const uint64_t kMainCounterSupports64bit = 1 << 13;
 
@@ -21,7 +23,7 @@ void hpet_init(HPET_RegisterSpace* registers)
 	g_hpet.registers = registers;
 	g_hpet.femtosecond_per_count = registers->general_capabilities_and_id >> 32;
 	uint64_t general_config = registers->general_configuration;
-	general_config |= HPET_USE_LEGACY_REPLACEMENT_ROUTING;
+	general_config |= HPET_GC_USE_LEGACY_REPLACEMENT_ROUTING;
 	general_config |= HPET_GC_ENABLE;
 	g_hpet.registers->general_configuration = general_config;
 }

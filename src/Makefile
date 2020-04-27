@@ -3,6 +3,7 @@ default: LIUMOS.ELF
 include ../common.mk
 
 KERNEL_SRCS= \
+	apic.c \
 	asm.S \
 	console.c \
 	efi.c \

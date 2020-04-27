@@ -2,31 +2,32 @@
 
 #include "common.h"
 
-#if 0
-class LocalAPIC {
- public:
-  void Init(void);
-  uint32_t GetID() { return id_; }
-  bool Isx2APIC() { return is_x2apic_; }
-  void SendEndOfInterrupt(void);
+#define kRegisterAreaSize 0x400
 
- private:
-  uint32_t ReadRegister(uint64_t offset) {
-    return *reinterpret_cast<uint32_t*>(kernel_virt_base_addr_ + offset);
-  }
-  void WriteRegister(uint64_t offset, uint32_t data) {
-    *reinterpret_cast<uint32_t*>(kernel_virt_base_addr_ + offset) = data;
-  }
-  uint32_t* GetRegisterAddr(uint64_t offset) {
-    return (uint32_t*)(base_addr_ + offset);
-  }
+typedef struct PACKED LocalAPIC {
+  uint64_t base_addr;
+  uint64_t kernel_virt_base_addr;
+  uint32_t id;
+  bool is_x2apic;
+} LocalAPIC;
 
-  static constexpr uint64_t kRegisterAreaSize = 0x400;
-  uint64_t base_addr_;
-  uint64_t kernel_virt_base_addr_;
-  uint32_t id_;
-  bool is_x2apic_;
-};
+void apic_init(uint64_t local_apic_id);
+void apic_new(LocalAPIC *a);
+inline uint32_t apic_get_id(LocalAPIC *a) { return a->id; }
+inline bool apic_is_x2(LocalAPIC *a) { return a->is_x2apic; }
+void apic_send_end_of_interrupt(LocalAPIC *a);
 
-void InitIOAPIC(uint64_t local_apic_id);
-#endif
+inline uint32_t apic_read_register(LocalAPIC *a, uint64_t offset)
+{
+    return *(uint32_t*)(a->kernel_virt_base_addr + offset);
+}
+
+inline void apic_write_register(LocalAPIC *a, uint64_t offset, uint32_t data)
+{
+    *(uint32_t*)(a->kernel_virt_base_addr + offset) = data;
+}
+
+inline uint32_t* apic_get_register_addr(LocalAPIC *a, uint64_t offset)
+{
+    return (uint32_t*)(a->base_addr + offset);
+}

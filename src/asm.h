@@ -2,23 +2,21 @@
 
 #include "common.h"
 
-#if 0
-namespace CPUIDIndex {
-constexpr uint32_t kXTopology = 0x0B;
-constexpr uint32_t kMaxAddr = 0x80000008;
-}  // namespace CPUIDIndex
+// CPUIDIndex
+#define CPUIDIndex_kXTopology 0x0B
+#define CPUIDIndex_kMaxAddr 0x80000008
 
-const uint32_t kCPUID01H_EDXBitAPIC = (1 << 9);
-const uint32_t kCPUID01H_ECXBitx2APIC = (1 << 21);
-const uint32_t kCPUID01H_EDXBitMSR = (1 << 5);
-const uint64_t kIOAPICRegIndexAddr = 0xfec00000;
-const uint64_t kIOAPICRegDataAddr = kIOAPICRegIndexAddr + 0x10;
-const uint64_t kLocalAPICBaseBitAPICEnabled = (1 << 11);
-const uint64_t kLocalAPICBaseBitx2APICEnabled = (1 << 10);
+#define kCPUID01H_EDXBitAPIC (1 << 9)
+#define kCPUID01H_ECXBitx2APIC (1 << 21)
+#define kCPUID01H_EDXBitMSR (1 << 5)
+#define kIOAPICRegIndexAddr 0xfec00000
+#define kIOAPICRegDataAddr (kIOAPICRegIndexAddr + 0x10)
+#define kLocalAPICBaseBitAPICEnabled (1 << 11)
+#define kLocalAPICBaseBitx2APICEnabled (1 << 10)
 
-const uint64_t kRFlagsInterruptEnable = (1ULL << 9);
+#define kRFlagsInterruptEnable (1ULL << 9)
 
-struct PACKED CPUFeatureSet {
+typedef struct PACKED CPUFeatureSet {
   uint64_t max_phy_addr;
   uint64_t phy_addr_mask;               // = (1ULL << max_phy_addr) - 1
   uint64_t kernel_phys_page_map_begin;  // = ~((1ULL << (max_phy_addr - 1) - 1))
@@ -29,15 +27,14 @@ struct PACKED CPUFeatureSet {
   bool clfsh;
   bool clflushopt;
   char brand_string[48];
-};
+} CPUFeatureSet;
 
-struct PACKED CPUID {
+typedef struct PACKED CPUID {
   uint32_t eax;
   uint32_t ebx;
   uint32_t ecx;
   uint32_t edx;
-};
-#endif
+} CPUID;
 
 typedef struct PACKED GDTR {
   uint16_t limit;
@@ -159,28 +156,23 @@ typedef struct PACKED IA_TSS64 {
 } IA_TSS64;
 static_assert(sizeof(IA_TSS64) == 104, "Invalid IA_TSS64 size");
 
-#if 0
-enum class MSRIndex : uint32_t {
-  kLocalAPICBase = 0x1b,
-  kx2APICEndOfInterrupt = 0x80b,
-  kEFER = 0xC0000080,
-  kSTAR = 0xC0000081,
-  kLSTAR = 0xC0000082,
-  kFMASK = 0xC0000084,
-  kFSBase = 0xC0000100,
-  kKernelGSBase = 0xC0000102,
-};
-#endif
+typedef uint64_t MSRIndex;
+#define MSRIndex_kLocalAPICBase 0x1b
+#define MSRIndex_kx2APICEndOfInterrupt 0x80b
+#define MSRIndex_kEFER 0xC0000080
+#define MSRIndex_kSTAR 0xC0000081
+#define MSRIndex_kLSTAR 0xC0000082
+#define MSRIndex_kFMASK 0xC0000084
+#define MSRIndex_kFSBase 0xC0000100
+#define MSRIndex_kKernelGSBase 0xC0000102p
 
 __attribute__((ms_abi)) void Sleep(void);
 #if 0
 __attribute__((ms_abi)) void ReadCPUID(CPUID*, uint32_t eax, uint32_t ecx);
 #endif
 
-#if 0
 __attribute__((ms_abi)) uint64_t ReadMSR(MSRIndex);
 __attribute__((ms_abi)) void WriteMSR(MSRIndex, uint64_t);
-#endif
 
 __attribute__((ms_abi)) void ReadGDTR(GDTR*);
 __attribute__((ms_abi)) void WriteGDTR(GDTR*);

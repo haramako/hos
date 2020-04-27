@@ -53,6 +53,8 @@ void kernel_entry(LiumOS* liumos_passed)
 {
 	g_liumos = liumos_passed;
 
+	Disable8259PIC();
+
 	serial_init();
 	console_init(serial_get_port(1));
 	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
@@ -75,13 +77,15 @@ void kernel_entry(LiumOS* liumos_passed)
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
 	interrupt_init();
 
+	__asm__("int $0x20");
+	
 	// Now ready to interrupt.
 
 	hpet_init((HPET_RegisterSpace*)g_liumos->acpi.hpet->base_address.address);
 	hpet_set_timer_ms( 0, 100, HPET_TC_USE_PERIODIC_MODE | HPET_TC_ENABLE);
 	g_liumos->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
-
-	// Now ready to HPET
+	
+	// Now ready to HPET timer.
 
 	kinfo("time %lld", hpet_read_main_counter_value());
 	kinfo("time %lld", hpet_read_main_counter_value());
@@ -91,8 +95,7 @@ void kernel_entry(LiumOS* liumos_passed)
 	kinfo("time %lld", t1);
 	kinfo("time %lld", t2);
 
-	__asm__("int3");
-	__asm__("int $32");
+	//__asm__("int3");
 
 	kinfo("Kernel ready!");
 	Die();

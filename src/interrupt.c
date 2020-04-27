@@ -1,7 +1,6 @@
 #include "interrupt.h"
 
 #include "apic.h"
-#include "console.h"
 #include "liumos.h"
 
 #define INTERRUPT_LEN 256

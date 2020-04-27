@@ -1,6 +1,5 @@
 #include "mem.h"
 
-#include "console.h"
 #include "physical_memory.h"
 
 uintptr_t heap_start_;

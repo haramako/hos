@@ -1,7 +1,6 @@
 #include "efi.h"
 
 #include "liumos.h"
-#include "console.h"
 
 int efi_memory_map_get_count(EFI_MemoryMap *mm)
 {

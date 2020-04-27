@@ -7,9 +7,11 @@
 #include <stdlib.h>
 
 #include "newlib_func.h"
+#include "common_k.h"
 
 //! Packed struct specifier.
 #define PACKED __attribute__((__packed__))
 
 //! Page size by byte.
 #define PAGE_SIZE 4096
+

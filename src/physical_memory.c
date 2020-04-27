@@ -1,7 +1,5 @@
 #include "physical_memory.h"
 
-#include "console.h"
-
 static PhysicalMemory pm_;
 
 static void physical_memory_add_page(uintptr_t physical_start, size_t pages);

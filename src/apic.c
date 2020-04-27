@@ -1,7 +1,6 @@
 #include "apic.h"
 
 #include "asm.h"
-#include "console.h"
 #include "liumos.h"
 
 LocalAPIC g_apic;

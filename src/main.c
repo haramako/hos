@@ -1,7 +1,6 @@
 #include "liumos.h"
 
 #include "asm.h"
-#include "console.h"
 #include "gdt.h"
 #include "hpet.h"
 #include "mem.h"

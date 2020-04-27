@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "asm.h"
-#include "console.h"
 
 GDTR g_gdt_gdtr;
 GDTDescriptors g_gdt_descriptors;

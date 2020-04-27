@@ -1,7 +1,6 @@
 #include "hpet.h"
 
 #include "asm.h"
-#include "console.h"
 
 // HPET General Configuration
 #define HPET_GC_ENABLE (1ULL << 0)

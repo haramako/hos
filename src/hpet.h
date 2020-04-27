@@ -4,10 +4,10 @@
 
 typedef enum HPET_TimerConfig
 {
-    kUseLevelTriggeredInterrupt = 1 << 1,
-    kEnable = 1 << 2,
-    kUsePeriodicMode = 1 << 3,
-    kSetComparatorValue = 1 << 6,
+    HPET_TC_USE_LEVEL_TRIGGERED_INTERRUPT = 1 << 1,
+    HPET_TC_ENABLE = 1 << 2,
+    HPET_TC_USE_PERIODIC_MODE = 1 << 3,
+    HPET_TC_SET_COMPARATOR_VALUE = 1 << 6,
 } HPET_TimerConfig;
 
 typedef struct PACKED TimerRegister {

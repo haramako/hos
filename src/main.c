@@ -56,6 +56,7 @@ void kernel_entry(LiumOS* liumos_passed)
 	serial_init();
 	console_init(serial_get_port(1));
 	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 	
 	// Now you can use console_*().
 
@@ -77,12 +78,21 @@ void kernel_entry(LiumOS* liumos_passed)
 	// Now ready to interrupt.
 
 	hpet_init((HPET_RegisterSpace*)g_liumos->acpi.hpet->base_address.address);
-	hpet_set_timer_ns(
-      0, 1000,
-      kUsePeriodicMode | kEnable);
+	hpet_set_timer_ms( 0, 100, HPET_TC_USE_PERIODIC_MODE | HPET_TC_ENABLE);
 	g_liumos->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
 
 	// Now ready to HPET
+
+	kinfo("time %lld", hpet_read_main_counter_value());
+	kinfo("time %lld", hpet_read_main_counter_value());
+	kinfo("time %lld", hpet_read_main_counter_value());
+	uint64_t t1 = hpet_read_main_counter_value();
+	uint64_t t2 = hpet_read_main_counter_value();
+	kinfo("time %lld", t1);
+	kinfo("time %lld", t2);
+
+	__asm__("int3");
+	__asm__("int $32");
 
 	kinfo("Kernel ready!");
 	Die();

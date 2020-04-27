@@ -8,10 +8,9 @@
 IDTGateDescriptor descriptors_[INTERRUPT_LEN];
 InterruptHandler handler_list_[INTERRUPT_LEN];
 
-static void int_handler_(uint64_t intcode,
-					  InterruptInfo* info)
+static void int_handler_(uint64_t intcode, InterruptInfo* info)
 {
-  kinfo("Int handler intcode=%lld, error_code=%lld", intcode, info->error_code);
+  kinfo("Int handler intcode=0x%02llx, error_code=%lld", intcode, info->error_code);
 }
 
 __attribute__((ms_abi)) void IntHandler(uint64_t intcode, InterruptInfo* info)
@@ -28,6 +27,7 @@ __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo* info)
 	assert(info);
 	SwitchContext(*info, proc, *next_proc);
 #endif
+  int_handler_(intcode, info);
 }
 
 void set_entry_(int index,
@@ -64,6 +64,7 @@ void interrupt_init() {
   }
 
   set_entry_(0x00, cs, 0, kInterruptGate, 0, AsmIntHandler00_DivideError);
+  set_entry_(0x02, cs, 0, kInterruptGate, 0, AsmIntHandler03);
   set_entry_(0x03, cs, 0, kInterruptGate, 0, AsmIntHandler03);
   set_entry_(0x06, cs, 0, kInterruptGate, 0, AsmIntHandler06);
   set_entry_(0x07, cs, 0, kInterruptGate, 0, AsmIntHandler07_DeviceNotAvailable);
@@ -76,3 +77,4 @@ void interrupt_init() {
   set_entry_(0x21, cs, 0, kInterruptGate, 0, AsmIntHandler21);
   WriteIDTR(&idtr);
 }
+

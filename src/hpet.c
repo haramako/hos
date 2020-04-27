@@ -4,8 +4,8 @@
 #include "console.h"
 
 //namespace GeneralConfigBits {
-const uint64_t kHPET_Enable = 1 << 0;
-const uint64_t kHPET_UseLegacyReplacementRouting = 1 << 1;
+const uint64_t HPET_GC_ENABLE = 1 << 0;
+const uint64_t HPET_USE_LEGACY_REPLACEMENT_ROUTING = 1 << 1;
 
 const uint64_t kMainCounterSupports64bit = 1 << 13;
 
@@ -21,8 +21,8 @@ void hpet_init(HPET_RegisterSpace* registers)
 	g_hpet.registers = registers;
 	g_hpet.femtosecond_per_count = registers->general_capabilities_and_id >> 32;
 	uint64_t general_config = registers->general_configuration;
-	general_config |= kHPET_UseLegacyReplacementRouting;
-	general_config |= kHPET_Enable;
+	general_config |= HPET_USE_LEGACY_REPLACEMENT_ROUTING;
+	general_config |= HPET_GC_ENABLE;
 	g_hpet.registers->general_configuration = general_config;
 }
 
@@ -36,10 +36,10 @@ void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig f
 	uint64_t count = 1e9 * nanoseconds / g_hpet.femtosecond_per_count;
 	TimerRegister* entry = &g_hpet.registers->timers[timer_index];
 	HPET_TimerConfig config = entry->configuration_and_capability;
-	HPET_TimerConfig mask = kUseLevelTriggeredInterrupt | kHPET_Enable | kUsePeriodicMode;
+	HPET_TimerConfig mask = HPET_TC_USE_LEVEL_TRIGGERED_INTERRUPT | HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE;
 	config &= ~mask;
 	config |= mask & flags;
-	config |= kSetComparatorValue;
+	config |= HPET_TC_SET_COMPARATOR_VALUE;
 	entry->configuration_and_capability = config;
 	entry->comparator_value = count;
 	g_hpet.registers->main_counter_value = 0;

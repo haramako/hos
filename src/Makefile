@@ -7,6 +7,7 @@ KERNEL_SRCS= \
 	console.c \
 	efi.c \
 	gdt.c \
+	hpet.c \
 	interrupt.c \
 	interrupt_handler.c \
 	main.c \
@@ -14,7 +15,8 @@ KERNEL_SRCS= \
 	newlib_support.c \
 	newlib_func.c \
 	physical_memory.c \
-	serial.c
+	serial.c \
+	sleep_handler.S
 
 KERNEL_OBJS= $(addsuffix .o, $(basename $(KERNEL_SRCS)))
 KERNEL_DEPS= $(addsuffix .d, $(basename $(KERNEL_SRCS)))

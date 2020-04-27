@@ -3,6 +3,7 @@
 #include "asm.h"
 #include "console.h"
 #include "gdt.h"
+#include "hpet.h"
 #include "mem.h"
 #include "physical_memory.h"
 #include "serial.h"
@@ -73,12 +74,16 @@ void KernelEntry(LiumOS* liumos_passed)
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
 	interrupt_init();
 
-	//gdt_print();
+	// Now ready to interrupt.
 
-	ktrace("TRACE");
-	kinfo("INFO");
-	kwarn("WARN");
+	hpet_init((HPET_RegisterSpace*)liumos_->acpi.hpet->base_address.address);
+	hpet_set_timer_ns(
+      0, 1000,
+      kUsePeriodicMode | kEnable);
+	liumos_->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
 
-	kinfo("Kernel OK!");
+	// Now ready to HPET
+
+	kinfo("Kernel ready!");
 	Die();
 }

@@ -1,5 +1,6 @@
 #include "interrupt.h"
 
+#include "console.h"
 #include "liumos.h"
 
 #define INTERRUPT_LEN 256
@@ -10,12 +11,23 @@ InterruptHandler handler_list_[INTERRUPT_LEN];
 static void int_handler_(uint64_t intcode,
 					  InterruptInfo* info)
 {
+  kinfo("Int handler intcode=%lld, error_code=%lld", intcode, info->error_code);
 }
 
-__attribute__((ms_abi)) void IntHandler(uint64_t intcode,
-										InterruptInfo* info)
+__attribute__((ms_abi)) void IntHandler(uint64_t intcode, InterruptInfo* info)
 {
   int_handler_(intcode, info);
+}
+
+__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo* info)
+{
+#if 0
+	Process& proc = liumos->scheduler->GetCurrentProcess();
+	Process* next_proc = liumos->scheduler->SwitchProcess();
+	if (!next_proc) return;  // no need to switching context.
+	assert(info);
+	SwitchContext(*info, proc, *next_proc);
+#endif
 }
 
 void set_entry_(int index,

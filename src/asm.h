@@ -172,8 +172,8 @@ enum class MSRIndex : uint32_t {
 };
 #endif
 
-#if 0
 __attribute__((ms_abi)) void Sleep(void);
+#if 0
 __attribute__((ms_abi)) void ReadCPUID(CPUID*, uint32_t eax, uint32_t ecx);
 #endif
 

@@ -3,7 +3,9 @@
 #include "common.h"
 
 #include "asm.h"
+#include "acpi.h"
 #include "efi.h"
+#include "hpet.h"
 //#include "sys_constant.h"
 
 #define kLAPICRegisterAreaPhysBase 0x00000000FEE00000ULL
@@ -19,7 +21,6 @@ typedef void EFIFile;
 typedef void ACPI_RSDT;
 typedef void ACPI_NFIT;
 typedef void ACPI_MADT;
-typedef void ACPI_HPET;
 typedef void ACPI_SRAT;
 typedef void ACPI_SLIT;
 typedef void ACPI_FADT;
@@ -31,7 +32,6 @@ typedef void LocalAPIC;
 typedef void CPUFeatureSet;
 typedef void PhysicalPageAllocator;
 typedef void KernelVirtualHeapAllocator;
-typedef void HPET;
 typedef void IA_PML4;
 typedef void Scheduler;
 typedef void ProcessController;

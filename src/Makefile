@@ -86,7 +86,7 @@ test_sheet : sheet_test.cc sheet.cc Makefile
 
 LIUMOS.ELF : $(KERNEL_OBJS) kernel.ld Makefile
 	$(LLVM_LD_LLD) $(LDFLAGS_KERNEL) \
-		-o LIUMOS.ELF -e KernelEntry -T kernel.ld $(KERNEL_OBJS)
+		-o LIUMOS.ELF -e kernel_entry -T kernel.ld $(KERNEL_OBJS)
 
 newlib:
 	CC=$(LLVM_CC) AR=$(LLVM_AR) RANLIB=$(LLVM_RANLIB) ./build_newlib.sh

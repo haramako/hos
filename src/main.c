@@ -49,7 +49,7 @@ static void test_reset_()
 	runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
 }
 
-void KernelEntry(LiumOS* liumos_passed)
+void kernel_entry(LiumOS* liumos_passed)
 {
 	g_liumos = liumos_passed;
 

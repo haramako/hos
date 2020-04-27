@@ -99,6 +99,8 @@ void kernel_entry(LiumOS* liumos_passed)
 
 	//__asm__("int3");
 
+	apic_print();
+
 	kinfo("Kernel ready!");
 	Die();
 }

@@ -1,5 +1,6 @@
 #include "interrupt.h"
 
+#include "apic.h"
 #include "console.h"
 #include "liumos.h"
 
@@ -15,7 +16,8 @@ static void int_handler_(uint64_t intcode, InterruptInfo* info)
 
 __attribute__((ms_abi)) void IntHandler(uint64_t intcode, InterruptInfo* info)
 {
-  int_handler_(intcode, info);
+	int_handler_(intcode, info);
+	apic_send_end_of_interrupt(&g_apic);
 }
 
 __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo* info)
@@ -27,7 +29,7 @@ __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo* info)
 	assert(info);
 	SwitchContext(*info, proc, *next_proc);
 #endif
-  int_handler_(intcode, info);
+	int_handler_(intcode, info);
 }
 
 void set_entry_(int index,
@@ -64,7 +66,6 @@ void interrupt_init() {
   }
 
   set_entry_(0x00, cs, 0, kInterruptGate, 0, AsmIntHandler00_DivideError);
-  set_entry_(0x02, cs, 0, kInterruptGate, 0, AsmIntHandler03);
   set_entry_(0x03, cs, 0, kInterruptGate, 0, AsmIntHandler03);
   set_entry_(0x06, cs, 0, kInterruptGate, 0, AsmIntHandler06);
   set_entry_(0x07, cs, 0, kInterruptGate, 0, AsmIntHandler07_DeviceNotAvailable);

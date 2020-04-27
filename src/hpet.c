@@ -4,12 +4,10 @@
 #include "console.h"
 
 // HPET General Configuration
-typedef enum HPET_GC {
-	HPET_GC_ENABLE = 1 << 0,
-	HPET_GC_USE_LEGACY_REPLACEMENT_ROUTING = 1 << 1,
-} HPET_GC;
+#define HPET_GC_ENABLE (1ULL << 0)
+#define HPET_GC_USE_LEGACY_REPLACEMENT_ROUTING (1ULL << 1)
 
-const uint64_t kMainCounterSupports64bit = 1 << 13;
+#define kMainCounterSupports64bit (1ULL << 13)
 
 static uint8_t get_num_of_timers_(uint64_t cap)
 {
@@ -26,11 +24,26 @@ void hpet_init(HPET_RegisterSpace* registers)
 	general_config |= HPET_GC_USE_LEGACY_REPLACEMENT_ROUTING;
 	general_config |= HPET_GC_ENABLE;
 	g_hpet.registers->general_configuration = general_config;
+	
+	// Disable timers.
+	hpet_set_timer_ns(0, 0, 0);
+	hpet_set_timer_ns(1, 0, 0);
 }
 
 void hpet_set_timer_ms(int timer_index, uint64_t milliseconds, HPET_TimerConfig flags)
 {
 	hpet_set_timer_ns(timer_index, 1e3 * milliseconds, flags);
+}
+
+void hpet_enable(bool enable)
+{
+	uint64_t general_config = g_hpet.registers->general_configuration;
+	if( enable ){
+		general_config |= HPET_GC_ENABLE;
+	}else{
+		general_config &= ~HPET_GC_ENABLE;
+	}
+	g_hpet.registers->general_configuration = general_config;
 }
 
 void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig flags)
@@ -43,8 +56,10 @@ void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig f
 	config |= mask & flags;
 	config |= HPET_TC_SET_COMPARATOR_VALUE;
 	entry->configuration_and_capability = config;
+	entry->comparator_value = hpet_read_main_counter_value() + count;
 	entry->comparator_value = count;
-	g_hpet.registers->main_counter_value = 0;
+
+	ktrace("Set HPET timer flags=%0x16llx, count: %lld", flags, count);
 }
 
 void *mem_physical_to_virtual(void *phy_addr)
@@ -65,14 +80,29 @@ uint64_t hpet_get_femtosecond_per_count()
 void hpet_busy_wait(uint64_t ms)
 {
 	uint64_t count = 1000000000000ULL * ms / g_hpet.femtosecond_per_count + hpet_read_main_counter_value();
-	while (hpet_read_main_counter_value() < count) Sleep();
+	while (hpet_read_main_counter_value() < count); // Sleep();
 }
 
 void hpet_print(void)
 {
-	klog("HPET at %016llx", g_hpet.registers);
-	klog("  # of timers %d", get_num_of_timers_(g_hpet.registers->general_capabilities_and_id));
-	klog("  femtosecond_per_count", g_hpet.femtosecond_per_count);
-	klog("  main counter supports 64bit mode %d",
-		 g_hpet.registers->general_capabilities_and_id & kMainCounterSupports64bit);
+	int num_timers = get_num_of_timers_(g_hpet.registers->general_capabilities_and_id);
+
+	uint64_t gc = g_hpet.registers->general_configuration;
+	klog("HPET info:");
+	klog("  Addr: %016llx", g_hpet.registers);
+	klog("  Num timers: %d", num_timers);
+	klog("  Femto second per count: %lld", g_hpet.femtosecond_per_count);
+	klog("  Supports 64bit mode: %d",
+		 !!(g_hpet.registers->general_capabilities_and_id & kMainCounterSupports64bit));
+	klog("  Enabled: %d", gc & 1);
+	klog("  Legacy replacement: %d", !!(gc & (1<<1)));
+	klog("  Time: %lld", hpet_read_main_counter_value());
+	klog("  Time Sec: %f", hpet_read_main_counter_value() / (1.0 / g_hpet.femtosecond_per_count * 1e15));
+
+	klog("  Timers:");
+	for( int i=0; i<num_timers; i++){
+		TimerRegister* entry = &g_hpet.registers->timers[i];
+		HPET_TimerConfig config = entry->configuration_and_capability;
+		klog("    %d: config=%016llx, comparator_value=%lld", i, config, entry->comparator_value);
+	}
 }

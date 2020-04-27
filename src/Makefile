@@ -37,13 +37,13 @@ LIBCXX_FOR_KERNEL_INC_PATH=../third_party_root/include
 LIBCXX_FOR_KERNEL_LIB_PATH=../third_party_root/lib
 
 CFLAGS_KERNEL= \
-			   -target x86_64-unknown-none-elf \
-			   -fno-stack-protector -fno-exceptions -fshort-wchar \
-	           -mno-red-zone -mcmodel=large \
-			   -nostdlib \
-				 -D__ELF__ -D_LDBL_EQ_DBL \
-			   -I$(LIBCXX_FOR_KERNEL_INC_PATH) \
-			   $(CLANG_WARNINGS) $(C_STD)
+	-target x86_64-unknown-none-elf \
+	-fno-stack-protector -fno-exceptions -fshort-wchar \
+	-mno-red-zone -mcmodel=large \
+	-nostdlib \
+	-D__ELF__ -D_LDBL_EQ_DBL \
+	-I$(LIBCXX_FOR_KERNEL_INC_PATH) \
+	$(CLANG_WARNINGS) $(C_STD)
 
 LDFLAGS_KERNEL= \
 				-L$(LIBCXX_FOR_KERNEL_LIB_PATH) -lm \

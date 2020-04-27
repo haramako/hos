@@ -101,7 +101,6 @@ static void set_interrupt_redirection_(LocalAPIC *a,
 void apic_init()
 {
 	apic_new(&g_apic);
-	set_interrupt_redirection_(&g_apic, g_apic.id, 0, 0x20);  // HPET
 	set_interrupt_redirection_(&g_apic, g_apic.id, 2, 0x20);  // HPET
 	set_interrupt_redirection_(&g_apic, g_apic.id, 1, 0x21);  // KBC
 }
@@ -109,17 +108,16 @@ void apic_init()
 void apic_print()
 {
 	LocalAPIC *a = &g_apic;
-	klog("APIC info");
+	klog("APIC info:");
 	klog("  ID: %d", apic_read_reg(a, 0x20));
 	klog("  Version: %d", apic_read_reg(a, 0x30));
-	klog("  EOI: %d", apic_read_reg(a, 0xb0));
 	klog("  Error: %d", apic_read_reg(a, 0x280));
 
 	
 	uint32_t reg1 = ioapic_read_reg_(a, 0x01);
 	int num_irq = reg1 >> 16;
 		
-	klog("IO APIC info");
+	klog("IO APIC info:");
 	klog("  ID: %d", ioapic_read_reg_(a, 0x00));
 	klog("  Version: %d", reg1 & 0xff);
 	klog("  Num IRQ: %d", num_irq);

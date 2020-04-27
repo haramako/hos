@@ -11,6 +11,8 @@ typedef struct PACKED LocalAPIC {
   bool is_x2apic;
 } LocalAPIC;
 
+extern LocalAPIC g_apic;
+
 void apic_init();
 void apic_new(LocalAPIC *a);
 inline uint32_t apic_get_id(LocalAPIC *a) { return a->id; }
@@ -20,12 +22,12 @@ void apic_print();
 
 inline uint32_t apic_read_reg(LocalAPIC *a, uint64_t offset)
 {
-    return *(uint32_t*)(a->kernel_virt_base_addr + offset);
+    return *((uint32_t*)(a->kernel_virt_base_addr + offset));
 }
 
 inline void apic_write_reg(LocalAPIC *a, uint64_t offset, uint32_t data)
 {
-    *(uint32_t*)(a->kernel_virt_base_addr + offset) = data;
+    *((uint32_t*)(a->kernel_virt_base_addr + offset)) = data;
 }
 
 inline uint32_t* apic_get_register_addr(LocalAPIC *a, uint64_t offset)

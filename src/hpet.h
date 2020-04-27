@@ -2,13 +2,11 @@
 
 #include "common.h"
 
-typedef enum HPET_TimerConfig
-{
-    HPET_TC_USE_LEVEL_TRIGGERED_INTERRUPT = 1 << 1,
-    HPET_TC_ENABLE = 1 << 2,
-    HPET_TC_USE_PERIODIC_MODE = 1 << 3,
-    HPET_TC_SET_COMPARATOR_VALUE = 1 << 6,
-} HPET_TimerConfig;
+typedef uint64_t HPET_TimerConfig;
+#define HPET_TC_USE_LEVEL_TRIGGERED_INTERRUPT (1ULL << 1)
+#define HPET_TC_ENABLE (1ULL << 2)
+#define HPET_TC_USE_PERIODIC_MODE (1ULL << 3)
+#define HPET_TC_SET_COMPARATOR_VALUE (1ULL << 6)
 
 typedef struct PACKED TimerRegister {
 	HPET_TimerConfig configuration_and_capability;

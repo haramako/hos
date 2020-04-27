@@ -49,6 +49,15 @@ static void test_reset_()
 	runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
 }
 
+static void timer_test_()
+{
+	hpet_set_timer_ms( 0, 900, HPET_TC_USE_PERIODIC_MODE | HPET_TC_ENABLE);
+	for(;;){
+		hpet_busy_wait(1000);
+		console_write(".");
+	}
+}
+
 void kernel_entry(LiumOS* liumos_passed)
 {
 	g_liumos = liumos_passed;
@@ -58,13 +67,12 @@ void kernel_entry(LiumOS* liumos_passed)
 	serial_init();
 	console_init(serial_get_port(1));
 	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
-	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 	
 	// Now you can use console_*().
 
 	console_write("\n");
 	kinfo("=======================");
-	kinfo("Kernel start");
+	kinfo("Kernel Start");
 
 	physical_memory_init(g_liumos->efi_memory_map);
 	mem_init();
@@ -79,28 +87,23 @@ void kernel_entry(LiumOS* liumos_passed)
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
 	interrupt_init();
 
-	__asm__("int $0x20");
-	
-	// Now ready to interrupt.
+	// Now ready to interrupt (but interrupt flag is not set).
 
 	hpet_init((HPET_RegisterSpace*)g_liumos->acpi.hpet->base_address.address);
-	hpet_set_timer_ms( 0, 100, HPET_TC_USE_PERIODIC_MODE | HPET_TC_ENABLE);
 	g_liumos->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
 	
 	// Now ready to HPET timer.
 
-	kinfo("time %lld", hpet_read_main_counter_value());
-	kinfo("time %lld", hpet_read_main_counter_value());
-	kinfo("time %lld", hpet_read_main_counter_value());
-	uint64_t t1 = hpet_read_main_counter_value();
-	uint64_t t2 = hpet_read_main_counter_value();
-	kinfo("time %lld", t1);
-	kinfo("time %lld", t2);
+	StoreIntFlag(); // Start interrupt.
 
-	//__asm__("int3");
+	// =========================
+	
+	kinfo("Kernel Ready!");
+	kinfo("Time %lld", hpet_read_main_counter_value());
 
-	apic_print();
+	StoreIntFlag(); // Start interrupt.
 
-	kinfo("Kernel ready!");
+	timer_test_();
+	
 	Die();
 }

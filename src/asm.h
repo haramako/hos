@@ -44,8 +44,7 @@ typedef struct PACKED GDTR {
   uint64_t* base;
 } GDTR;
 
-#if 0
-struct PACKED GeneralRegisterContext {
+typedef struct PACKED GeneralRegisterContext {
   uint64_t rax;
   uint64_t rdx;
   uint64_t rbx;
@@ -63,37 +62,37 @@ struct PACKED GeneralRegisterContext {
   uint64_t r15;
   //
   uint64_t rcx;
-};
-static_assert(sizeof(GeneralRegisterContext) == (16 - 1) * 8);
+} GeneralRegisterContext;
+static_assert(sizeof(GeneralRegisterContext) == (16 - 1) * 8, "Invalid size.");
 
-struct PACKED InterruptContext {
+typedef struct PACKED InterruptContext {
   uint64_t rip;
   uint64_t cs;
   uint64_t rflags;
   uint64_t rsp;
   uint64_t ss;
-};
-static_assert(sizeof(InterruptContext) == 40);
+} InterruptContext;
+static_assert(sizeof(InterruptContext) == 40, "Invalid size.");
 
-struct PACKED CPUContext {
+typedef struct PACKED CPUContext {
   uint64_t cr3;
   GeneralRegisterContext greg;
   InterruptContext int_ctx;
-};
+} CPUContext;
 
-struct PACKED InterruptInfo {
+typedef struct PACKED InterruptInfo {
   GeneralRegisterContext greg;
   uint64_t error_code;
   InterruptContext int_ctx;
-};
-static_assert(sizeof(InterruptInfo) == (16 + 4 + 1) * 8);
+} InterruptInfo;
+static_assert(sizeof(InterruptInfo) == (16 + 4 + 1) * 8, "Invalid size.");
 
-enum class IDTType {
+typedef enum {
   kInterruptGate = 0xE,
   kTrapGate = 0xF,
-};
+} IDTType;
 
-struct PACKED IDTGateDescriptor {
+typedef struct PACKED IDTGateDescriptor {
   uint16_t offset_low;
   uint16_t segment_descriptor;
   unsigned interrupt_stack_table : 3;
@@ -105,13 +104,14 @@ struct PACKED IDTGateDescriptor {
   unsigned offset_mid : 16;
   uint32_t offset_high;
   uint32_t reserved2;
-};
+} IDTGateDescriptor;
 
-struct PACKED IDTR {
+typedef struct PACKED IDTR {
   uint16_t limit;
   IDTGateDescriptor* base;
-};
+} IDTR;
 
+#if 0
 struct PACKED IA32_EFER_BITS {
   unsigned syscall_enable : 1;
   unsigned reserved0 : 7;
@@ -184,10 +184,8 @@ __attribute__((ms_abi)) void WriteMSR(MSRIndex, uint64_t);
 
 __attribute__((ms_abi)) void ReadGDTR(GDTR*);
 __attribute__((ms_abi)) void WriteGDTR(GDTR*);
-#if 0
 __attribute__((ms_abi)) void ReadIDTR(IDTR*);
 __attribute__((ms_abi)) void WriteIDTR(IDTR*);
-#endif
 __attribute__((ms_abi)) void WriteTaskRegister(uint16_t);
 __attribute__((ms_abi)) void Int03(void);
 __attribute__((ms_abi)) uint8_t ReadIOPort8(uint16_t);

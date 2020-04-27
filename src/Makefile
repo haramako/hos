@@ -7,6 +7,8 @@ KERNEL_SRCS= \
 	console.c \
 	efi.c \
 	gdt.c \
+	interrupt.c \
+	interrupt_handler.c \
 	main.c \
 	mem.c \
 	newlib_support.c \

@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "physical_memory.h"
 #include "serial.h"
+#include "interrupt.h"
 
 LiumOS *liumos_;
 
@@ -68,6 +69,7 @@ void KernelEntry(LiumOS* liumos_passed)
 	uintptr_t stack = physical_memory_alloc(stack_pages);
 	uintptr_t ist = physical_memory_alloc(stack_pages);
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
+	interrupt_init();
 
 	gdt_print();
 

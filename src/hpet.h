@@ -29,8 +29,8 @@ typedef struct PACKED HPET_RegisterSpace {
 } HPET_RegisterSpace;
 
 typedef struct HPET {
-	HPET_TimerConfig configuration_and_capability;
-	HPET_RegisterSpace *registers;
+	volatile HPET_TimerConfig configuration_and_capability;
+	volatile HPET_RegisterSpace *registers;
 	uint64_t femtosecond_per_count;
 } HPET;
 

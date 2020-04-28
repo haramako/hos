@@ -41,7 +41,7 @@ void hpet_enable(bool enable) {
 
 void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig flags) {
 	uint64_t count = 1e9 * nanoseconds / g_hpet.femtosecond_per_count;
-	TimerRegister *entry = &g_hpet.registers->timers[timer_index];
+	volatile TimerRegister *entry = &g_hpet.registers->timers[timer_index];
 	HPET_TimerConfig config = entry->configuration_and_capability;
 	HPET_TimerConfig mask = HPET_TC_USE_LEVEL_TRIGGERED_INTERRUPT | HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE;
 	config &= ~mask;
@@ -57,7 +57,7 @@ void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig f
 void *mem_physical_to_virtual(void *phy_addr) { return phy_addr; }
 
 uint64_t hpet_read_main_counter_value() {
-	return ((HPET_RegisterSpace *)mem_physical_to_virtual(g_hpet.registers))->main_counter_value;
+	return ((HPET_RegisterSpace *)mem_physical_to_virtual((void *)g_hpet.registers))->main_counter_value;
 }
 
 uint64_t hpet_get_femtosecond_per_count() { return g_hpet.femtosecond_per_count; }
@@ -84,7 +84,7 @@ void hpet_print(void) {
 
 	klog("  Timers:");
 	for (int i = 0; i < num_timers; i++) {
-		TimerRegister *entry = &g_hpet.registers->timers[i];
+		volatile TimerRegister *entry = &g_hpet.registers->timers[i];
 		HPET_TimerConfig config = entry->configuration_and_capability;
 		klog("    %d: config=%016llx, comparator_value=%lld", i, config, entry->comparator_value);
 	}

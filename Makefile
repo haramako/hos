@@ -121,3 +121,8 @@ commit : format unittest
 	git add .
 	git diff HEAD --color=always | less -R
 	git commit
+
+
+setup:
+	echo "#!/bin/sh\nmake -C src format" >.git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit

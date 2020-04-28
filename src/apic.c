@@ -17,8 +17,7 @@ static void Panic(const char *msg) {
 void apic_new(LocalAPIC *a) {
 	uint64_t base_msr = ReadMSR(MSRIndex_kLocalAPICBase);
 
-	if (!(base_msr & kLocalAPICBaseBitAPICEnabled))
-		Panic("APIC not enabled");
+	if (!(base_msr & kLocalAPICBaseBitAPICEnabled)) Panic("APIC not enabled");
 
 	if (g_liumos->cpu_features->x2apic && !(base_msr & kLocalAPICBaseBitx2APICEnabled)) {
 		base_msr |= kLocalAPICBaseBitx2APICEnabled;

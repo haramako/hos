@@ -2,7 +2,7 @@ default: LIUMOS.ELF
 
 include ../common.mk
 
-KERNEL_SRCS= \
+SRCS= \
 	apic.c \
 	asm.S \
 	console.c \
@@ -19,8 +19,8 @@ KERNEL_SRCS= \
 	serial.c \
 	sleep_handler.S
 
-OBJS= $(addsuffix .o, $(basename $(KERNEL_SRCS)))
-DEPS= $(addsuffix .d, $(basename $(KERNEL_SRCS)))
+OBJS= $(addsuffix .o, $(basename $(SRCS)))
+DEPS= $(addsuffix .d, $(basename $(SRCS)))
 
 CLANG_WARNINGS = \
 	-Wall -Wpedantic -Wextra -Wconditional-uninitialized -Wshorten-64-to-32 \
@@ -28,12 +28,12 @@ CLANG_WARNINGS = \
 	-Wno-keyword-macro \
 	-Wno-unused-variable -Wno-unused-parameter -Wno-unused-function \
     -Wno-gnu-binary-literal
-C_STD = -std=c11
 
 NEWLIB_INC_PATH=../third_party_root/include
 NEWLIB_LIB_PATH=../third_party_root/lib
 
 CFLAGS= \
+	-std=c11 \
 	-target x86_64-unknown-none-elf \
 	-fno-stack-protector -fno-exceptions -fshort-wchar \
 	-mno-red-zone -mcmodel=large \
@@ -67,6 +67,9 @@ LIUMOS.ELF : $(OBJS) kernel.ld Makefile
 run:
 	make -C .. run
 
+runc:
+	make -C .. runc
+
 clean :
 	-rm -rf *.EFI
 	-rm -rf *.o
@@ -74,13 +77,5 @@ clean :
 
 format :
 	clang-format -i *.c *.h
-
-print_cc :
-	@echo "$(LLVM_CC)"
-
-dump : $(addsuffix .dump.txt, $(OBJS))
-
-kerneldump :
-	/usr/local/opt/llvm/bin/llvm-objdump --x86-asm-syntax=intel -d LIUMOS.ELF | more
 
 -include $(DEPS)

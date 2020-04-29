@@ -1,6 +1,8 @@
 #include "hpet.h"
 
+#include "apic.h"
 #include "asm.h"
+#include "interrupt.h"
 
 // HPET General Configuration
 #define HPET_GC_ENABLE (1ULL << 0)
@@ -40,7 +42,7 @@ void hpet_enable(bool enable) {
 }
 
 void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig flags) {
-	uint64_t count = 1e9 * nanoseconds / g_hpet.femtosecond_per_count;
+	uint64_t count = 1e6 * nanoseconds / g_hpet.femtosecond_per_count;
 	volatile TimerRegister *entry = &g_hpet.registers->timers[timer_index];
 	HPET_TimerConfig config = entry->configuration_and_capability;
 	HPET_TimerConfig mask = HPET_TC_USE_LEVEL_TRIGGERED_INTERRUPT | HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE;
@@ -48,10 +50,14 @@ void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig f
 	config |= mask & flags;
 	config |= HPET_TC_SET_COMPARATOR_VALUE;
 	entry->configuration_and_capability = config;
-	entry->comparator_value = hpet_read_main_counter_value() + count;
-	entry->comparator_value = count;
+	if (flags & HPET_TC_USE_PERIODIC_MODE) {
+		entry->comparator_value = hpet_read_main_counter_value() + count;
+		entry->comparator_value = count;
+	} else {
+		entry->comparator_value = count;
+	}
 
-	ktrace("Set HPET timer flags=%0x16llx, count: %lld", flags, count);
+	ktrace("Set HPET timer flags=0x%02llx, count: %lld", flags, count);
 }
 
 void *mem_physical_to_virtual(void *phy_addr) { return phy_addr; }

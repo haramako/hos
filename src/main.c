@@ -7,6 +7,7 @@
 #include "mem.h"
 #include "physical_memory.h"
 #include "serial.h"
+#include "timer.h"
 
 LiumOS *g_liumos;
 
@@ -41,8 +42,13 @@ static void test_reset_() {
 	runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
 }
 
+static void timer_test_callback1_(TimerParam *p, void *data) { klog("call_periodic"); }
+
+static void timer_test_callback2_(TimerParam *p, void *data) { klog("call_after"); }
+
 static void timer_test_() {
-	hpet_set_timer_ms(0, 900, HPET_TC_USE_PERIODIC_MODE | HPET_TC_ENABLE);
+	timer_call_periodic(1 * SEC, timer_test_callback1_, NULL);
+	timer_call_after(3 * SEC, timer_test_callback2_, NULL);
 	for (;;) {
 		hpet_busy_wait(1000);
 		console_write(".");
@@ -80,7 +86,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	// Now ready to interrupt (but interrupt flag is not set).
 
 	hpet_init((HPET_RegisterSpace *)g_liumos->acpi.hpet->base_address.address);
-	g_liumos->time_slice_count = 1e12 * 100 / hpet_get_femtosecond_per_count();
+	timer_init();
 
 	// Now ready to HPET timer.
 
@@ -90,8 +96,6 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	kinfo("Kernel Ready!");
 	kinfo("Time %lld", hpet_read_main_counter_value());
-
-	StoreIntFlag(); // Start interrupt.
 
 	timer_test_();
 

@@ -6,6 +6,7 @@ SRCS= \
 	apic.c \
 	asm.S \
 	console.c \
+	common_k.c \
 	efi.c \
 	gdt.c \
 	hpet.c \
@@ -17,7 +18,8 @@ SRCS= \
 	newlib_func.c \
 	physical_memory.c \
 	serial.c \
-	sleep_handler.S
+	sleep_handler.S \
+	timer.c 
 
 OBJS= $(addsuffix .o, $(basename $(SRCS)))
 DEPS= $(addsuffix .d, $(basename $(SRCS)))

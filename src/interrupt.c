@@ -3,18 +3,24 @@
 #include "apic.h"
 #include "liumos.h"
 
-#define INTERRUPT_LEN 256
+#define INTERRUPT_LEN 0x100
 
 IDTGateDescriptor descriptors_[INTERRUPT_LEN];
 InterruptHandler handler_list_[INTERRUPT_LEN];
 
-static void int_handler_(uint64_t intcode, InterruptInfo *info) {
-	kinfo("Int handler intcode=0x%02llx, error_code=%lld", intcode, info->error_code);
-}
-
+/**
+ * Interrupt handler.
+ *
+ * called from AsmIntHandler* in asm.S.
+ */
 __attribute__((ms_abi)) void IntHandler(uint64_t intcode, InterruptInfo *info) {
-	int_handler_(intcode, info);
-	apic_send_end_of_interrupt(&g_apic);
+	// int_handler_(intcode, info);
+	if (intcode <= 0xFF && handler_list_[intcode]) {
+		handler_list_[intcode](intcode, info);
+	} else {
+		kinfo("Int handler not implemented intcode=%d", intcode);
+	}
+	// apic_send_end_of_interrupt(&g_apic);
 }
 
 __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {
@@ -25,7 +31,7 @@ __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info)
 	assert(info);
 	SwitchContext(*info, proc, *next_proc);
 #endif
-	int_handler_(intcode, info);
+	IntHandler(intcode, info);
 }
 
 void set_entry_(int index, uint8_t segm_desc, uint8_t ist, IDTType type, uint8_t dpl,
@@ -51,7 +57,7 @@ void interrupt_init() {
 	idtr.limit = sizeof(descriptors_) - 1;
 	idtr.base = descriptors_;
 
-	for (int i = 0; i < 0x100; i++) {
+	for (int i = 0; i < INTERRUPT_LEN; i++) {
 		set_entry_(i, cs, 1, kInterruptGate, 0, AsmIntHandlerNotImplemented);
 		handler_list_[i] = NULL;
 	}
@@ -67,5 +73,11 @@ void interrupt_init() {
 	set_entry_(0x13, cs, 0, kInterruptGate, 0, AsmIntHandler13_SIMDFPException);
 	set_entry_(0x20, cs, 0, kInterruptGate, 0, AsmIntHandler20);
 	set_entry_(0x21, cs, 0, kInterruptGate, 0, AsmIntHandler21);
+
 	WriteIDTR(&idtr);
+}
+
+void interrupt_set_int_handler(uint64_t intcode, InterruptHandler handler) {
+	assert(intcode < INTERRUPT_LEN);
+	handler_list_[intcode] = handler;
 }

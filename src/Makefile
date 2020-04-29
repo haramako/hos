@@ -52,16 +52,10 @@ LDFLAGS= \
 # Kernel rules
 
 %.o : %.c Makefile
-	$(LLVM_CC) $(CFLAGS) -g -c -o $*.o $*.c
-%.d : %.c Makefile
-	@$(LLVM_CC) $(CFLAGS) -MD -MF $@ -c -o $*.o $*.c >/dev/null 2>&1
-	@echo 'DEP $@'
+	$(LLVM_CC) $(CFLAGS) -MD -g -c $*.c
 
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
-%.d : %.S Makefile
-	@touch $@ # generate dummy
-	@echo 'DEP $@'
 
 LIUMOS.ELF : $(OBJS) kernel.ld Makefile
 	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS)

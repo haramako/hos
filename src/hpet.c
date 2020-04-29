@@ -21,6 +21,7 @@ void hpet_init(HPET_RegisterSpace *registers) {
 	general_config |= HPET_GC_USE_LEGACY_REPLACEMENT_ROUTING;
 	general_config |= HPET_GC_ENABLE;
 	g_hpet.registers->general_configuration = general_config;
+	g_hpet.registers->main_counter_value = 0;
 
 	// Disable timers.
 	hpet_set_timer_ns(0, 0, 0);

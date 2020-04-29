@@ -54,7 +54,6 @@ static void timer_test_() {
 		hpet_busy_wait(1000);
 		console_write(".");
 	}
-	timer_print();
 }
 
 void kernel_entry(LiumOS *liumos_passed) {

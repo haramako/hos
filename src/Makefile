@@ -79,5 +79,6 @@ clean :
 
 format :
 	clang-format -i *.c *.h
+	-gtags
 
 -include $(DEPS)

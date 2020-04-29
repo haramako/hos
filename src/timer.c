@@ -11,17 +11,19 @@ TimerList g_timer;
 
 static void refresh_timers_();
 
-uint64_t time_now() { return 1e6 * hpet_read_main_counter_value() / g_hpet.femtosecond_per_count; }
+uint64_t time_now() { return hpet_read_main_counter_value() * g_hpet.femtosecond_per_count / 1e6; }
 
 static void handler_(uint64_t intcode, InterruptInfo *info) {
 	apic_send_end_of_interrupt(&g_apic);
 
+	uint64_t now = time_now();
 	TimerParam param;
-	param.time = time_now();
+	param.time = now;
 
 	for (int i = 0; i < TIMER_LEN; i++) {
 		Timer *t = &g_timer.timers[i];
 		if (t->type == TIMER_TYPE_NONE) continue;
+		if (now <= t->time) continue;
 
 		switch (t->type) {
 		case TIMER_TYPE_ONESHOT:

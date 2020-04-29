@@ -68,7 +68,7 @@ static void refresh_timers_() {
 		}
 	}
 
-	klog("min time = %lld", min_time);
+	// klog("min time = %lld", min_time);
 
 	if (min_time == UINT64_MAX) {
 		hpet_set_timer_ns(0, 0, 0);
@@ -117,4 +117,22 @@ void timer_free(Timer *timer) {
 	timer->type = TIMER_TYPE_NONE;
 }
 
-void timer_print() {}
+void timer_print() {
+	klog("Timer:");
+	klog("  idx: P next             callback           data             interval");
+	uint64_t now = time_now();
+	for (int i = 0; i < TIMER_LEN; i++) {
+		Timer *t = &g_timer.timers[i];
+		switch (t->type) {
+		case TIMER_TYPE_ONESHOT:
+			klog("  %03d: - %16lld %16p %16p", i, t->time - now, t->callback, t->data);
+			break;
+		case TIMER_TYPE_PERIODIC:
+			klog("  %03d: o %16lld %16p %16p %16lld", i, t->time - now, t->callback, t->data, t->interval);
+			break;
+		default:
+			break;
+		}
+	}
+	klog("  (P=Periodic)");
+}

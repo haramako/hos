@@ -49,10 +49,12 @@ static void timer_test_callback2_(TimerParam *p, void *data) { klog("call_after"
 static void timer_test_() {
 	timer_call_periodic(1 * SEC, timer_test_callback1_, NULL);
 	timer_call_after(3 * SEC, timer_test_callback2_, NULL);
+	timer_print();
 	for (;;) {
 		hpet_busy_wait(1000);
 		console_write(".");
 	}
+	timer_print();
 }
 
 void kernel_entry(LiumOS *liumos_passed) {

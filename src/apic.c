@@ -87,7 +87,8 @@ static void set_interrupt_redirection_(LocalAPIC *a, uint64_t local_apic_id, int
 
 void apic_init() {
 	apic_new(&g_apic);
-	set_interrupt_redirection_(&g_apic, g_apic.id, 2, 0x20); // HPET
+	set_interrupt_redirection_(&g_apic, g_apic.id, 2, 0x20); // HPET Timer 0
+	set_interrupt_redirection_(&g_apic, g_apic.id, 8, 0x28); // HPET Timer 1
 	set_interrupt_redirection_(&g_apic, g_apic.id, 1, 0x21); // KBC
 }
 

@@ -38,6 +38,12 @@ void set_entry_(int index, uint8_t segm_desc, uint8_t ist, IDTType type, uint8_t
 	desc->reserved2 = 0;
 }
 
+static void handler_general_protection_fault_(uint64_t intcode, InterruptInfo *info) {
+	klog("GPF at %016p", info->int_ctx.rip);
+	for (;;)
+		;
+}
+
 void interrupt_init() {
 	uint16_t cs = ReadCSSelector();
 
@@ -61,8 +67,11 @@ void interrupt_init() {
 	set_entry_(0x13, cs, 0, kInterruptGate, 0, AsmIntHandler13_SIMDFPException);
 	set_entry_(0x20, cs, 0, kInterruptGate, 0, AsmIntHandler20);
 	set_entry_(0x21, cs, 0, kInterruptGate, 0, AsmIntHandler21);
+	set_entry_(0x28, cs, 0, kInterruptGate, 0, AsmIntHandler28);
 
 	WriteIDTR(&idtr);
+
+	interrupt_set_int_handler(0x0d, handler_general_protection_fault_);
 }
 
 void interrupt_set_int_handler(uint64_t intcode, InterruptHandler handler) {

@@ -29,8 +29,10 @@ uintptr_t physical_memory_alloc(uintptr_t pages) {
 			uintptr_t result = pm_.blocks[i].start;
 			pm_.blocks[i].start += pages * PAGE_SIZE;
 			pm_.blocks[i].pages -= pages;
+			klog("Alloc memory at %p, pages=%lld.", result, pages);
 			return result;
 		}
 	}
+	klog("Cant allocate %d pages.", pages);
 	return 0;
 }

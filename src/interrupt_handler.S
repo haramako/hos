@@ -74,6 +74,13 @@ AsmIntHandler21:
 	mov rcx, 0x21
 	jmp IntHandlerWrapper
 
+.global AsmIntHandler28
+AsmIntHandler28:
+	push 0
+	push rcx
+	mov rcx, 0x28
+	jmp IntHandlerWrapper
+	
 .global AsmIntHandlerNotImplemented
 AsmIntHandlerNotImplemented:
 	push 0
@@ -120,7 +127,7 @@ RestoreRegistersAndIRETQ:
   pop r12
   pop r13
   pop r14
-  pop r15
+	pop r15
 
 	pop rcx
 	add rsp, 8

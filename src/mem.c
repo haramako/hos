@@ -18,5 +18,6 @@ void mem_init() {
 
 uintptr_t mem_sbrk(int diff) {
 	heap_sbrk_ += diff;
+	ktrace("mem_sbrk %d at %016p", diff, heap_sbrk_);
 	return heap_sbrk_;
 }

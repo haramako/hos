@@ -1,6 +1,7 @@
 #include "process.h"
 
 void process_new(Process *p, ExecutionContext *ctx) {
+	bzero(p, sizeof(*p));
 	assert(p->status == kNotInitialized);
 	assert(!p->ctx);
 	p->ctx = ctx;
@@ -15,9 +16,13 @@ void process_wait_until_exit(Process *p) {
 
 void process_notify_contextsaving(Process *p) { p->number_of_ctx_switch++; }
 
-void process_print_statistics() {
+void process_print(Process *p) {
+	klog("Process:");
+	klog(" ID: %d", p->id);
+	klog(" Regs:");
+	klog("   rip: %016p", p->ctx->cpu_context.int_ctx.rip);
+	klog("   rsp: %016p", p->ctx->cpu_context.int_ctx.rsp);
 #if 0
-	PutStringAndDecimal("Process id", id_);
 	PutString("num of ctx sw, proc time[s], sys time [s], time for ctx save [s], copy "
 			  "in ctx save [MB], clflush in ctx sw [M]\n");
 	PutDecimal64(number_of_ctx_switch_);

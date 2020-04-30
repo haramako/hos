@@ -12,7 +12,7 @@
 
 LiumOS *g_liumos;
 
-void KernelEntry(LiumOS *liumos_passed);
+void kernel_entry(LiumOS *liumos_passed);
 
 static void test_malloc_() {
 	int *a = (int *)malloc(4);
@@ -23,7 +23,7 @@ static void test_malloc_() {
 
 	klog("a = %p\nb= %p\nc= %p", (void *)a, (void *)b, c);
 
-	klog("KernelEntry %016llx", KernelEntry);
+	klog("KernelEntry %016llx", kernel_entry);
 	klog("g_liumos     %016llx", g_liumos);
 	klog("n   _       %016llx", &n);
 }
@@ -61,16 +61,18 @@ static void timer_test_() {
 // Process test
 void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process *to_proc) {
 #if 0
-  static uint64_t proc_last_time_count = 0;
-  const uint64_t now_count = time_now();
-  if ((proc_last_time_count - now_count) < liumos->time_slice_count)
-    return;
+	static uint64_t proc_last_time_count = 0;
+	const uint64_t now_count = time_now();
+	if ((proc_last_time_count - now_count) < liumos->time_slice_count)
+		return;
 
-  from_proc.AddProcTimeFemtoSec(
-      (liumos->hpet->ReadMainCounterValue() - proc_last_time_count) *
-      liumos->hpet->GetFemtosecondPerCount());
+	from_proc.AddProcTimeFemtoSec(
+								  (liumos->hpet->ReadMainCounterValue() - proc_last_time_count) *
+								  liumos->hpet->GetFemtosecondPerCount());
 #endif
 
+	// process_print(from_proc);
+	// process_print(to_proc);
 	CPUContext *from = &from_proc->ctx->cpu_context;
 	const uint64_t t0 = time_now();
 	from->cr3 = ReadCR3();
@@ -87,8 +89,10 @@ void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process
 		WriteCR3(to->cr3);
 		// proc_last_time_count = liumos->hpet->ReadMainCounterValue();
 	}
+	// klog("3 %p", int_info->int_ctx.rip);
 }
 
+#if 0
 __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {
 	assert(info);
 	Process *proc = g_scheduler.current;
@@ -96,16 +100,23 @@ __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info)
 	if (!next_proc) return; // no need to switching context.
 	process_switch_context(info, proc, next_proc);
 }
-
-void process_sleep() {}
+#else
+__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {}
+#endif
 
 // Process test
-static void process_test_timer_(TimerParam *p, void *data) {
-	klog("process_test_timer_");
-	klog("");
+static void process_test_timer_(uint64_t intcode, InterruptInfo *info) {
+	apic_send_end_of_interrupt(&g_apic);
+	// klog("process_test_timer_");
+	assert(info);
+	Process *proc = g_scheduler.current;
+	Process *next_proc = scheduler_switch_process();
+	if (!next_proc) return; // no need to switching context.
+	process_switch_context(info, proc, next_proc);
 }
 
 static void process_test_process1_() {
+	klog("[1]");
 	for (;;) {
 		hpet_busy_wait(1000);
 		console_write("1");
@@ -113,6 +124,7 @@ static void process_test_process1_() {
 }
 
 static void process_test_process2_() {
+	klog("[2]");
 	for (;;) {
 		hpet_busy_wait(1000);
 		console_write("2");
@@ -120,36 +132,43 @@ static void process_test_process2_() {
 }
 
 static void process_test_() {
-	timer_call_periodic(1 * SEC, timer_test_callback1_, NULL);
+	// timer_call_periodic(1 * MSEC, , NULL);
 
-	Process *root_process;
-	Process *p1;
-	Process *p2;
 	{
 		ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
+		char *sp = malloc(1024 * 4);
+		char *kernel_sp = malloc(1024 * 4);
 		uint64_t cr3 = ReadCR3();
-		execution_context_new(ctx, NULL, 0, cr3, 0, 0);
+		klog("sp %p", sp);
+		execution_context_new(ctx, process_test_process1_, sp + 1024 * 4, cr3, kRFlagsInterruptEnable,
+							  (uint64_t)(kernel_sp + 1024 * 4));
 
 		Process *p = malloc(sizeof(Process));
 		process_new(p, ctx);
 
-		root_process = p;
+		scheduler_register_process(p);
 	}
 
 	{
 		ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
-		char *sp = malloc(1024 * 16);
-		char *kernel_sp = malloc(1024 * 16);
+		char *sp = malloc(1024 * 4);
+		char *kernel_sp = malloc(1024 * 4);
 		uint64_t cr3 = ReadCR3();
-		execution_context_new(ctx, process_test_process1_, sp + 1024 * 16, cr3, 0, (uint64_t)(kernel_sp + 1024 * 16));
+		execution_context_new(ctx, process_test_process2_, sp + 1024 * 4, cr3, kRFlagsInterruptEnable,
+							  (uint64_t)(kernel_sp + 1024 * 4));
 
 		Process *p = malloc(sizeof(Process));
 		process_new(p, ctx);
 
-		p1 = p;
+		scheduler_register_process(p);
 	}
 
 	// process_switch_context();
+
+	interrupt_set_int_handler(0x28, process_test_timer_);
+	hpet_set_timer_ns(1, 100 * MSEC, HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE);
+
+	//__asm__("int $0x28");
 
 	for (;;) {
 		hpet_busy_wait(1000);
@@ -164,7 +183,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	serial_init();
 	console_init(serial_get_port(1));
-	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// Now you can use console_*().
 
@@ -179,7 +198,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	apic_init();
 
-	const int stack_pages = 1024;
+	const int stack_pages = 1024 * 16;
 	uintptr_t stack = physical_memory_alloc(stack_pages);
 	uintptr_t ist = physical_memory_alloc(stack_pages);
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);

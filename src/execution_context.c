@@ -60,7 +60,9 @@ void execution_context_new(ExecutionContext *ctx, void (*rip)(), void *rsp, uint
 	bzero(ctx, sizeof(ExecutionContext));
 	CPUContext *cc = &ctx->cpu_context;
 	cc->int_ctx.rip = (uint64_t)rip;
+	cc->int_ctx.cs = ReadCSSelector();
 	cc->int_ctx.rsp = (uint64_t)rsp;
+	cc->int_ctx.ss = ReadSSSelector();
 	cc->int_ctx.rflags = rflags | 2;
 	cc->cr3 = cr3;
 	ctx->kernel_rsp = kernel_rsp;

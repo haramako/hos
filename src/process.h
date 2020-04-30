@@ -46,4 +46,4 @@ void process_wait_until_exit(Process *p);
 
 void process_notify_contextsaving(Process *p);
 void NotifyContextSaving();
-void PrintStatistics();
+void process_print(Process *p);

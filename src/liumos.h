@@ -7,6 +7,7 @@
 #include "asm.h"
 #include "efi.h"
 #include "hpet.h"
+#include "process.h"
 //#include "sys_constant.h"
 
 #define kLAPICRegisterAreaPhysBase 0x00000000FEE00000ULL
@@ -32,10 +33,7 @@ typedef void KeyboardController;
 typedef void PhysicalPageAllocator;
 typedef void KernelVirtualHeapAllocator;
 typedef void IA_PML4;
-typedef void Scheduler;
-typedef void ProcessController;
 typedef void IDT;
-typedef void Process;
 
 // @liumos.c
 typedef struct PACKED LoaderInfo {
@@ -74,8 +72,8 @@ typedef struct PACKED LiumOS {
 	HPET *hpet;
 	EFI_MemoryMap *efi_memory_map;
 	IA_PML4 *kernel_pml4;
-	Scheduler *scheduler;
-	ProcessController *proc_ctrl;
+	/*Scheduler*/ void *scheduler;
+	/*ProcessController*/ void *proc_ctrl;
 	IDT *idt;
 	Process *root_process;
 	Process *sub_process;

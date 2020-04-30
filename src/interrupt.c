@@ -20,18 +20,6 @@ __attribute__((ms_abi)) void IntHandler(uint64_t intcode, InterruptInfo *info) {
 	} else {
 		kinfo("Int handler not implemented intcode=%d", intcode);
 	}
-	// apic_send_end_of_interrupt(&g_apic);
-}
-
-__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {
-#if 0
-	Process& proc = liumos->scheduler->GetCurrentProcess();
-	Process* next_proc = liumos->scheduler->SwitchProcess();
-	if (!next_proc) return;  // no need to switching context.
-	assert(info);
-	SwitchContext(*info, proc, *next_proc);
-#endif
-	IntHandler(intcode, info);
 }
 
 void set_entry_(int index, uint8_t segm_desc, uint8_t ist, IDTType type, uint8_t dpl,

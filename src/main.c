@@ -6,6 +6,7 @@
 #include "interrupt.h"
 #include "mem.h"
 #include "physical_memory.h"
+#include "scheduler.h"
 #include "serial.h"
 #include "timer.h"
 
@@ -42,6 +43,7 @@ static void test_reset_() {
 	runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
 }
 
+// Timer test
 static void timer_test_callback1_(TimerParam *p, void *data) { klog("call_periodic"); }
 
 static void timer_test_callback2_(TimerParam *p, void *data) { klog("call_after"); }
@@ -50,6 +52,105 @@ static void timer_test_() {
 	timer_call_periodic(1 * SEC, timer_test_callback1_, NULL);
 	timer_call_after(3 * SEC, timer_test_callback2_, NULL);
 	timer_print();
+	for (;;) {
+		hpet_busy_wait(1000);
+		console_write(".");
+	}
+}
+
+// Process test
+void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process *to_proc) {
+#if 0
+  static uint64_t proc_last_time_count = 0;
+  const uint64_t now_count = time_now();
+  if ((proc_last_time_count - now_count) < liumos->time_slice_count)
+    return;
+
+  from_proc.AddProcTimeFemtoSec(
+      (liumos->hpet->ReadMainCounterValue() - proc_last_time_count) *
+      liumos->hpet->GetFemtosecondPerCount());
+#endif
+
+	CPUContext *from = &from_proc->ctx->cpu_context;
+	const uint64_t t0 = time_now();
+	from->cr3 = ReadCR3();
+	from->greg = int_info->greg;
+	from->int_ctx = int_info->int_ctx;
+	process_notify_contextsaving(from_proc);
+	const uint64_t t1 = time_now();
+	from_proc->time_consumed_in_ctx_save_femto_sec += t1 - t0;
+
+	CPUContext *to = &to_proc->ctx->cpu_context;
+	int_info->greg = to->greg;
+	int_info->int_ctx = to->int_ctx;
+	if (from->cr3 != to->cr3) {
+		WriteCR3(to->cr3);
+		// proc_last_time_count = liumos->hpet->ReadMainCounterValue();
+	}
+}
+
+__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {
+	assert(info);
+	Process *proc = g_scheduler.current;
+	Process *next_proc = scheduler_switch_process();
+	if (!next_proc) return; // no need to switching context.
+	process_switch_context(info, proc, next_proc);
+}
+
+void process_sleep() {}
+
+// Process test
+static void process_test_timer_(TimerParam *p, void *data) {
+	klog("process_test_timer_");
+	klog("");
+}
+
+static void process_test_process1_() {
+	for (;;) {
+		hpet_busy_wait(1000);
+		console_write("1");
+	}
+}
+
+static void process_test_process2_() {
+	for (;;) {
+		hpet_busy_wait(1000);
+		console_write("2");
+	}
+}
+
+static void process_test_() {
+	timer_call_periodic(1 * SEC, timer_test_callback1_, NULL);
+
+	Process *root_process;
+	Process *p1;
+	Process *p2;
+	{
+		ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
+		uint64_t cr3 = ReadCR3();
+		execution_context_new(ctx, NULL, 0, cr3, 0, 0);
+
+		Process *p = malloc(sizeof(Process));
+		process_new(p, ctx);
+
+		root_process = p;
+	}
+
+	{
+		ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
+		char *sp = malloc(1024 * 16);
+		char *kernel_sp = malloc(1024 * 16);
+		uint64_t cr3 = ReadCR3();
+		execution_context_new(ctx, process_test_process1_, sp + 1024 * 16, cr3, 0, (uint64_t)(kernel_sp + 1024 * 16));
+
+		Process *p = malloc(sizeof(Process));
+		process_new(p, ctx);
+
+		p1 = p;
+	}
+
+	// process_switch_context();
+
 	for (;;) {
 		hpet_busy_wait(1000);
 		console_write(".");
@@ -89,6 +190,8 @@ void kernel_entry(LiumOS *liumos_passed) {
 	hpet_init((HPET_RegisterSpace *)g_liumos->acpi.hpet->base_address.address);
 	timer_init();
 
+	scheduler_init();
+
 	// Now ready to HPET timer.
 
 	StoreIntFlag(); // Start interrupt.
@@ -98,7 +201,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	kinfo("Kernel Ready!");
 	kinfo("Time %lld", hpet_read_main_counter_value());
 
-	timer_test_();
+	process_test_();
 
 	Die();
 }

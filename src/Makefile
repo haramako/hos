@@ -8,6 +8,7 @@ SRCS= \
 	console.c \
 	common_k.c \
 	efi.c \
+	execution_context.c \
 	gdt.c \
 	hpet.c \
 	interrupt.c \
@@ -17,7 +18,9 @@ SRCS= \
 	newlib_support.c \
 	newlib_func.c \
 	physical_memory.c \
+	process.c \
 	serial.c \
+	scheduler.c \
 	sleep_handler.S \
 	timer.c 
 

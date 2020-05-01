@@ -47,3 +47,6 @@ void process_wait_until_exit(Process *p);
 void process_notify_contextsaving(Process *p);
 void NotifyContextSaving();
 void process_print(Process *p);
+
+void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process *to_proc);
+void process_timer_handler(uint64_t intcode, InterruptInfo *info);

@@ -1,5 +1,9 @@
 #include "process.h"
 
+#include "apic.h"
+#include "scheduler.h"
+#include "timer.h"
+
 void process_new(Process *p, ExecutionContext *ctx) {
 	bzero(p, sizeof(*p));
 	assert(p->status == kNotInitialized);
@@ -39,6 +43,65 @@ void process_print(Process *p) {
 	PutString("\n");
 #endif
 }
+
+//============================================================
+// Context switch
+//============================================================
+
+void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process *to_proc) {
+#if 0
+	static uint64_t proc_last_time_count = 0;
+	const uint64_t now_count = time_now();
+	if ((proc_last_time_count - now_count) < liumos->time_slice_count)
+		return;
+
+	from_proc.AddProcTimeFemtoSec(
+								  (liumos->hpet->ReadMainCounterValue() - proc_last_time_count) *
+								  liumos->hpet->GetFemtosecondPerCount());
+#endif
+
+	// process_print(from_proc);
+	// process_print(to_proc);
+	CPUContext *from = &from_proc->ctx->cpu_context;
+	const uint64_t t0 = time_now();
+	from->cr3 = ReadCR3();
+	from->greg = int_info->greg;
+	from->int_ctx = int_info->int_ctx;
+	process_notify_contextsaving(from_proc);
+	const uint64_t t1 = time_now();
+	from_proc->time_consumed_in_ctx_save_femto_sec += t1 - t0;
+
+	CPUContext *to = &to_proc->ctx->cpu_context;
+	int_info->greg = to->greg;
+	int_info->int_ctx = to->int_ctx;
+	if (from->cr3 != to->cr3) {
+		WriteCR3(to->cr3);
+		// proc_last_time_count = liumos->hpet->ReadMainCounterValue();
+	}
+	// klog("3 %p", int_info->int_ctx.rip);
+}
+
+void process_timer_handler(uint64_t intcode, InterruptInfo *info) {
+	apic_send_end_of_interrupt(&g_apic);
+	// klog("process_test_timer_");
+	assert(info);
+	Process *proc = g_scheduler.current;
+	Process *next_proc = scheduler_switch_process();
+	if (!next_proc) return; // no need to switching context.
+	process_switch_context(info, proc, next_proc);
+}
+
+#if 0
+__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {
+	assert(info);
+	Process *proc = g_scheduler.current;
+	Process *next_proc = scheduler_switch_process();
+	if (!next_proc) return; // no need to switching context.
+	process_switch_context(info, proc, next_proc);
+}
+#else
+__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {}
+#endif
 
 #if 0
 Process &ProcessController::Create() {

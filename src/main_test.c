@@ -61,21 +61,6 @@ static void process_test_process2_() {
 	}
 }
 
-Process *process_create(void (*entry)()) {
-	ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
-	char *sp = malloc(1024 * 4);
-	char *kernel_sp = malloc(1024 * 4);
-	uint64_t cr3 = ReadCR3();
-	execution_context_new(ctx, entry, sp + 1024 * 4, cr3, kRFlagsInterruptEnable, (uint64_t)(kernel_sp + 1024 * 4));
-
-	Process *p = malloc(sizeof(Process));
-	process_new(p, ctx);
-
-	scheduler_register_process(p);
-
-	return p;
-}
-
 static void process_test_() {
 	process_create(process_test_process1_);
 	process_create(process_test_process2_);

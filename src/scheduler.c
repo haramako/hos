@@ -5,15 +5,10 @@
 
 Scheduler g_scheduler;
 
-/// Create root procecc from current execution.
+/// Create root process from current execution.
 static Process *create_root_process_() {
-	ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
-	uint64_t cr3 = ReadCR3();
-	execution_context_new(ctx, NULL, 0, cr3, 0, 0);
-
-	Process *p = malloc(sizeof(Process));
-	process_new(p, ctx);
-
+	ExecutionContext *ctx = execution_context_new(NULL, 0, ReadCR3(), 0, 0);
+	Process *p = process_new(ctx);
 	return p;
 }
 

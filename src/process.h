@@ -3,8 +3,6 @@
 #include "common.h"
 
 #include "execution_context.h"
-//#include "generic.h"
-//#include "kernel_virtual_heap_allocator.h"
 
 typedef enum ProcessStatus {
 	kNotInitialized,
@@ -41,7 +39,8 @@ class ProcessController {
 };
 #endif
 
-void process_new(Process *p, ExecutionContext *ctx);
+Process *process_new(ExecutionContext *ctx);
+Process *process_create(void (*entry)());
 void process_wait_until_exit(Process *p);
 
 void process_notify_contextsaving(Process *p);

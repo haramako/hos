@@ -55,8 +55,8 @@ void execution_context_flush(IA_PML4 &pml4, uint64_t &num_of_clflush_issued) {
 }
 #endif
 
-void execution_context_new(ExecutionContext *ctx, void (*rip)(), void *rsp, uint64_t cr3, uint64_t rflags,
-						   uint64_t kernel_rsp) {
+ExecutionContext *execution_context_new(void (*rip)(), void *rsp, uint64_t cr3, uint64_t rflags, uint64_t kernel_rsp) {
+	ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
 	bzero(ctx, sizeof(ExecutionContext));
 	CPUContext *cc = &ctx->cpu_context;
 	cc->int_ctx.rip = (uint64_t)rip;
@@ -67,4 +67,5 @@ void execution_context_new(ExecutionContext *ctx, void (*rip)(), void *rsp, uint
 	cc->cr3 = cr3;
 	ctx->kernel_rsp = kernel_rsp;
 	ctx->heap_used_size = 0;
+	return ctx;
 }

@@ -4,12 +4,28 @@
 #include "scheduler.h"
 #include "timer.h"
 
-void process_new(Process *p, ExecutionContext *ctx) {
+Process *process_new(ExecutionContext *ctx) {
+	Process *p = malloc(sizeof(Process));
 	bzero(p, sizeof(*p));
 	assert(p->status == kNotInitialized);
 	assert(!p->ctx);
 	p->ctx = ctx;
 	p->status = kNotScheduled;
+	return p;
+}
+
+Process *process_create(void (*entry)()) {
+	char *sp = malloc(1024 * 4);
+	char *kernel_sp = malloc(1024 * 4);
+	uint64_t cr3 = ReadCR3();
+	ExecutionContext *ctx =
+		execution_context_new(entry, sp + 1024 * 4, cr3, kRFlagsInterruptEnable, (uint64_t)(kernel_sp + 1024 * 4));
+
+	Process *p = process_new(ctx);
+
+	scheduler_register_process(p);
+
+	return p;
 }
 
 void process_wait_until_exit(Process *p) {

@@ -31,5 +31,4 @@ typedef struct ExecutionContext {
   }
 #endif
 
-void execution_context_new(ExecutionContext *ctx, void (*rip)(), void *rsp, uint64_t cr3, uint64_t rflags,
-						   uint64_t kernel_rsp);
+ExecutionContext *execution_context_new(void (*rip)(), void *rsp, uint64_t cr3, uint64_t rflags, uint64_t kernel_rsp);

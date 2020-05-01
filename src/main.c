@@ -10,7 +10,7 @@
 #include "serial.h"
 #include "timer.h"
 
-#include "main_test.c" //
+#include "main_test.c" // Include test source.
 
 LiumOS *g_liumos;
 

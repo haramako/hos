@@ -28,12 +28,6 @@ Process *process_create(void (*entry)()) {
 	return p;
 }
 
-void process_wait_until_exit(Process *p) {
-	while (p->status != kKilled) {
-		// Sleep();
-	}
-}
-
 void process_notify_contextsaving(Process *p) { p->number_of_ctx_switch++; }
 
 void process_print(Process *p) {

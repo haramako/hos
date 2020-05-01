@@ -26,7 +26,7 @@ void console_log(int log_level, const char *fmt,
 
 void kpanic(const char *msg) NORETURN;
 
-#define kcheck(must_true, msg)                                                                                         \
-	if (!must_true) {                                                                                                  \
-		kpanic(msg);                                                                                                   \
+#define kcheck(must_true, msg) \
+	if (!must_true) { \
+		kpanic(msg); \
 	};

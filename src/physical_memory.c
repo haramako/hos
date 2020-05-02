@@ -29,7 +29,7 @@ uintptr_t physical_memory_alloc(uintptr_t pages) {
 			uintptr_t result = pm_.blocks[i].start;
 			pm_.blocks[i].start += pages * PAGE_SIZE;
 			pm_.blocks[i].pages -= pages;
-			ktrace("Allocate physical memory at %p, %lld pages.", result, pages);
+			ktrace("Allocate physical memory %lld pages at %p.", pages, result);
 			return result;
 		}
 	}

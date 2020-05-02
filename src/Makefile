@@ -17,6 +17,7 @@ SRCS= \
 	mem.c \
 	newlib_support.c \
 	newlib_func.c \
+	page.h \
 	physical_memory.c \
 	process.c \
 	serial.c \

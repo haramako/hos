@@ -31,6 +31,7 @@ void scheduler_register_process(Process *proc) {
 	proc->status = kSleeping;
 }
 
+#if 0
 uint64_t scheduler_launch_and_wait_until_exit(Process *proc) {
 	Scheduler *s = &g_scheduler;
 	uint64_t t0 = time_now();
@@ -39,6 +40,7 @@ uint64_t scheduler_launch_and_wait_until_exit(Process *proc) {
 	uint64_t t1 = time_now();
 	return t1 - t0;
 }
+#endif
 
 Process *scheduler_switch_process() {
 	Scheduler *s = &g_scheduler;
@@ -56,7 +58,9 @@ Process *scheduler_switch_process() {
 	return NULL;
 }
 
+#if 0
 void scheduler_kill_current_process() {
 	Scheduler *s = &g_scheduler;
 	s->current->status = kKilled;
 }
+#endif

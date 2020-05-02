@@ -22,8 +22,13 @@ typedef union PACKED PageMapEntry {
 
 #define PAGE_MAP_TABLE_LEN 512
 
+typedef struct PageMapTable_ {
+	int i;
+} PageMapTable;
+
 typedef struct {
 	uint64_t mask;
+	bool show_nonleaf;
 } PMEDisplayConfig;
 
 inline uint64_t canonical_addr(uint64_t addr) {

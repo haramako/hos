@@ -4,7 +4,7 @@
 
 #define kRegisterAreaSize 0x400
 
-typedef struct PACKED LocalAPIC {
+typedef struct PACKED LocalAPIC_ {
 	uint64_t base_addr;
 	uint64_t kernel_virt_base_addr;
 	uint32_t id;

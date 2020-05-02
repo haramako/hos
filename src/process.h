@@ -4,7 +4,7 @@
 
 #include "execution_context.h"
 
-typedef enum ProcessStatus {
+typedef enum ProcessStatus_ {
 	kNotInitialized,
 	kNotScheduled,
 	kSleeping,
@@ -12,7 +12,7 @@ typedef enum ProcessStatus {
 	kKilled,
 } ProcessStatus;
 
-typedef struct Process {
+typedef struct Process_ {
 	uint64_t id;
 	ProcessStatus status;
 	int scheduler_index;

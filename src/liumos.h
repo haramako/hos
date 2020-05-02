@@ -36,7 +36,7 @@ typedef void IA_PML4;
 typedef void IDT;
 
 // @liumos.c
-typedef struct PACKED LoaderInfo {
+typedef struct PACKED LoaderInfo_ {
 	struct {
 		EFIFile *logo_ppm;
 		EFIFile *hello_bin;
@@ -49,7 +49,7 @@ typedef struct PACKED LoaderInfo {
 
 #define kNumOfPMEMManagers 4
 
-typedef struct PACKED LiumOS {
+typedef struct PACKED LiumOS_ {
 	struct {
 		ACPI_RSDT *rsdt;
 		ACPI_NFIT *nfit;

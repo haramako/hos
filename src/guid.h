@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-typedef struct PACKED GUID {
+typedef struct PACKED GUID_ {
 	uint32_t id1;
 	uint16_t id2;
 	uint16_t id3;

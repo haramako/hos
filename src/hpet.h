@@ -8,14 +8,14 @@ typedef uint64_t HPET_TimerConfig;
 #define HPET_TC_USE_PERIODIC_MODE (1ULL << 3)
 #define HPET_TC_SET_COMPARATOR_VALUE (1ULL << 6)
 
-typedef struct PACKED TimerRegister {
+typedef struct PACKED TimerRegister_ {
 	HPET_TimerConfig configuration_and_capability;
 	uint64_t comparator_value;
 	uint64_t fsb_interrupt_route;
 	uint64_t reserved;
 } TimerRegister;
 
-typedef struct PACKED HPET_RegisterSpace {
+typedef struct PACKED HPET_RegisterSpace_ {
 	uint64_t general_capabilities_and_id;
 	uint64_t reserved00;
 	uint64_t general_configuration;
@@ -28,7 +28,7 @@ typedef struct PACKED HPET_RegisterSpace {
 	TimerRegister timers[32];
 } HPET_RegisterSpace;
 
-typedef struct HPET {
+typedef struct HPET_ {
 	volatile HPET_TimerConfig configuration_and_capability;
 	volatile HPET_RegisterSpace *registers;
 	uint64_t femtosecond_per_count;

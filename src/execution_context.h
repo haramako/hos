@@ -4,7 +4,7 @@
 
 #include "asm.h"
 
-typedef struct ExecutionContext {
+typedef struct ExecutionContext_ {
 	CPUContext cpu_context;
 	// ProcessMappingInfo map_info;
 	uint64_t kernel_rsp;

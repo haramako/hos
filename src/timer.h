@@ -4,11 +4,11 @@
 
 #define TIMER_LEN 256
 
-typedef struct TimerParam {
+typedef struct TimerParam_ {
 	uint64_t time;
 } TimerParam;
 
-typedef enum {
+typedef enum TimerType_ {
 	TIMER_TYPE_NONE,
 	TIMER_TYPE_ONESHOT,
 	TIMER_TYPE_PERIODIC,

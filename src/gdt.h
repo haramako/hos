@@ -32,7 +32,7 @@
 #define kUserCS64Selector (kUserCS64Index << 3 | 3)
 #define kTSS64Selector (kTSS64Index << 3)
 
-typedef struct PACKED GDT_TSS64Entry {
+typedef struct PACKED GDT_TSS64Entry_ {
 	uint16_t limit_low;
 	uint16_t base_low;
 	uint8_t base_mid_low;
@@ -44,7 +44,7 @@ typedef struct PACKED GDT_TSS64Entry {
 
 static_assert(sizeof(GDT_TSS64Entry) == 16, "Invalid GDT_TSS64Entry size");
 
-typedef struct PACKED GDTDescriptors {
+typedef struct PACKED GDTDescriptors_ {
 	uint64_t null_segment;
 	uint64_t kernel_code_segment;
 	uint64_t kernel_data_segment;

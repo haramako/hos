@@ -6,14 +6,14 @@
 
 #define kBufferSize 0x8000
 
-typedef struct EFI_MemoryMap {
+typedef struct EFI_MemoryMap_ {
 	uintptr_t key;
 	uintptr_t bytes_used;
 	uintptr_t descriptor_size;
 	uint8_t buf[kBufferSize];
 } EFI_MemoryMap;
 
-typedef enum MemoryType {
+typedef enum MemoryType_ {
 	kReserved,
 	kLoaderCode,
 	kLoaderData,
@@ -32,7 +32,7 @@ typedef enum MemoryType {
 	kMaxMemoryType,
 } MemoryType;
 
-typedef struct EFI_MemoryDescriptor {
+typedef struct EFI_MemoryDescriptor_ {
 	MemoryType type;
 	UINTN physical_start;
 	UINTN virtual_start;
@@ -59,7 +59,7 @@ typedef void ConfigurationTable;
 
 typedef enum { EfiResetCold, EfiResetWarm, EfiResetShutdown, EfiResetPlatformSpecific } ResetType;
 
-typedef struct EFI_RuntimeServices {
+typedef struct EFI_RuntimeServices_ {
 	char _buf_rs1[24];
 	uint64_t _buf_rs2[4];
 
@@ -71,7 +71,7 @@ typedef struct EFI_RuntimeServices {
 	void (*reset_system)(ResetType, uint64_t reset_status, uint64_t data_size, void *);
 } EFI_RuntimeServices;
 
-typedef struct EFI_TableHeader {
+typedef struct EFI_TableHeader_ {
 	uint64_t signature;
 	uint32_t revision;
 	uint32_t header_size;
@@ -80,7 +80,7 @@ typedef struct EFI_TableHeader {
 } EFI_TableHeader;
 // static_assert(sizeof(EFI_TableHeader) == 24);
 
-typedef struct EFI_SystemTable {
+typedef struct EFI_SystemTable_ {
 	EFI_TableHeader header;
 	wchar_t *firmware_vendor;
 	uint32_t firmware_revision;
@@ -96,7 +96,7 @@ typedef struct EFI_SystemTable {
 	ConfigurationTable *configuration_table;
 } EFI_SystemTable;
 
-typedef struct EFI {
+typedef struct EFI_ {
 	Handle image_handle;
 	EFI_SystemTable *system_table;
 	GraphicsOutputProtocol *graphics_output_protocol;

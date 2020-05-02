@@ -23,8 +23,7 @@ static void init_process_and_scheduler_() {
 }
 
 static void paging_test_() {
-	const int S = 512;
-	uint64_t cr0; // = ReadCR0();
+	uint64_t cr0;
 	uint64_t cr3 = ReadCR3();
 	__asm__(".intel_syntax noprefix\n"
 			"mov rax, cr0"

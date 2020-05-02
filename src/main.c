@@ -84,7 +84,16 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	// process_test_();
 
+	test_virtual_memory_map_();
 	paging_test_();
+
+	int *x = (int *)0x0000000080000000;
+	// int * x = (int*)0x000000007f000000;
+	// int * x = (int*)0x000000007fffffff;
+	// int * x = (int*)0x00000000ffe00000;
+	klog("%d", *x);
+	*x = 1;
+	klog("%d", *x);
 
 	Die();
 }

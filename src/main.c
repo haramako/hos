@@ -43,7 +43,15 @@ static void paging_test_() {
 	klog("%d", *x);
 
 	PageMapEntry *pml4 = (PageMapEntry *)cr3;
+
+	void *p = (void *)(7 * 1024 * 1024 + 123);
+	klog("v2p %p => %p", p, page_v2p(pml4, p));
+
 	page_map_entry_print(pml4);
+
+	PageMapEntry *new_pml4 = page_copy_page_map_table(pml4);
+
+	page_map_entry_print(new_pml4);
 }
 
 void kernel_entry(LiumOS *liumos_passed) {
@@ -53,7 +61,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	serial_init();
 	console_init(serial_get_port(1));
-	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// Now you can use console_*().
 
@@ -62,6 +70,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	kinfo("Kernel Start");
 
 	physical_memory_init(g_liumos->efi_memory_map);
+	page_init((PageMapEntry *)ReadCR3());
 	mem_init();
 
 	// Now you can use malloc/free.

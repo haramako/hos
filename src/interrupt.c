@@ -44,6 +44,12 @@ static void handler_general_protection_fault_(uint64_t intcode, InterruptInfo *i
 		;
 }
 
+static void handler_page_fault_(uint64_t intcode, InterruptInfo *info) {
+	klog("Page Fault at %016p, target addr = %018p", info->int_ctx.rip, ReadCR2());
+	for (;;)
+		;
+}
+
 void interrupt_init() {
 	uint16_t cs = ReadCSSelector();
 
@@ -72,6 +78,7 @@ void interrupt_init() {
 	WriteIDTR(&idtr);
 
 	interrupt_set_int_handler(0x0d, handler_general_protection_fault_);
+	interrupt_set_int_handler(0x0e, handler_page_fault_);
 }
 
 void interrupt_set_int_handler(uint64_t intcode, InterruptHandler handler) {

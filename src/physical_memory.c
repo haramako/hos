@@ -1,5 +1,8 @@
 #include "physical_memory.h"
 
+#include "asm.h"
+#include "page.h"
+
 static PhysicalMemory pm_;
 
 static void physical_memory_add_page(uintptr_t physical_start, size_t pages);
@@ -36,3 +39,5 @@ uintptr_t physical_memory_alloc(uintptr_t pages) {
 	klog("Cant allocate %d pages.", pages);
 	return 0;
 }
+
+uintptr_t physmem_v2p(void *addr) { return (uintptr_t)addr; }

@@ -1,7 +1,14 @@
 #include "page.h"
 
+#include "asm.h"
+#include "physical_memory.h"
+
 extern inline uint64_t canonical_addr(uint64_t addr);
-extern inline uint64_t pme_addr(PageMapEntry pml);
+extern inline uint64_t pme_addr(PageMapEntry pme);
+extern inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr);
+
+#define PME_MARK_NONE 0ULL
+#define PME_MARK_FIXED (1ULL << 2) /// Fixed for EFI and bootstrap.
 
 const char *pme_flags(PageMapEntry p) {
 	static char buf[10];
@@ -16,6 +23,20 @@ const char *pme_flags(PageMapEntry p) {
 	buf[8] = '\0';
 	return buf;
 }
+
+static bool pme_is_leaf_(PageMapEntry pme, int level) {
+	bool is_leaf;
+	switch (level) {
+	case 1:
+		return true;
+	case 2:
+		return pme.x.page_size;
+	default:
+		return false;
+	}
+}
+
+static bool pme_is_fixed_(PageMapEntry pme) { return pme.x.available & PME_MARK_FIXED; }
 
 static uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
 
@@ -39,16 +60,16 @@ static const char *humanize_size(uint64_t size) {
 }
 
 static void print_pml4_(PMEDisplayConfig *conf, PageMapEntry *pml4) {
-	klog("LV: v-addr                                      size num flags    table-address");
+	klog("LV   : v-addr                                      size num flags    table-address");
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry p4 = pml4[i];
 		uint64_t addr = canonical_addr(((uint64_t)i) << 39);
-		if (p4.x.present) {
-			if (conf->show_nonleaf)
-				klog("L4   : %018p~                                  %s %018p", addr, pme_flags(p4), pme_addr(p4));
-			PageMapEntry *pml3 = (PageMapEntry *)pme_addr(p4);
-			print_pml3_(conf, pml3, addr);
-		}
+		if (!p4.x.present) continue;
+		if (!conf->show_fixed && pme_is_fixed_(p4)) continue;
+		if (conf->show_nonleaf)
+			klog("L4   : %018p~                                  %s %018p", addr, pme_flags(p4), pme_addr(p4));
+		PageMapEntry *pml3 = (PageMapEntry *)pme_addr(p4);
+		print_pml3_(conf, pml3, addr);
 	}
 }
 
@@ -150,6 +171,111 @@ static void print_pml1_(PMEDisplayConfig *conf, PageMapEntry *pml1, uint64_t bas
 }
 
 void page_map_entry_print(PageMapEntry *pml4) {
-	PMEDisplayConfig conf = {.mask = ~0x60, .show_nonleaf = true};
+	PMEDisplayConfig conf = {.mask = ~0x60, .show_nonleaf = true, .show_fixed = false};
 	print_pml4_(&conf, pml4);
+}
+
+typedef struct FindEntryOpt_ {
+	uint64_t vaddr;
+	bool map_if_not_found;
+} FindEntryOpt;
+
+typedef struct FindEntryResult_ {
+	PageMapEntry *entry;
+	uintptr_t paddr;
+	int level;
+	bool found;
+} FindEntryResult;
+
+FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
+	int shift = (12 + (level - 1) * 9);
+	uint64_t entry_num = (opt->vaddr >> shift) & (PAGE_MAP_TABLE_LEN - 1);
+	PageMapEntry *pme = &pml[entry_num];
+	// klog("%d %p %d %p", level, vaddr, entry_num, pme);
+
+	if (!pme->x.present) {
+		if (opt->map_if_not_found) {
+			uintptr_t new_pml = physical_memory_alloc(1);
+			bzero((void *)new_pml, 4096);
+			pme_set_addr(pme, new_pml);
+			pme->x.present = true;
+			pme->x.is_read = true;
+			ktrace("Init page map entry at %018p, level %d", pme, level);
+		} else {
+			FindEntryResult result = {.entry = pme, .level = level - 1, 0};
+			return result;
+		}
+	}
+
+	bool is_leaf = pme_is_leaf_(*pme, level);
+
+	if (is_leaf) {
+		uint64_t mask = (1 << shift) - 1;
+		uint64_t paddr = pme_addr(*pme) | (opt->vaddr & mask);
+		FindEntryResult result = {.found = true, .entry = pme, .level = level - 1, .paddr = paddr};
+		return result;
+	} else {
+		return find_entry_(opt, (PageMapEntry *)(pme_addr(*pme)), level - 1);
+	}
+}
+
+uintptr_t page_v2p(PageMapEntry *pml4, void *addr) {
+	FindEntryOpt opt = {.vaddr = (uint64_t)addr, .map_if_not_found = false};
+	FindEntryResult el = find_entry_(&opt, pml4, 4);
+	return el.paddr;
+}
+
+PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
+	PageMapEntry *new_pml = (PageMapEntry *)physical_memory_alloc(1);
+	kcheck(new_pml, "Can't allocate new page map table.");
+	bzero(new_pml, 4096);
+
+	int num_copied = 0;
+	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
+		PageMapEntry pme = pml[i];
+		if (!pme.x.present) continue;
+		num_copied++;
+		if (pme_is_fixed_(pme)) {
+			new_pml[i] = pme;
+		} else {
+			if (pme_is_leaf_(pme, level - 1)) {
+				new_pml[i] = pme;
+			} else {
+				copy_page_map_table_((PageMapEntry *)pme_addr(pme), level - 1);
+			}
+		}
+	}
+	ktrace("Copy page map table %018p level %d, %d entries", pml, level, num_copied);
+	return new_pml;
+}
+
+PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4) { return copy_page_map_table_(pml4, 4); }
+
+void page_init(PageMapEntry *pml4) {
+	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
+		PageMapEntry *pme = &pml4[i];
+		if (!pme->x.present) continue;
+		pme->x.available |= PME_MARK_FIXED;
+	}
+}
+
+PageMapEntry *get_pml4_() { return (PageMapEntry *)ReadCR3(); }
+
+void page_alloc_addr(void *addr, int num_page) {
+	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
+	FindEntryOpt opt = {.vaddr = (uint64_t)addr, .map_if_not_found = false};
+	FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
+	klog("%p", r.entry);
+}
+
+void page_alloc_addr_prelude(void *addr, int num_page) {
+
+	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
+	for (int i = 0; i < num_page; i++) {
+		FindEntryOpt opt = {.vaddr = (uint64_t)addr, .map_if_not_found = (uint64_t)addr + (uint64_t)i * PAGE_SIZE};
+		FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
+		kcheck(r.found, "BUG");
+	}
+
+	page_map_entry_print(get_pml4_());
 }

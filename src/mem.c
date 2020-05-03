@@ -1,15 +1,20 @@
 #include "mem.h"
 
+#include "page.h"
 #include "physical_memory.h"
 
-uintptr_t heap_start_;
-uintptr_t heap_sbrk_;
-uintptr_t heap_end_;
+static uintptr_t heap_start_;
+static uintptr_t heap_sbrk_;
+static uintptr_t heap_end_;
 
 void mem_init() {
 	ktrace("Initialize kernel heap.");
-	const int num = 2048;
-	uintptr_t block = physical_memory_alloc(num);
+	const int num = 8;
+	uintptr_t block = canonical_addr(256 * (1ULL << 39));
+	klog("block %018p", block);
+
+	page_alloc_addr_prelude((void *)block, num);
+	// uintptr_t block = physical_memory_alloc(num);
 	heap_start_ = block;
 	heap_sbrk_ = block;
 	heap_end_ = block + num * PAGE_SIZE;

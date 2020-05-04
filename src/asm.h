@@ -193,6 +193,8 @@ __attribute__((ms_abi)) void WriteSSSelector(uint16_t);
 __attribute__((ms_abi)) void WriteDataAndExtraSegmentSelectors(uint16_t);
 __attribute__((ms_abi)) uint64_t ReadCR2(void);
 __attribute__((ms_abi)) uint64_t ReadCR3(void);
+__attribute__((ms_abi)) uint64_t asm_read_cr0(void);
+__attribute__((ms_abi)) uint64_t asm_read_cr1(void);
 __attribute__((ms_abi)) void WriteCR3(uint64_t);
 __attribute__((ms_abi)) uint64_t CompareAndSwap(uint64_t *, uint64_t);
 __attribute__((ms_abi)) void SwapGS(void);

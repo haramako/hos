@@ -1,6 +1,7 @@
 #include "page.h"
 
 #include "asm.h"
+#include "interrupt.h"
 #include "physical_memory.h"
 
 extern inline uint64_t canonical_addr(uint64_t addr);
@@ -8,7 +9,10 @@ extern inline uint64_t pme_addr(PageMapEntry pme);
 extern inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr);
 
 #define PME_MARK_NONE 0ULL
-#define PME_MARK_FIXED (1ULL << 2) /// Fixed for EFI and bootstrap.
+#define PME_MARK_MAPPED (1ULL << 1) /// Fixed for EFI and bootstrap.
+#define PME_MARK_FIXED (1ULL << 2)  /// Fixed for EFI and bootstrap.
+
+static PageMapEntry *get_pml4_() { return (PageMapEntry *)ReadCR3(); }
 
 const char *pme_flags(PageMapEntry p) {
 	static char buf[10];
@@ -36,9 +40,9 @@ static bool pme_is_leaf_(PageMapEntry pme, int level) {
 	}
 }
 
-static bool pme_is_fixed_(PageMapEntry pme) { return pme.x.available & PME_MARK_FIXED; }
-
-static uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
+static inline bool pme_is_fixed_(PageMapEntry pme) { return pme.x.available & PME_MARK_FIXED; }
+static inline uint64_t pme_mapped(PageMapEntry p) { return p.x.present || (p.x.available & PME_MARK_MAPPED); }
+static inline uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
 
 static void print_pml4_(PMEDisplayConfig *conf, PageMapEntry *pml4);
 static void print_pml3_(PMEDisplayConfig *conf, PageMapEntry *pml3, uint64_t base_addr);
@@ -77,7 +81,7 @@ static void print_pml3_(PMEDisplayConfig *conf, PageMapEntry *pml3, uint64_t bas
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry p3 = pml3[i];
 		uint64_t addr = canonical_addr(base_addr | ((uint64_t)i) << 30);
-		if (p3.x.present) {
+		if (pme_mapped(p3)) {
 			if (conf->show_nonleaf)
 				klog(" L3  : %018p~                                  %s %018p", addr, pme_flags(p3), pme_addr(p3));
 			PageMapEntry *pml2 = (PageMapEntry *)pme_addr(p3);
@@ -105,7 +109,7 @@ static void print_pml2_(PMEDisplayConfig *conf, PageMapEntry *pml2, uint64_t bas
 
 		// Display merging.
 		uint64_t flags = pme_flag(p2) & conf->mask;
-		bool has_page = (p2.x.present && p2.x.page_size);
+		bool has_page = (pme_mapped(p2) && p2.x.page_size);
 
 		if (merge_start != -1 && (!has_page || (merge_flags != flags))) {
 			// Finish display merging.
@@ -119,12 +123,12 @@ static void print_pml2_(PMEDisplayConfig *conf, PageMapEntry *pml2, uint64_t bas
 			merge_flags = flags;
 		}
 
-		if (p2.x.present && p2.x.page_size) {
+		if (pme_mapped(p2) && p2.x.page_size) {
 			// klog("L2: %018p~%018p %10s %3d %s %018p", addr, addr + (1UL<<21) - 1, humanize_size(1UL<<21), 1,
 			// pme_flags(p2), pme_addr(p2) );
 		}
 
-		if (p2.x.present && !p2.x.page_size) {
+		if (pme_mapped(p2) && !p2.x.page_size) {
 			// 4KB page
 			if (conf->show_nonleaf)
 				klog("  L2 : %018p~                                  %s %018p", addr, pme_flags(p2), pme_addr(p2));
@@ -149,7 +153,7 @@ static void print_pml1_(PMEDisplayConfig *conf, PageMapEntry *pml1, uint64_t bas
 
 		// Display merging.
 		uint64_t flags = pme_flag(p1) & conf->mask;
-		bool has_page = p1.x.present;
+		bool has_page = pme_mapped(p1);
 
 		if (merge_start != -1 && (!has_page || (merge_flags != flags))) {
 			// Finish display merging.
@@ -178,6 +182,7 @@ void page_map_entry_print(PageMapEntry *pml4) {
 typedef struct FindEntryOpt_ {
 	uint64_t vaddr;
 	bool map_if_not_found;
+	bool alloc;
 } FindEntryOpt;
 
 typedef struct FindEntryResult_ {
@@ -193,18 +198,24 @@ FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
 	PageMapEntry *pme = &pml[entry_num];
 	// klog("%d %p %d %p", level, vaddr, entry_num, pme);
 
-	if (!pme->x.present) {
+	if (!pme_mapped(*pme)) {
 		if (opt->map_if_not_found) {
-			uintptr_t new_pml = physical_memory_alloc(1);
-			bzero((void *)new_pml, 4096);
-			pme_set_addr(pme, new_pml);
-			pme->x.present = true;
-			pme->x.is_read = true;
+			pme->raw = 0;
+			pme->x.available |= PME_MARK_MAPPED;
 			ktrace("Init page map entry at %018p, level %d", pme, level);
 		} else {
 			FindEntryResult result = {.entry = pme, .level = level - 1, 0};
 			return result;
 		}
+	}
+
+	if (opt->alloc && !pme->x.present) {
+		uintptr_t new_pml = physical_memory_alloc(1);
+		bzero((void *)new_pml, 4096);
+		pme_set_addr(pme, new_pml);
+		pme->x.present = true;
+		pme->x.is_read = true;
+		ktrace("Init page map entry at %018p, level %d, paddr=%018p", pme, level, new_pml);
 	}
 
 	bool is_leaf = pme_is_leaf_(*pme, level);
@@ -233,7 +244,7 @@ PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
 	int num_copied = 0;
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry pme = pml[i];
-		if (!pme.x.present) continue;
+		if (!pme_mapped(pme)) continue;
 		num_copied++;
 		if (pme_is_fixed_(pme)) {
 			new_pml[i] = pme;
@@ -251,31 +262,36 @@ PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
 
 PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4) { return copy_page_map_table_(pml4, 4); }
 
-void page_init(PageMapEntry *pml4) {
+void page_init() {
+	PageMapEntry *pml4 = get_pml4_();
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry *pme = &pml4[i];
-		if (!pme->x.present) continue;
+		if (!pme_mapped(*pme)) continue;
 		pme->x.available |= PME_MARK_FIXED;
 	}
 }
 
-PageMapEntry *get_pml4_() { return (PageMapEntry *)ReadCR3(); }
+void *page_align(void *addr) { return (void *)((uint64_t)addr & ~(PAGE_SIZE - 1)); }
 
-void page_alloc_addr(void *addr, int num_page) {
-	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
-	FindEntryOpt opt = {.vaddr = (uint64_t)addr, .map_if_not_found = false};
+static void handler_page_fault_(uint64_t intcode, InterruptInfo *info) {
+	uint64_t addr = ReadCR2();
+	klog("Page Fault at %016p, target addr = %018p", info->int_ctx.rip, addr);
+	FindEntryOpt opt = {.vaddr = (uint64_t)page_align((void *)addr), .map_if_not_found = true, .alloc = true};
 	FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
-	klog("%p", r.entry);
+	// klog("r=%p, pme=%s", r.paddr, pme_flags(*r.entry));
+
+	// kpanic("Page Fault.");
 }
 
-void page_alloc_addr_prelude(void *addr, int num_page) {
+void page_init_interrupt() { interrupt_set_int_handler(0x0e, handler_page_fault_); }
 
+void page_alloc_addr(void *addr, int num_page, bool alloc) {
 	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
+
 	for (int i = 0; i < num_page; i++) {
-		FindEntryOpt opt = {.vaddr = (uint64_t)addr, .map_if_not_found = (uint64_t)addr + (uint64_t)i * PAGE_SIZE};
+		FindEntryOpt opt = {
+			.vaddr = (uint64_t)addr + ((uint64_t)i) * PAGE_SIZE, .map_if_not_found = true, .alloc = alloc};
 		FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
 		kcheck(r.found, "BUG");
 	}
-
-	page_map_entry_print(get_pml4_());
 }

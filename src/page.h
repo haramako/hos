@@ -42,8 +42,8 @@ inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr) { pme->x.addr = padd
 const char *pme_flags(PageMapEntry pml);
 void page_map_entry_print(PageMapEntry *pml4);
 
-void page_init(PageMapEntry *pml4);
+void page_init();
+void page_init_interrupt();
 uintptr_t page_v2p(PageMapEntry *pml4, void *addr);
 PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4);
-void page_alloc_addr(void *addr, int num_page);
-void page_alloc_addr_prelude(void *addr, int num_page);
+void page_alloc_addr(void *addr, int num_page, bool alloc);

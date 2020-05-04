@@ -13,7 +13,7 @@ void mem_init() {
 	uintptr_t block = canonical_addr(256 * (1ULL << 39));
 	klog("block %018p", block);
 
-	page_alloc_addr_prelude((void *)block, num);
+	page_alloc_addr((void *)block, num, true);
 	// uintptr_t block = physical_memory_alloc(num);
 	heap_start_ = block;
 	heap_sbrk_ = block;

@@ -54,6 +54,16 @@ ReadCR3:
 	mov rax, cr3
 	ret
 
+.global asm_read_cr0
+asm_read_cr0:
+	mov rax, cr0
+	ret
+
+.global asm_read_cr1
+asm_read_cr1:
+	mov rax, cr1
+	ret
+	
 .global ReadCSSelector
 ReadCSSelector:
 	mov rax, 0

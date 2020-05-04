@@ -14,20 +14,9 @@
 #include "main_test.c" // Include test source.
 
 LiumOS *g_liumos;
-
-static void init_process_and_scheduler_() {
-	scheduler_init();
-
-	interrupt_set_int_handler(0x28, process_timer_handler);
-	hpet_set_timer_ns(1, 100 * MSEC, HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE);
-}
-
 static void paging_test_() {
-	uint64_t cr0;
+	uint64_t cr0 = asm_read_cr0();
 	uint64_t cr3 = ReadCR3();
-	__asm__(".intel_syntax noprefix\n"
-			"mov rax, cr0"
-			: "=rax"(cr0));
 	klog("CR0 %p", cr0);
 	klog("CR3 %p", cr3);
 
@@ -51,7 +40,41 @@ static void paging_test_() {
 
 	PageMapEntry *new_pml4 = page_copy_page_map_table(pml4);
 
+	klog("=================");
 	page_map_entry_print(new_pml4);
+
+	{
+		int *x2 = (int *)0xffff800000000100;
+		page_alloc_addr((void *)((uint64_t)x2 & ~(PAGE_SIZE - 1)), 100, false);
+		*x2 = 1;
+
+		klog("=================");
+		page_map_entry_print(pml4);
+	}
+
+	{
+		int *x2 = (int *)0xffff800000010000;
+		*x2 = 1;
+
+		klog("=================");
+		page_map_entry_print(pml4);
+	}
+}
+
+static void init_gdt_and_interrupt_() {
+	const int stack_pages = 1024 * 16;
+	uintptr_t stack = physical_memory_alloc(stack_pages);
+	uintptr_t ist = physical_memory_alloc(stack_pages);
+	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
+	interrupt_init();
+	page_init_interrupt();
+}
+
+static void init_process_and_scheduler_() {
+	scheduler_init();
+
+	interrupt_set_int_handler(0x28, process_timer_handler);
+	hpet_set_timer_ns(1, 100 * MSEC, HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE);
 }
 
 void kernel_entry(LiumOS *liumos_passed) {
@@ -61,7 +84,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	serial_init();
 	console_init(serial_get_port(1));
-	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 
 	// Now you can use console_*().
 
@@ -70,18 +93,13 @@ void kernel_entry(LiumOS *liumos_passed) {
 	kinfo("Kernel Start");
 
 	physical_memory_init(g_liumos->efi_memory_map);
-	page_init((PageMapEntry *)ReadCR3());
+	page_init();
 	mem_init();
 
 	// Now you can use malloc/free.
 
 	apic_init();
-
-	const int stack_pages = 1024 * 16;
-	uintptr_t stack = physical_memory_alloc(stack_pages);
-	uintptr_t ist = physical_memory_alloc(stack_pages);
-	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
-	interrupt_init();
+	init_gdt_and_interrupt_();
 
 	// Now ready to interrupt (but interrupt flag is not set).
 

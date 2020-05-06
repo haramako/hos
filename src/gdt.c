@@ -1,7 +1,5 @@
 #include "gdt.h"
 
-#include <string.h>
-
 #include "asm.h"
 
 GDTR g_gdt_gdtr;

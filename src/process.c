@@ -1,8 +1,11 @@
 #include "process.h"
 
 #include "apic.h"
+#include "page.h"
 #include "scheduler.h"
 #include "timer.h"
+
+#define STACK_ADDR (0x0000100000000000UL)
 
 Process *process_new(ExecutionContext *ctx) {
 	Process *p = malloc(sizeof(Process));
@@ -14,18 +17,21 @@ Process *process_new(ExecutionContext *ctx) {
 	return p;
 }
 
-Process *process_create(void (*entry)()) {
-	char *sp = malloc(1024 * 4);
-	char *kernel_sp = malloc(1024 * 4);
-	uint64_t cr3 = ReadCR3();
-	ExecutionContext *ctx =
-		execution_context_new(entry, sp + 1024 * 4, cr3, kRFlagsInterruptEnable, (uint64_t)(kernel_sp + 1024 * 4));
+Process *process_create(ProcessCreateParam *p) {
+	if (p->stack_size <= 0) p->stack_size = 4096;
+	if (p->kernel_stack_size <= 0) p->kernel_stack_size = 4096;
 
-	Process *p = process_new(ctx);
+	char *sp = malloc(p->stack_size);
+	char *kernel_sp = malloc(p->kernel_stack_size);
+	PageMapEntry *pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
+	ExecutionContext *ctx = execution_context_new(p->entry_point, sp + p->stack_size, (uint64_t)pml4,
+												  kRFlagsInterruptEnable, (uint64_t)(kernel_sp + p->kernel_stack_size));
 
-	scheduler_register_process(p);
+	Process *process = process_new(ctx);
 
-	return p;
+	scheduler_register_process(process);
+
+	return process;
 }
 
 void process_notify_contextsaving(Process *p) { p->number_of_ctx_switch++; }

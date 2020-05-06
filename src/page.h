@@ -40,7 +40,9 @@ inline uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.x.addr <<
 inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr) { pme->x.addr = paddr >> 12; }
 
 const char *pme_flags(PageMapEntry pml);
-void page_map_entry_print(PageMapEntry *pml4);
+void pme_print(PageMapEntry *pml4);
+
+inline void *page_align(void *addr) { return (void *)((uint64_t)addr & ~(PAGE_SIZE - 1)); }
 
 void page_init();
 void page_init_interrupt();

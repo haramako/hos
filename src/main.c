@@ -36,12 +36,12 @@ static void paging_test_() {
 	void *p = (void *)(7 * 1024 * 1024 + 123);
 	klog("v2p %p => %p", p, page_v2p(pml4, p));
 
-	page_map_entry_print(pml4);
+	pme_print(pml4);
 
 	PageMapEntry *new_pml4 = page_copy_page_map_table(pml4);
 
 	klog("=================");
-	page_map_entry_print(new_pml4);
+	pme_print(new_pml4);
 
 	{
 		int *x2 = (int *)0xffff800000000100;
@@ -49,7 +49,7 @@ static void paging_test_() {
 		*x2 = 1;
 
 		klog("=================");
-		page_map_entry_print(pml4);
+		pme_print(pml4);
 	}
 
 	{
@@ -57,7 +57,7 @@ static void paging_test_() {
 		*x2 = 1;
 
 		klog("=================");
-		page_map_entry_print(pml4);
+		pme_print(pml4);
 	}
 }
 
@@ -117,10 +117,12 @@ void kernel_entry(LiumOS *liumos_passed) {
 	kinfo("Kernel Ready!");
 	kinfo("Time %lld", hpet_read_main_counter_value());
 
-	// process_test_();
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// test_virtual_memory_map_();
-	paging_test_();
+	// paging_test_();
+	// process_test_();
+	process_test2_();
 
 	Die();
 }

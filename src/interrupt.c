@@ -43,6 +43,12 @@ static void handler_general_protection_fault_(uint64_t intcode, InterruptInfo *i
 		;
 }
 
+static void handler_undefined_operation_(uint64_t intcode, InterruptInfo *info) {
+	klog("Undefined Operation Exception at %016p", info->int_ctx.rip);
+	for (;;)
+		;
+}
+
 void interrupt_init() {
 	uint16_t cs = ReadCSSelector();
 
@@ -71,6 +77,7 @@ void interrupt_init() {
 	WriteIDTR(&idtr);
 
 	interrupt_set_int_handler(0x0d, handler_general_protection_fault_);
+	interrupt_set_int_handler(0x06, handler_undefined_operation_);
 }
 
 void interrupt_set_int_handler(uint64_t intcode, InterruptHandler handler) {

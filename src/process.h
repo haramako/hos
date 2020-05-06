@@ -17,6 +17,7 @@ typedef struct Process_ {
 	ProcessStatus status;
 	int scheduler_index;
 	ExecutionContext *ctx;
+
 	uint64_t number_of_ctx_switch;
 	uint64_t proc_time_femto_sec;
 	uint64_t sys_time_femto_sec;
@@ -39,8 +40,15 @@ class ProcessController {
 };
 #endif
 
+typedef struct ProcessCreateParam_ {
+	void (*entry_point)();
+	int priority;
+	size_t stack_size;
+	size_t kernel_stack_size;
+} ProcessCreateParam;
+
 Process *process_new(ExecutionContext *ctx);
-Process *process_create(void (*entry)());
+Process *process_create(ProcessCreateParam *p);
 
 void process_notify_contextsaving(Process *p);
 void process_print(Process *p);

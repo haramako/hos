@@ -62,8 +62,53 @@ static void process_test_process2_() {
 }
 
 static void process_test_() {
-	process_create(process_test_process1_);
-	process_create(process_test_process2_);
+	{
+		ProcessCreateParam param = {.entry_point = process_test_process1_};
+		Process *p = process_create(&param);
+		process_print(p);
+	}
+	{
+		ProcessCreateParam param = {.entry_point = process_test_process2_};
+		Process *p = process_create(&param);
+		process_print(p);
+	}
+
+	for (;;) {
+		hpet_busy_wait(1000);
+		console_write(".");
+	}
+}
+
+extern uint8_t _binary_hello_elf_start[];
+extern uint8_t _binary_hello_elf_end[];
+extern uint8_t _binary_hello_elf_size[];
+
+#include "page.h"
+#include <elf.h>
+
+typedef void (*EntryPoint)();
+
+// Process test
+static void process_test2_() {
+	uint8_t *bin_start = _binary_hello_elf_start;
+	uint64_t bin_size = (uint64_t)_binary_hello_elf_size;
+	Elf64_Ehdr *elf = (Elf64_Ehdr *)bin_start;
+
+	klog("HOGE");
+	char *bin = (char *)0x0000100000000000ULL;
+	page_alloc_addr(bin, 4, true);
+	klog("HOGE2 %lld", bin_size);
+	memcpy(bin, bin_start, bin_size);
+
+	{
+		EntryPoint entry_point = (EntryPoint)elf->e_entry;
+		klog("size %lld, ep = %p, entry_point = %p", bin_size, elf->e_entry, entry_point);
+
+		ProcessCreateParam param = {.entry_point = entry_point};
+		Process *p = process_create(&param);
+		process_print(p);
+		pme_print((PageMapEntry *)ReadCR3());
+	}
 
 	for (;;) {
 		hpet_busy_wait(1000);

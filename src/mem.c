@@ -11,7 +11,6 @@ void mem_init() {
 	ktrace("Initialize kernel heap.");
 	const int num = 8;
 	uintptr_t block = canonical_addr(256 * (1ULL << 39));
-	klog("block %018p", block);
 
 	page_alloc_addr((void *)block, num, true);
 	// uintptr_t block = physical_memory_alloc(num);

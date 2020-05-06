@@ -7,6 +7,7 @@
 extern inline uint64_t canonical_addr(uint64_t addr);
 extern inline uint64_t pme_addr(PageMapEntry pme);
 extern inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr);
+extern inline void *page_align(void *addr);
 
 #define PME_MARK_NONE 0ULL
 #define PME_MARK_MAPPED (1ULL << 1) /// Fixed for EFI and bootstrap.
@@ -174,7 +175,7 @@ static void print_pml1_(PMEDisplayConfig *conf, PageMapEntry *pml1, uint64_t bas
 	}
 }
 
-void page_map_entry_print(PageMapEntry *pml4) {
+void pme_print(PageMapEntry *pml4) {
 	PMEDisplayConfig conf = {.mask = ~0x60, .show_nonleaf = true, .show_fixed = false};
 	print_pml4_(&conf, pml4);
 }
@@ -196,7 +197,7 @@ FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
 	int shift = (12 + (level - 1) * 9);
 	uint64_t entry_num = (opt->vaddr >> shift) & (PAGE_MAP_TABLE_LEN - 1);
 	PageMapEntry *pme = &pml[entry_num];
-	// klog("%d %p %d %p", level, vaddr, entry_num, pme);
+	// klog("%d %p %d %p", level, opt->vaddr, entry_num, pme);
 
 	if (!pme_mapped(*pme)) {
 		if (opt->map_if_not_found) {
@@ -211,7 +212,7 @@ FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
 
 	if (opt->alloc && !pme->x.present) {
 		uintptr_t new_pml = physical_memory_alloc(1);
-		bzero((void *)new_pml, 4096);
+		bzero((void *)new_pml, PAGE_SIZE);
 		pme_set_addr(pme, new_pml);
 		pme->x.present = true;
 		pme->x.is_read = true;
@@ -242,21 +243,25 @@ PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
 	bzero(new_pml, 4096);
 
 	int num_copied = 0;
+	int num_fixed = 0;
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry pme = pml[i];
 		if (!pme_mapped(pme)) continue;
-		num_copied++;
 		if (pme_is_fixed_(pme)) {
+			num_fixed++;
 			new_pml[i] = pme;
 		} else {
-			if (pme_is_leaf_(pme, level - 1)) {
+			num_copied++;
+			if (pme_is_leaf_(pme, level)) {
 				new_pml[i] = pme;
 			} else {
-				copy_page_map_table_((PageMapEntry *)pme_addr(pme), level - 1);
+				PageMapEntry *child = copy_page_map_table_((PageMapEntry *)pme_addr(pme), level - 1);
+				new_pml[i] = pme;
+				pme_set_addr(&new_pml[i], (uint64_t)child);
 			}
 		}
 	}
-	ktrace("Copy page map table %018p level %d, %d entries", pml, level, num_copied);
+	ktrace("Copy page map table %018p level %d, copy %d entries, fixed %d entries", pml, level, num_copied, num_fixed);
 	return new_pml;
 }
 
@@ -271,16 +276,16 @@ void page_init() {
 	}
 }
 
-void *page_align(void *addr) { return (void *)((uint64_t)addr & ~(PAGE_SIZE - 1)); }
-
 static void handler_page_fault_(uint64_t intcode, InterruptInfo *info) {
 	uint64_t addr = ReadCR2();
-	klog("Page Fault at %016p, target addr = %018p", info->int_ctx.rip, addr);
-	FindEntryOpt opt = {.vaddr = (uint64_t)page_align((void *)addr), .map_if_not_found = true, .alloc = true};
+	ktrace("Page Fault at %016p, target addr = %018p", info->int_ctx.rip, addr);
+	FindEntryOpt opt = {.vaddr = (uint64_t)page_align((void *)addr), .map_if_not_found = false, .alloc = true};
 	FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
 	// klog("r=%p, pme=%s", r.paddr, pme_flags(*r.entry));
 
-	// kpanic("Page Fault.");
+	if (!r.found) {
+		kpanic("Page Fault.");
+	}
 }
 
 void page_init_interrupt() { interrupt_set_int_handler(0x0e, handler_page_fault_); }

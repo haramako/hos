@@ -215,6 +215,7 @@ FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
 		bzero((void *)new_pml, PAGE_SIZE);
 		pme_set_addr(pme, new_pml);
 		pme->x.present = true;
+		pme->x.is_user = true;
 		pme->x.is_read = true;
 		ktrace("Init page map entry at %018p, level %d, paddr=%018p", pme, level, new_pml);
 	}
@@ -278,7 +279,7 @@ void page_init() {
 
 static void handler_page_fault_(uint64_t intcode, InterruptInfo *info) {
 	uint64_t addr = ReadCR2();
-	ktrace("Page Fault at %016p, target addr = %018p", info->int_ctx.rip, addr);
+	ktrace("Page Fault at %018p, target addr = %018p, error = %08x", info->int_ctx.rip, addr, info->error_code);
 	FindEntryOpt opt = {.vaddr = (uint64_t)page_align((void *)addr), .map_if_not_found = false, .alloc = true};
 	FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
 	// klog("r=%p, pme=%s", r.paddr, pme_flags(*r.entry));

@@ -23,6 +23,7 @@ SRCS= \
 	serial.c \
 	scheduler.c \
 	sleep_handler.S \
+	syscall_handler.S \
 	timer.c 
 
 OBJS= $(addsuffix .o, $(basename $(SRCS)))
@@ -61,7 +62,7 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
-LIUMOS.ELF : $(OBJS) kernel.ld Makefile
+LIUMOS.ELF : $(OBJS) kernel.ld Makefile ../app/hello/hello_data.o
 	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) ../app/hello/hello_data.o
 
 run:

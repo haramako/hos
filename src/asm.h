@@ -108,23 +108,23 @@ typedef struct PACKED IDTR {
 	IDTGateDescriptor *base;
 } IDTR;
 
+typedef struct PACKED IA32_EFER_BITS_ {
+	unsigned syscall_enable : 1;
+	unsigned reserved0 : 7;
+	unsigned LME : 1;
+	unsigned reserved1 : 1;
+	unsigned LMA : 1;
+	unsigned NXE : 1;
+} IA32_EFER_BITS;
+
+typedef struct PACKED IA32_EFER_ {
+	union {
+		uint64_t data;
+		IA32_EFER_BITS bits;
+	};
+} IA32_EFER;
+
 #if 0
-struct PACKED IA32_EFER_BITS {
-  unsigned syscall_enable : 1;
-  unsigned reserved0 : 7;
-  unsigned LME : 1;
-  unsigned reserved1 : 1;
-  unsigned LMA : 1;
-  unsigned NXE : 1;
-};
-
-struct PACKED IA32_EFER {
-  union {
-    uint64_t data;
-    IA32_EFER_BITS bits;
-  };
-};
-
 struct PACKED IA32_MaxPhyAddr_BITS {
   uint8_t physical_address_bits;
   uint8_t linear_address_bits;

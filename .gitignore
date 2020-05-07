@@ -6,7 +6,6 @@ mnt/
 *.swp
 *.dSYM
 *.vdi
-*.txt
 cc_cache.gen.mk
 
 GPATH

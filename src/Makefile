@@ -23,6 +23,7 @@ SRCS= \
 	serial.c \
 	scheduler.c \
 	sleep_handler.S \
+	syscall.c \
 	syscall_handler.S \
 	timer.c 
 

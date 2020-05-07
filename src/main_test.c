@@ -108,3 +108,51 @@ static void process_test2_() {
 		// pme_print((PageMapEntry *)ReadCR3());
 	}
 }
+
+// Paging test
+static void paging_test_() {
+	uint64_t cr0 = asm_read_cr0();
+	uint64_t cr3 = ReadCR3();
+	klog("CR0 %p", cr0);
+	klog("CR3 %p", cr3);
+
+	// int n = *((int*)0x01);
+	//*((int*)0x01) = 1;
+
+	int *x = (int *)0x0000000080000000;
+	// int * x = (int*)0x000000007f000000;
+	// int * x = (int*)0x000000007fffffff;
+	// int * x = (int*)0x00000000ffe00000;
+	klog("%d", *x);
+	*x = 1;
+	klog("%d", *x);
+
+	PageMapEntry *pml4 = (PageMapEntry *)cr3;
+
+	void *p = (void *)(7 * 1024 * 1024 + 123);
+	klog("v2p %p => %p", p, page_v2p(pml4, p));
+
+	pme_print(pml4);
+
+	PageMapEntry *new_pml4 = page_copy_page_map_table(pml4);
+
+	klog("=================");
+	pme_print(new_pml4);
+
+	{
+		int *x2 = (int *)0xffff800000000100;
+		page_alloc_addr((void *)((uint64_t)x2 & ~(PAGE_SIZE - 1)), 100, false);
+		*x2 = 1;
+
+		klog("=================");
+		pme_print(pml4);
+	}
+
+	{
+		int *x2 = (int *)0xffff800000010000;
+		*x2 = 1;
+
+		klog("=================");
+		pme_print(pml4);
+	}
+}

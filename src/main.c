@@ -133,7 +133,6 @@ static void init_syscall_() {
 
 	IA32_EFER efer = {.data = ReadMSR(MSRIndex_kEFER)};
 	efer.bits.syscall_enable = 1;
-	klog("EFER %p", efer.data);
 	WriteMSR(MSRIndex_kEFER, efer.data);
 }
 
@@ -187,19 +186,20 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	// Now ready to HPET timer.
 
-	StoreIntFlag(); // Start interrupt.
-
 	// =========================
 
 	kinfo("Kernel Ready!");
 	kinfo("Time %lld", hpet_read_main_counter_value());
 
-	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	// console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// test_virtual_memory_map_();
 	// paging_test_();
 	// process_test_();
 	process_test2_();
+	process_test2_();
+	process_test2_();
 
+	StoreIntFlag(); // Start interrupt.
 	Die();
 }

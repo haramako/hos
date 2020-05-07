@@ -1,5 +1,7 @@
 #include "execution_context.h"
 
+#include "gdt.h"
+
 #if 0
 void SegmentMapping::Print() {
 	PutString("vaddr:");
@@ -60,9 +62,9 @@ ExecutionContext *execution_context_new(void (*rip)(), void *rsp, uint64_t cr3, 
 	bzero(ctx, sizeof(ExecutionContext));
 	CPUContext *cc = &ctx->cpu_context;
 	cc->int_ctx.rip = (uint64_t)rip;
-	cc->int_ctx.cs = ReadCSSelector();
+	cc->int_ctx.cs = kUserCS64Selector;
 	cc->int_ctx.rsp = (uint64_t)rsp;
-	cc->int_ctx.ss = ReadSSSelector();
+	cc->int_ctx.ss = kUserDSSelector;
 	cc->int_ctx.rflags = rflags | 2;
 	cc->cr3 = cr3;
 	ctx->kernel_rsp = kernel_rsp;

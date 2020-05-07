@@ -22,7 +22,9 @@ Process *process_create(ProcessCreateParam *p) {
 	if (p->kernel_stack_size <= 0) p->kernel_stack_size = 4096;
 
 	char *sp = malloc(p->stack_size);
+	kcheck(sp, "Invalid sp");
 	char *kernel_sp = malloc(p->kernel_stack_size);
+	kcheck(kernel_sp, "Invalid kernel_sp");
 	PageMapEntry *pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
 	ExecutionContext *ctx = execution_context_new(p->entry_point, sp + p->stack_size, (uint64_t)pml4,
 												  kRFlagsInterruptEnable, (uint64_t)(kernel_sp + p->kernel_stack_size));

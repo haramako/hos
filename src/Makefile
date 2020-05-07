@@ -62,6 +62,10 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
+.PHONY: ../app/hello/hello_data.o
+../app/hello/hello_data.o:
+	make -C ../app/hello
+
 LIUMOS.ELF : $(OBJS) kernel.ld Makefile ../app/hello/hello_data.o
 	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) ../app/hello/hello_data.o
 

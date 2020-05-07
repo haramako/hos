@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-typedef union PACKED PageMapEntry {
+typedef union PACKED PageMapEntry_ {
 	uint64_t raw;
 	struct {
 		int present : 1;
@@ -48,4 +48,6 @@ void page_init();
 void page_init_interrupt();
 uintptr_t page_v2p(PageMapEntry *pml4, void *addr);
 PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4);
-void page_alloc_addr(void *addr, int num_page, bool alloc);
+void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user);
+void page_pme_alloc_addr(PageMapEntry *pml4, void *addr, int num_page, bool alloc, bool is_user);
+void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size);

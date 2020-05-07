@@ -20,13 +20,16 @@ Process *process_new(ExecutionContext *ctx) {
 Process *process_create(ProcessCreateParam *p) {
 	if (p->stack_size <= 0) p->stack_size = 4096;
 	if (p->kernel_stack_size <= 0) p->kernel_stack_size = 4096;
+	if (p->pml4 == NULL) {
+		p->pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
+	}
 
-	char *sp = malloc(p->stack_size);
+	char *sp = (char *)0x0000200000000000;
+	page_pme_alloc_addr(p->pml4, sp, 1, true, true);
 	kcheck(sp, "Invalid sp");
 	char *kernel_sp = malloc(p->kernel_stack_size);
 	kcheck(kernel_sp, "Invalid kernel_sp");
-	PageMapEntry *pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
-	ExecutionContext *ctx = execution_context_new(p->entry_point, sp + p->stack_size, (uint64_t)pml4,
+	ExecutionContext *ctx = execution_context_new(p->entry_point, sp + p->stack_size, (uint64_t)p->pml4,
 												  kRFlagsInterruptEnable, (uint64_t)(kernel_sp + p->kernel_stack_size));
 
 	Process *process = process_new(ctx);

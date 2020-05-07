@@ -10,9 +10,9 @@ static uintptr_t heap_end_;
 void mem_init() {
 	ktrace("Initialize kernel heap.");
 	const int num = 16;
-	uintptr_t block = canonical_addr(256 * (1ULL << 39));
+	uintptr_t block = canonical_addr(0xffff800000000000);
 
-	page_alloc_addr((void *)block, num, true);
+	page_alloc_addr((void *)block, num, true, true);
 	// uintptr_t block = physical_memory_alloc(num);
 	heap_start_ = block;
 	heap_sbrk_ = block;

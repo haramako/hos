@@ -184,6 +184,7 @@ typedef struct FindEntryOpt_ {
 	uint64_t vaddr;
 	bool map_if_not_found;
 	bool alloc;
+	bool is_user;
 } FindEntryOpt;
 
 typedef struct FindEntryResult_ {
@@ -215,7 +216,9 @@ FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
 		bzero((void *)new_pml, PAGE_SIZE);
 		pme_set_addr(pme, new_pml);
 		pme->x.present = true;
-		pme->x.is_user = true;
+		if (opt->vaddr < 0xffff800000000000) {
+			pme->x.is_user = true;
+		}
 		pme->x.is_read = true;
 		ktrace("Init page map entry at %018p, level %d, paddr=%018p", pme, level, new_pml);
 	}
@@ -291,13 +294,30 @@ static void handler_page_fault_(uint64_t intcode, InterruptInfo *info) {
 
 void page_init_interrupt() { interrupt_set_int_handler(0x0e, handler_page_fault_); }
 
-void page_alloc_addr(void *addr, int num_page, bool alloc) {
+void page_pme_alloc_addr(PageMapEntry *pml4, void *addr, int num_page, bool alloc, bool is_user) {
 	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
 
 	for (int i = 0; i < num_page; i++) {
-		FindEntryOpt opt = {
-			.vaddr = (uint64_t)addr + ((uint64_t)i) * PAGE_SIZE, .map_if_not_found = true, .alloc = alloc};
-		FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
+		FindEntryOpt opt = {.vaddr = (uint64_t)addr + ((uint64_t)i) * PAGE_SIZE,
+							.map_if_not_found = true,
+							.alloc = alloc,
+							.is_user = is_user};
+		FindEntryResult r = find_entry_(&opt, pml4, 4);
 		kcheck(r.found, "BUG");
+	}
+}
+
+void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user) {
+	page_pme_alloc_addr(get_pml4_(), addr, num_page, alloc, is_user);
+}
+
+void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size) {
+	for (size_t i = 0; i < size; i++) {
+		uintptr_t addr_rest = ((uintptr_t)dest + i) & (PAGE_SIZE - 1);
+		FindEntryOpt opt = {.vaddr = (uint64_t)page_align((uint8_t *)dest + i), .alloc = true};
+		FindEntryResult r = find_entry_(&opt, dest_pml4, 4);
+		kcheck(r.found, "Page not mapped");
+		uint8_t *a = (uint8_t *)r.paddr + addr_rest;
+		*a = ((uint8_t *)src)[i];
 	}
 }

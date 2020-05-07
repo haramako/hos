@@ -1,4 +1,5 @@
 // Test code, included directory from main.c.
+#include <elf.h>
 
 static void test_malloc_() {
 	int *a = (int *)malloc(4);
@@ -83,29 +84,27 @@ extern uint8_t _binary_hello_elf_start[];
 extern uint8_t _binary_hello_elf_end[];
 extern uint8_t _binary_hello_elf_size[];
 
-#include "page.h"
-#include <elf.h>
-
 typedef void (*EntryPoint)();
 
-// Process test
+// Process test 2
 static void process_test2_() {
 	uint8_t *bin_start = _binary_hello_elf_start;
 	uint64_t bin_size = (uint64_t)_binary_hello_elf_size;
 	Elf64_Ehdr *elf = (Elf64_Ehdr *)bin_start;
 
 	char *bin = (char *)0x0000100000000000ULL;
-	page_alloc_addr(bin, 4, true);
-	memcpy(bin, bin_start, bin_size);
+	PageMapEntry *new_pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
+	page_pme_alloc_addr(new_pml4, bin, 4, true, false);
+	page_memcpy(new_pml4, bin, bin_start, bin_size);
 
 	{
 		EntryPoint entry_point = (EntryPoint)elf->e_entry;
 		// klog("size %lld, ep = %p, entry_point = %p", bin_size, elf->e_entry, entry_point);
 
-		ProcessCreateParam param = {.entry_point = entry_point};
+		ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
 		Process *p = process_create(&param);
-		// process_print(p);
-		// pme_print((PageMapEntry *)ReadCR3());
+		process_print(p);
+		pme_print(new_pml4);
 	}
 }
 
@@ -141,7 +140,7 @@ static void paging_test_() {
 
 	{
 		int *x2 = (int *)0xffff800000000100;
-		page_alloc_addr((void *)((uint64_t)x2 & ~(PAGE_SIZE - 1)), 100, false);
+		page_alloc_addr((void *)((uint64_t)x2 & ~(PAGE_SIZE - 1)), 100, false, false);
 		*x2 = 1;
 
 		klog("=================");

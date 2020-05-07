@@ -45,6 +45,7 @@ typedef struct ProcessCreateParam_ {
 	int priority;
 	size_t stack_size;
 	size_t kernel_stack_size;
+	union PageMapEntry_ *pml4;
 } ProcessCreateParam;
 
 Process *process_new(ExecutionContext *ctx);

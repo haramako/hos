@@ -31,7 +31,7 @@ files : src/LIUMOS.ELF .FORCE
 	cp -a dist/* mnt
 	cp src/LIUMOS.ELF mnt/LIUMOS.ELF
 
-run : files
+run : # files
 	$(QEMU) $(QEMU_ARGS)
 
 runc : files

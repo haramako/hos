@@ -1,11 +1,13 @@
 #include "liumos.h"
 
+#include "ahci.h"
 #include "asm.h"
 #include "gdt.h"
 #include "hpet.h"
 #include "interrupt.h"
 #include "mem.h"
 #include "page.h"
+#include "pci.h"
 #include "physical_memory.h"
 #include "scheduler.h"
 #include "serial.h"
@@ -15,6 +17,12 @@
 #include "main_test.c" // Include test source.
 
 LiumOS *g_liumos;
+
+static void pci_test() {
+	pci_init();
+	pci_print();
+	ahci_init();
+}
 
 static void init_gdt_and_interrupt_() {
 	const int stack_pages = 1024 * 16;
@@ -76,9 +84,10 @@ void kernel_entry(LiumOS *liumos_passed) {
 	// test_virtual_memory_map_();
 	// paging_test_();
 	// process_test_();
-	process_test2_();
-	process_test2_();
-	process_test2_();
+	// process_test2_();
+	// process_test2_();
+	// process_test2_();
+	pci_test();
 
 	StoreIntFlag(); // Start interrupt.
 	Die();

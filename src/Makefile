@@ -3,6 +3,7 @@ default: LIUMOS.ELF
 include ../common.mk
 
 SRCS= \
+	ahci.c \
 	apic.c \
 	asm.S \
 	console.c \
@@ -18,6 +19,7 @@ SRCS= \
 	newlib_support.c \
 	newlib_func.c \
 	page.h \
+	pci.h \
 	physical_memory.c \
 	process.c \
 	serial.c \

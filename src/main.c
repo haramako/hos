@@ -79,16 +79,19 @@ void kernel_entry(LiumOS *liumos_passed) {
 	kinfo("Kernel Ready!");
 	kinfo("Time %lld", hpet_read_main_counter_value());
 
-	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	bootfs_init();
+
+	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 
 	// test_virtual_memory_map_();
 	// paging_test_();
-	fat_test_();
+
+	// fat_test_();
 	// process_test_()
+	process_test2_();
 	// process_test2_();
 	// process_test2_();
-	// process_test2_();
-	test_malloc_();
+	// test_malloc_();
 	pci_test();
 
 	StoreIntFlag(); // Start interrupt.

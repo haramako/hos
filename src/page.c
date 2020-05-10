@@ -304,6 +304,7 @@ void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size) {
 		FindEntryResult r = find_entry_(&opt, dest_pml4, 4);
 		kcheck(r.found, "Page not mapped");
 		uint8_t *a = (uint8_t *)r.paddr + addr_rest;
+		// klog("%lld, %p", i, a);
 		*a = ((uint8_t *)src)[i];
 	}
 }

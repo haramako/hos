@@ -7,11 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-error_t fat_probe(struct fat *fs, void (*blk_read)(size_t offset, void *buf, size_t len),
-				  void (*blk_write)(size_t offset, const void *buf, size_t len)) {
+#include "common.h"
+
+error_t fat_probe(struct fat *fs, void (*blk_read)(void *data, size_t offset, void *buf, size_t len),
+				  void (*blk_write)(void *data, size_t offset, const void *buf, size_t len), void *data) {
 	struct bpb bpb;
 	STATIC_ASSERT(sizeof(bpb) == SECTOR_SIZE);
-	blk_read(0, &bpb, 1);
+	blk_read(data, 0, &bpb, 1);
 
 	if (bpb.sector_size != SECTOR_SIZE) {
 		WARN("unexpected sector size: %d (expected to be %d)", bpb.sector_size, SECTOR_SIZE);
@@ -53,6 +55,7 @@ error_t fat_probe(struct fat *fs, void (*blk_read)(size_t offset, void *buf, siz
 	}
 
 	fs->type = type;
+	fs->data = data;
 	fs->blk_read = blk_read;
 	fs->blk_write = blk_write;
 	fs->sectors_per_cluster = bpb.sectors_per_cluster;
@@ -139,7 +142,7 @@ static offset_t get_next_cluster(struct fat *fs, cluster_t cluster) {
 	}
 
 	uint8_t buf[SECTOR_SIZE];
-	fs->blk_read(fs->fat_lba + (cluster / entries_per_sector), &buf, 1);
+	fs->blk_read(fs->data, fs->fat_lba + (cluster / entries_per_sector), &buf, 1);
 
 	switch (fs->type) {
 	case FAT16: {
@@ -161,14 +164,14 @@ static void open_root_dir(struct fat *fs, struct fat_dir *dir) {
 
 	dir->entries = malloc(fs->sectors_per_cluster * SECTOR_SIZE);
 	dir->index = 0;
-	fs->blk_read(lba, dir->entries, fs->sectors_per_cluster);
+	fs->blk_read(fs->data, lba, dir->entries, fs->sectors_per_cluster);
 }
 
 static void opendir_from_dirent(struct fat *fs, struct fat_dir *dir, struct fat_dirent *e) {
 	dir->cluster = get_cluster_from_entry(e);
 	dir->entries = malloc(fs->sectors_per_cluster * SECTOR_SIZE);
 	dir->index = 0;
-	fs->blk_read(cluster2lba(fs, dir->cluster), dir->entries, fs->sectors_per_cluster);
+	fs->blk_read(fs->data, cluster2lba(fs, dir->cluster), dir->entries, fs->sectors_per_cluster);
 }
 
 /// Looks for the file from the root directory.
@@ -237,7 +240,7 @@ error_t fat_read(struct fat *fs, struct fat_file *file, offset_t off, void *buf,
 		for (offset_t i = sector_offset; i < (offset_t)fs->sectors_per_cluster; i++) {
 			// Use a temporary buffer to support unaligned read operations.
 			uint8_t buf[SECTOR_SIZE];
-			fs->blk_read(cluster2lba(fs, current) + i, buf, 1);
+			fs->blk_read(fs->data, cluster2lba(fs, current) + i, buf, 1);
 			memcpy(p, &buf[off_in_cluster], MIN(len, SECTOR_SIZE));
 
 			if (len <= SECTOR_SIZE) {
@@ -289,7 +292,7 @@ struct fat_dirent *fat_readdir(struct fat *fs, struct fat_dir *dir) {
 		dir->cluster = get_next_cluster(fs, dir->cluster);
 		if (dir->cluster) {
 			dir->index = 0;
-			fs->blk_read(cluster2lba(fs, dir->cluster), dir->entries, fs->sectors_per_cluster);
+			fs->blk_read(fs->data, cluster2lba(fs, dir->cluster), dir->entries, fs->sectors_per_cluster);
 		} else {
 			dir->index = -1;
 		}

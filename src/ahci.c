@@ -8,44 +8,6 @@ AHCI *g_ahci;
 
 static void start_cmd(AHCI_HBA_PORT *port);
 
-char to_hex(char n) {
-	assert(n >= 0 && n < 16);
-	if (n < 10) {
-		return '0' + n;
-	} else {
-		return 'a' + (n - 10);
-	}
-}
-
-char *dump_bytes(void *p_, size_t size) {
-	assert(size < 0x10000);
-
-	static char buf[8000];
-	char *s = buf;
-	uint8_t *p = (uint8_t *)p_;
-
-	for (size_t i = 0; i < size; i++) {
-		if (i % 16 == 0) {
-			s += snprintf(s, 8, "%04x: ", (int)i);
-		}
-		*(s++) = to_hex(p[i] >> 4);
-		*(s++) = to_hex(p[i] & 0x0f);
-		*(s++) = ' ';
-		if (i % 16 == 15) {
-			*(s++) = '\n';
-		}
-	}
-
-	*s++ = '\0';
-	return buf;
-}
-
-uint64_t int_merge64(uint32_t high, uint32_t low) { return ((uint64_t)low) | ((uint64_t)high << 32); }
-
-uint32_t uint64_high(uint64_t n) { return (uint32_t)(n >> 32); }
-
-uint32_t uint64_low(uint64_t n) { return (uint32_t)n; }
-
 #define ATA_DEV_BUSY 0x80
 #define ATA_DEV_DRQ 0x08
 #define HBA_PxIS_TFES (1 << 30)
@@ -147,7 +109,7 @@ void ahci_init() {
 		};
 		// char *buf = (char *)malloc(512);
 		char *buf = (char *)physical_memory_alloc(1);
-		send_h2d_command_(d, 1, 0, &fis, buf);
+		send_h2d_command_(d, 2, 0, &fis, buf);
 		uint64_t sectors = (uint64_t)(*(uint32_t *)(buf + 100 * 2));
 		klog("sectors %s", humanize_size(sectors * 512));
 		// klog("%s", dump_bytes(buf, 0x200));

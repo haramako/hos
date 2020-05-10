@@ -141,7 +141,8 @@ typedef enum {
 	FIS_TYPE_DEV_BITS = 0xA1,  // Set device bits FIS - device to host
 } FIS_TYPE;
 
-#define ATACMD_IDENTIFY_DEVICE 0xec
+#define ATA_CMD_IDENTIFY_DEVICE 0xec
+#define ATA_CMD_READ_DMA_EX 0x25
 
 typedef struct tagFIS_REG_H2D {
 	// DWORD 0
@@ -155,20 +156,15 @@ typedef struct tagFIS_REG_H2D {
 	uint8_t featurel; // Feature register, 7:0
 
 	// DWORD 1
-	uint8_t lba0;   // LBA low register, 7:0
-	uint8_t lba1;   // LBA mid register, 15:8
-	uint8_t lba2;   // LBA high register, 23:16
-	uint8_t device; // Device register
+	uint32_t lba0 : 24; // LBA low register, 23:0
+	uint8_t device;		// Device register
 
 	// DWORD 2
-	uint8_t lba3;	 // LBA register, 31:24
-	uint8_t lba4;	 // LBA register, 39:32
-	uint8_t lba5;	 // LBA register, 47:40
-	uint8_t featureh; // Feature register, 15:8
+	uint32_t lba1 : 24; // LBA register, 47:24
+	uint8_t featureh;   // Feature register, 15:8
 
 	// DWORD 3
-	uint8_t countl;  // Count register, 7:0
-	uint8_t counth;  // Count register, 15:8
+	uint16_t count;  // Count register
 	uint8_t icc;	 // Isochronous command completion
 	uint8_t control; // Control register
 
@@ -190,20 +186,15 @@ typedef struct {
 	uint8_t error;  // Error register
 
 	// DWORD 1
-	uint8_t lba0;   // LBA low register, 7:0
-	uint8_t lba1;   // LBA mid register, 15:8
-	uint8_t lba2;   // LBA high register, 23:16
-	uint8_t device; // Device register
+	uint32_t lba0 : 24; // LBA low register, 23:0
+	uint8_t device;		// Device register
 
 	// DWORD 2
-	uint8_t lba3; // LBA register, 31:24
-	uint8_t lba4; // LBA register, 39:32
-	uint8_t lba5; // LBA register, 47:40
-	uint8_t rsv2; // Reserved
+	uint32_t lba1 : 24; // LBA register, 47:24
+	uint8_t rsv2;		// Reserved
 
 	// DWORD 3
-	uint8_t countl;   // Count register, 7:0
-	uint8_t counth;   // Count register, 15:8
+	uint16_t count;   // Count register
 	uint8_t rsv3;	 // Reserved
 	uint8_t e_status; // New value of status register
 

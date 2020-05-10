@@ -50,20 +50,6 @@ static void print_pml3_(PMEDisplayConfig *conf, PageMapEntry *pml3, uint64_t bas
 static void print_pml2_(PMEDisplayConfig *conf, PageMapEntry *pml2, uint64_t base_addr);
 static void print_pml1_(PMEDisplayConfig *conf, PageMapEntry *pml1, uint64_t base_addr);
 
-static const char *humanize_size(uint64_t size) {
-	static char buf[16];
-	if (size >= (1LLU << 30)) {
-		snprintf(buf, sizeof(buf), "%4ld GB", size >> 30);
-	} else if (size >= (1LLU << 20)) {
-		snprintf(buf, sizeof(buf), "%4ld MB", size >> 20);
-	} else if (size >= (1LLU << 10)) {
-		snprintf(buf, sizeof(buf), "%4ld KB", size >> 10);
-	} else {
-		snprintf(buf, sizeof(buf), "%ld", size);
-	}
-	return buf;
-}
-
 static void print_pml4_(PMEDisplayConfig *conf, PageMapEntry *pml4) {
 	klog("LV   : v-addr                                      size num flags    table-address");
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
@@ -321,3 +307,5 @@ void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size) {
 		*a = ((uint8_t *)src)[i];
 	}
 }
+
+PageMapEntry *page_current_pml4() { return get_pml4_(); }

@@ -34,7 +34,6 @@ LDFLAGS= \
 
 $(TARGET): $(SRCS) Makefile
 	$(LLVM_CC) $(CFLAGS) -o $@ -T kernel.ld $(SRCS)
-	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 hello.elf hello_data.o
 
 clean :
 	-rm -rf $(TARGET)

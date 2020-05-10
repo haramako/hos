@@ -80,13 +80,24 @@ static void process_test_() {
 	}
 }
 
+// FAT test
+extern uint8_t _binary_fat_test_test_fat_start[];
+extern uint8_t _binary_fat_test_test_fat_size[];
+
+static void fat_test_() {
+	uint64_t fs_size = (uint64_t)_binary_fat_test_test_fat_size;
+	uint8_t *fs_bin = _binary_fat_test_test_fat_start;
+	atoi("1");
+}
+
+// Process test 2
+
 extern uint8_t _binary_hello_elf_start[];
 extern uint8_t _binary_hello_elf_end[];
 extern uint8_t _binary_hello_elf_size[];
 
 typedef void (*EntryPoint)();
 
-// Process test 2
 static void process_test2_() {
 	uint8_t *bin_start = _binary_hello_elf_start;
 	uint64_t bin_size = (uint64_t)_binary_hello_elf_size;

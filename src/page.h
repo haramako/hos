@@ -46,6 +46,7 @@ inline void *page_align(void *addr) { return (void *)((uint64_t)addr & ~(PAGE_SI
 
 void page_init();
 void page_init_interrupt();
+PageMapEntry *page_current_pml4();
 uintptr_t page_v2p(PageMapEntry *pml4, void *addr);
 PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4);
 void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user);

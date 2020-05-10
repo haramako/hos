@@ -15,7 +15,9 @@ QEMU_ARGS=\
 	-machine q35 -cpu qemu64 -smp 4 \
 	-monitor telnet:127.0.0.1:1240,server,nowait \
 	-m 2G \
-	-drive format=raw,file=fat:rw:mnt -net none \
+	 -net none \
+	-drive format=raw,file=fat:rw:mnt \
+	-drive format=raw,file=fat_test/test.fat \
 	-serial tcp::1234,server,nowait \
 	-serial stdio \
 	-device qemu-xhci -device usb-mouse -device usb-kbd
@@ -30,6 +32,13 @@ files : src/LIUMOS.ELF .FORCE
 	mkdir -p mnt/
 	cp -a dist/* mnt
 	cp src/LIUMOS.ELF mnt/LIUMOS.ELF
+
+.PHONY: bootfs
+bootfs:
+	make -C app/hello
+	make -C fat_test 
+	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 fat_test/test.fat src/bootfs.o
+
 
 run : # files
 	$(QEMU) $(QEMU_ARGS)

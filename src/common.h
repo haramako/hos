@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 
 /// Packed struct specifier.
 #define PACKED __attribute__((__packed__))
@@ -13,4 +15,3 @@
 #define NORETURN __attribute__((__noreturn__))
 
 #include "common_k.h"
-#include "newlib_func.h"

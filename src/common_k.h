@@ -30,3 +30,5 @@ void kpanic(const char *msg) NORETURN;
 	if (!(must_true)) { \
 		kpanic(msg); \
 	};
+
+const char *humanize_size(uint64_t size);

@@ -10,6 +10,7 @@ SRCS= \
 	common_k.c \
 	efi.c \
 	execution_context.c \
+	fat.c \
 	gdt.c \
 	hpet.c \
 	interrupt.c \
@@ -17,7 +18,6 @@ SRCS= \
 	main.c \
 	mem.c \
 	newlib_support.c \
-	newlib_func.c \
 	page.h \
 	pci.h \
 	physical_memory.c \
@@ -37,6 +37,7 @@ CLANG_WARNINGS = \
 	-Werror \
 	-Wno-keyword-macro \
 	-Wno-unused-variable -Wno-unused-parameter -Wno-unused-function \
+	-Wno-char-subscripts \
     -Wno-gnu-binary-literal
 
 NEWLIB_INC_PATH=../third_party_root/include
@@ -65,12 +66,12 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
-.PHONY: ../app/hello/hello_data.o
-../app/hello/hello_data.o:
-	make -C ../app/hello
+.PHONY: bootfs.o
+bootfs.o:
+	make -C .. bootfs
 
-LIUMOS.ELF : $(OBJS) kernel.ld Makefile ../app/hello/hello_data.o
-	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) ../app/hello/hello_data.o
+LIUMOS.ELF : $(OBJS) kernel.ld Makefile bootfs.o
+	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) bootfs.o
 
 run:
 	make -C .. run

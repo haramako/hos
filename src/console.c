@@ -6,7 +6,7 @@
 #include "asm.h"
 #include "serial.h"
 
-static const int CONSOLE_BUF_SIZE = 1024;
+static const int CONSOLE_BUF_SIZE = 8192;
 
 static Serial *com_;
 

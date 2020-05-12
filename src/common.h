@@ -8,6 +8,10 @@
 #include <string.h>
 #include <strings.h>
 
+#ifndef __GCC__ // For avoid VS Code assertion errors.
+#define static_assert(...)
+#endif
+
 /// Packed struct specifier.
 #define PACKED __attribute__((__packed__))
 

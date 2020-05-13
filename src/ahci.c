@@ -22,7 +22,7 @@ static void send_h2d_command_(AHCI *d, int port_num, int slot_num, FIS_REG_H2D *
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL *)(int_merge64(command->ctbau, command->ctba));
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) + (command->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
 
-	uint64_t paddr_out_buf = page_v2p(page_current_pml4(), out_buf);
+	uint64_t paddr_out_buf = (uint64_t)out_buf; // page_v2p(page_current_pml4(), out_buf);
 	cmdtbl->prdt_entry[0].dba = uint64_low(paddr_out_buf);
 	cmdtbl->prdt_entry[0].dbau = uint64_high(paddr_out_buf);
 	cmdtbl->prdt_entry[0].dbc = 0x200;
@@ -94,7 +94,7 @@ void ahci_init() {
 		// klog("%s", buf + 0x14); // name
 		uint64_t sectors = *(uint32_t *)(buf + 60);
 		// uint64_t sectors = *(uint64_t*)(buf + 100);
-		klog("sectors %s", humanize_size(sectors * 512));
+		klog("sectors %s %p", humanize_size(sectors * 512), buf);
 	}
 
 	// PIO IENTIFY_DEVICE

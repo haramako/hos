@@ -2,6 +2,7 @@
 #include <elf.h>
 
 #include "fat.h"
+#include "mm.h"
 
 static void test_malloc_() {
 	int *a = (int *)malloc(4);
@@ -165,7 +166,7 @@ static void process_test2_() {
 	}
 }
 
-// Paging test
+// Paging test.
 static void paging_test_() {
 	uint64_t cr0 = asm_read_cr0();
 	uint64_t cr3 = ReadCR3();
@@ -210,5 +211,38 @@ static void paging_test_() {
 
 		klog("=================");
 		pme_print(pml4);
+	}
+}
+
+// MemoryMap test.
+void mm_test_() {
+	MemoryMap *mm = mm_new();
+	PageAttribute attr = {.is_user = true};
+	MemoryBlock *b1 = mm_alloc(mm, (void *)0x0000200000000000, 1, &attr);
+
+	MemoryBlock *b2 = mm_alloc(mm, (void *)0x0000300000000000, 8, &attr);
+
+	mm_print(mm);
+
+	{
+		MemoryBlock *b = mm_find_vaddr(mm, (void *)0x0000200000000000);
+		kcheck(b == b1, "unexpect block");
+		kcheck(b && b->vaddr_start == 0x0000200000000000, "unexpect vaddr_start.");
+		kcheck(b && b->vaddr_end == 0x0000200000001000, "unexpect vaddr_end.");
+	}
+
+	{
+		MemoryBlock *b = mm_find_vaddr(mm, (void *)0x0000200000000fff);
+		kcheck(b == b1, "unexpect block");
+	}
+
+	{
+		MemoryBlock *b = mm_find_vaddr(mm, (void *)0x0000200000001000);
+		kcheck(b == NULL, "unexpect block");
+	}
+
+	{
+		MemoryBlock *b = mm_find_vaddr(mm, (void *)0x0000300000000000);
+		kcheck0(b == b2);
 	}
 }

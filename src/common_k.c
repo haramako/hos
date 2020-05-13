@@ -1,7 +1,10 @@
 #include "common_k.h"
 
-void kpanic(const char *msg) {
-	klog(msg);
+void kpanic(const char *msg, ...) {
+	va_list vargs;
+	va_start(vargs, msg);
+	console_vprintf(msg, vargs);
+	va_end(vargs);
 	while (1) {
 	}
 }

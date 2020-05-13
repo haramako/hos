@@ -88,11 +88,12 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	// fat_test_();
 	// process_test_()
-	process_test2_();
+	// process_test2_();
 	// process_test2_();
 	// process_test2_();
 	// test_malloc_();
-	pci_test();
+	// pci_test();
+	mm_test_();
 
 	StoreIntFlag(); // Start interrupt.
 	Die();

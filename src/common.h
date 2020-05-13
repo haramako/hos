@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,7 +9,7 @@
 #include <string.h>
 #include <strings.h>
 
-#ifndef __GCC__ // For avoid VS Code assertion errors.
+#ifndef __clang__ // For avoid VS Code assertion errors.
 #define static_assert(...)
 #endif
 

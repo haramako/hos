@@ -17,6 +17,7 @@ SRCS= \
 	interrupt_handler.c \
 	main.c \
 	mem.c \
+	mm.c \
 	newlib_support.c \
 	page.h \
 	pci.h \

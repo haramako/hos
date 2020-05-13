@@ -46,4 +46,9 @@ inline uint32_t uint64_high(uint64_t n) { return (uint32_t)(n >> 32); }
 
 inline uint32_t uint64_low(uint64_t n) { return (uint32_t)n; }
 
-#define kalloc_zero(type) ((type *)malloc(sizeof(type)))
+inline void *malloc_zero(size_t size) {
+	void *m = malloc(size);
+	memset(m, 0, size);
+	return m;
+}
+#define kalloc(type) ((type *)malloc_zero(sizeof(type)))

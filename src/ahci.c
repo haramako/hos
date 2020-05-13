@@ -1,5 +1,7 @@
 #include "ahci.h"
 
+#include <string.h>
+
 #include "asm.h"
 #include "page.h"
 #include "physical_memory.h"
@@ -20,7 +22,7 @@ static void send_h2d_command_(AHCI *d, int port_num, int slot_num, FIS_REG_H2D *
 	command->prdtl = 1;
 
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL *)(int_merge64(command->ctbau, command->ctba));
-	bzero(cmdtbl, sizeof(HBA_CMD_TBL) + (command->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
+	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) + (command->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
 
 	uint64_t paddr_out_buf = page_v2p(page_current_pml4(), out_buf);
 	cmdtbl->prdt_entry[0].dba = uint64_low(paddr_out_buf);
@@ -49,9 +51,8 @@ static void send_h2d_command_(AHCI *d, int port_num, int slot_num, FIS_REG_H2D *
 void ahci_init() {
 	PCI_DeviceInfo *pci = pci_find_device(0x01, 0x06);
 	assert(pci);
-	g_ahci = malloc(sizeof(AHCI));
+	g_ahci = kalloc(AHCI);
 	kcheck(g_ahci, "Cant alloc g_ahci");
-	bzero(g_ahci, sizeof(AHCI));
 
 	AHCI *d = g_ahci;
 	d->hba = (volatile AHCI_HBA *)((uint64_t)pci->reg.x.base_addr5);
@@ -63,8 +64,7 @@ void ahci_init() {
 	AHCI_Capability *c = &d->capability;
 	klog("ports %d", c->x.number_of_ports);
 
-	d->ports = malloc(sizeof(AHCI_Port) * c->x.number_of_ports);
-	bzero(d->ports, sizeof(AHCI_Port) * c->x.number_of_ports);
+	d->ports = malloc_zero(sizeof(AHCI_Port) * c->x.number_of_ports);
 	for (int i = 0; i <= c->x.number_of_ports; i++) {
 		AHCI_HBA_PORT *p = &d->hba->ports[i];
 		AHCI_Port *port = &d->ports[i];

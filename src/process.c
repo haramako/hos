@@ -8,8 +8,7 @@
 #define STACK_ADDR (0x0000100000000000UL)
 
 Process *process_new(ExecutionContext *ctx) {
-	Process *p = malloc(sizeof(Process));
-	bzero(p, sizeof(*p));
+	Process *p = kalloc(Process);
 	assert(p->status == kNotInitialized);
 	assert(!p->ctx);
 	p->ctx = ctx;

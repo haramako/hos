@@ -27,14 +27,14 @@ void gdt_init(uint64_t kernel_stack_pointer, uint64_t ist1_pointer) {
 		kDescBitTypeCode | kDescBitPresent | kCSDescBitLongMode | kCSDescBitReadable | (3ULL << kDescBitOfsDPL);
 
 	GDT_TSS64Entry *tss = &g_gdt_descriptors.task_state_segment;
-	bzero(tss, sizeof(GDT_TSS64Entry));
+	memset(tss, 0, sizeof(GDT_TSS64Entry));
 	tss->attr = 0b1000000010001001 | (3 << 5);
 	tss->limit_low = sizeof(g_ia_tss64) - 1;
 	set_base_addr_(tss, &g_ia_tss64);
 	// assert(0);
 
 	// Initials TSS.
-	bzero(&g_ia_tss64, sizeof(g_ia_tss64));
+	memset(&g_ia_tss64, 0, sizeof(g_ia_tss64));
 	g_ia_tss64.rsp[0] = kernel_stack_pointer;
 	g_ia_tss64.ist[1] = ist1_pointer;
 

@@ -1,7 +1,7 @@
 #include "mm.h"
 
 MemoryMap *mm_new() {
-	MemoryMap *mm = kalloc_zero(MemoryMap);
+	MemoryMap *mm = kalloc(MemoryMap);
 	return mm;
 }
 
@@ -10,13 +10,12 @@ MemoryBlock *mm_alloc(MemoryMap *mm, void *vaddr, int page_num, const PageAttrib
 	kcheck(mm, "mm must not null.");
 	kcheck(mm->block_num < MM_BLOCK_LEN, "Too many blocks.");
 
-	MemoryBlock *block = kalloc_zero(MemoryBlock);
+	MemoryBlock *block = kalloc(MemoryBlock);
 	block->vaddr_start = (uintptr_t)vaddr;
 	block->vaddr_end = (uintptr_t)vaddr + PAGE_SIZE * page_num;
 	kcheck0(block->vaddr_start < block->vaddr_end);
 	block->page_num = page_num;
-	block->paddr = malloc(page_num * sizeof(uint64_t));
-	bzero(block->paddr, page_num * sizeof(uint64_t));
+	block->paddr = malloc_zero(page_num * sizeof(uint64_t));
 
 	block->attr = *attr;
 

@@ -1,6 +1,8 @@
 // Test code, included directory from main.c.
 #include <elf.h>
 
+#include <string.h>
+
 #include "fat.h"
 #include "mm.h"
 

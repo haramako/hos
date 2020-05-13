@@ -58,8 +58,7 @@ void execution_context_flush(IA_PML4 &pml4, uint64_t &num_of_clflush_issued) {
 #endif
 
 ExecutionContext *execution_context_new(void (*rip)(), void *rsp, uint64_t cr3, uint64_t rflags, uint64_t kernel_rsp) {
-	ExecutionContext *ctx = malloc(sizeof(ExecutionContext));
-	bzero(ctx, sizeof(ExecutionContext));
+	ExecutionContext *ctx = kalloc(ExecutionContext);
 	CPUContext *cc = &ctx->cpu_context;
 	cc->int_ctx.rip = (uint64_t)rip;
 	cc->int_ctx.cs = kUserCS64Selector;

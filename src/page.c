@@ -51,7 +51,7 @@ uintptr_t page_v2p(PageMapEntry *pml4, void *addr) {
 PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
 	PageMapEntry *new_pml = (PageMapEntry *)physical_memory_alloc(1);
 	kcheck(new_pml, "Can't allocate new page map table.");
-	bzero(new_pml, 4096);
+	memset(new_pml, 0, 4096);
 
 	int num_copied = 0;
 	int num_fixed = 0;
@@ -77,7 +77,7 @@ void page_init() {}
 
 static bool alloc_page_callback2_(int level, PageMapEntry *pme, void *data) {
 	uintptr_t page = physical_memory_alloc(1);
-	bzero((void *)page, PAGE_SIZE);
+	memset((void *)page, 0, PAGE_SIZE);
 	pme_set_addr(pme, page);
 	pme->x.present = 1;
 	pme->x.is_read = 1;

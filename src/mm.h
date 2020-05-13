@@ -2,8 +2,6 @@
 
 #include "common.h"
 
-#include "page.h"
-
 typedef struct {
 	bool is_user;
 } PageAttribute;
@@ -21,7 +19,6 @@ typedef struct {
 typedef struct {
 	MemoryBlock *blocks[MM_BLOCK_LEN];
 	int block_num;
-	PageMapEntry *pml4;
 } MemoryMap;
 
 MemoryMap *mm_new();

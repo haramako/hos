@@ -1,7 +1,5 @@
 #include "ahci.h"
 
-#include <string.h>
-
 #include "asm.h"
 #include "page.h"
 #include "physical_memory.h"

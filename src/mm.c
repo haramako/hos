@@ -5,7 +5,7 @@ MemoryMap *mm_new() {
 	return mm;
 }
 
-MemoryBlock *mm_alloc(MemoryMap *mm, void *vaddr, int page_num, const PageAttribute *attr) {
+MemoryBlock *mm_map(MemoryMap *mm, void *vaddr, int page_num, const PageAttribute *attr) {
 	kcheck(page_num > 0, "page_num must not 0.");
 	kcheck(mm, "mm must not null.");
 	kcheck(mm->block_num < MM_BLOCK_LEN, "Too many blocks.");

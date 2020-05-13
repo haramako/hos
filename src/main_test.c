@@ -1,8 +1,6 @@
 // Test code, included directory from main.c.
 #include <elf.h>
 
-#include <string.h>
-
 #include "fat.h"
 #include "mm.h"
 
@@ -146,8 +144,8 @@ static void process_test2_() {
 	PageMapEntry *new_pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
 	MemoryMap *mm = mm_new();
 	PageAttribute attr = {.is_user = true};
-	mm_alloc(mm, bin, 4, &attr);
-	page_pme_alloc_addr(new_pml4, bin, 4, true, true);
+	MemoryBlock *block = mm_map(mm, bin, 4, &attr);
+	kcheck0(mem_alloc_memory_block(new_pml4, block) == ERR_OK);
 
 	char *buf = (char *)physical_memory_alloc(10);
 
@@ -159,7 +157,9 @@ static void process_test2_() {
 	Elf64_Ehdr *elf = (Elf64_Ehdr *)buf;
 
 	klog("H");
+	pme_print(new_pml4);
 	page_memcpy(new_pml4, bin, buf, file.size);
+	klog("D");
 
 	{
 		EntryPoint entry_point = (EntryPoint)elf->e_entry;
@@ -204,7 +204,9 @@ static void paging_test_() {
 
 	{
 		int *x2 = (int *)0xffff800000000100;
+#if 0
 		page_alloc_addr((void *)((uint64_t)x2 & ~(PAGE_SIZE - 1)), 100, false, false);
+#endif
 		*x2 = 1;
 
 		klog("=================");
@@ -224,9 +226,9 @@ static void paging_test_() {
 void mm_test_() {
 	MemoryMap *mm = mm_new();
 	PageAttribute attr = {.is_user = true};
-	MemoryBlock *b1 = mm_alloc(mm, (void *)0x0000200000000000, 1, &attr);
+	MemoryBlock *b1 = mm_map(mm, (void *)0x0000200000000000, 1, &attr);
 
-	MemoryBlock *b2 = mm_alloc(mm, (void *)0x0000300000000000, 8, &attr);
+	MemoryBlock *b2 = mm_map(mm, (void *)0x0000300000000000, 8, &attr);
 
 	mm_print(mm);
 
@@ -253,7 +255,7 @@ void mm_test_() {
 	}
 
 	{
-		mm_alloc(g_kernel_mm, (void *)0x0000200000000000, 1, &attr);
+		mm_map(g_kernel_mm, (void *)0x0000200000000000, 1, &attr);
 		int *p = (int *)0x0000200000000000;
 		//*p = 1;
 	}

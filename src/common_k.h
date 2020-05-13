@@ -2,6 +2,11 @@
 
 #include "console.h"
 
+typedef int error_t;
+
+#define ERR_OK 0
+#define ERR_MM_NOT_FOUND 10000
+
 /// Page size by byte.
 #define PAGE_SIZE 4096
 

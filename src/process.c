@@ -23,16 +23,18 @@ Process *process_create(ProcessCreateParam *p) {
 		p->pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
 	}
 
+	MemoryMap *mm = mm_new();
 	char *sp = (char *)0x0000200000000000;
-	page_pme_alloc_addr(p->pml4, sp, 1, true, true);
-	kcheck(sp, "Invalid sp");
+	PageAttribute attr = {.is_user = true};
+	mm_map(mm, sp, 1, &attr);
+	// page_pme_alloc_addr(p->pml4, sp, 1, true, true);
 	char *kernel_sp = malloc(p->kernel_stack_size);
 	kcheck(kernel_sp, "Invalid kernel_sp");
 	ExecutionContext *ctx = execution_context_new(p->entry_point, sp + p->stack_size, (uint64_t)p->pml4,
 												  kRFlagsInterruptEnable, (uint64_t)(kernel_sp + p->kernel_stack_size));
 
 	Process *process = process_new(ctx);
-	process->mm = mm_new();
+	process->mm = mm;
 
 	scheduler_register_process(process);
 

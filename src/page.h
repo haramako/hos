@@ -22,12 +22,6 @@ typedef union PACKED PageMapEntry_ {
 
 #define PAGE_MAP_TABLE_LEN 512
 
-typedef struct {
-	uint64_t mask;
-	bool show_nonleaf;
-	bool show_fixed;
-} PMEDisplayConfig;
-
 inline uint64_t canonical_addr(uint64_t addr) {
 	if (addr & (1UL << 47)) {
 		return addr | 0xffff000000000000;
@@ -39,7 +33,7 @@ inline uint64_t canonical_addr(uint64_t addr) {
 inline uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.x.addr << 12); }
 inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr) { pme->x.addr = paddr >> 12; }
 inline uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
-inline bool pme_is_leaf_(PageMapEntry pme, int level) {
+inline bool pme_is_leaf(PageMapEntry pme, int level) {
 	switch (level) {
 	case 1:
 		return true;
@@ -50,20 +44,25 @@ inline bool pme_is_leaf_(PageMapEntry pme, int level) {
 	}
 }
 
-const char *pme_flags(PageMapEntry pml);
-void pme_print(PageMapEntry *pml4);
-
 inline void *page_align(void *addr) { return (void *)((uint64_t)addr & ~(PAGE_SIZE - 1)); }
 
-typedef bool (*Page_FindEntryCallback)(int level, PageMapEntry *entry, void *data);
-
 void page_init();
-void page_init_interrupt();
 PageMapEntry *page_current_pml4();
 uintptr_t page_v2p(PageMapEntry *pml4, void *addr);
 PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4);
-void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user);
-void page_pme_alloc_addr(PageMapEntry *pml4, void *addr, int num_page, bool alloc, bool is_user);
 void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size);
+
+typedef bool (*Page_FindEntryCallback)(int level, PageMapEntry *entry, void *data);
 PageMapEntry *page_find_entry(PageMapEntry *pml, int level, uint64_t vaddr, Page_FindEntryCallback callback,
 							  void *callback_data);
+
+// For page_print.h
+
+typedef struct {
+	uint64_t mask;
+	bool show_nonleaf;
+	bool show_fixed;
+} PMEDisplayConfig;
+
+const char *pme_flag_str(PageMapEntry pml);
+void pme_print(PageMapEntry *pml4);

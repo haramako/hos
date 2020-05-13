@@ -11,7 +11,7 @@ extern inline uint64_t pme_addr(PageMapEntry pme);
 extern inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr);
 extern inline uint64_t pme_flag(PageMapEntry p);
 extern inline void *page_align(void *addr);
-extern inline bool pme_is_leaf_(PageMapEntry pme, int level);
+extern inline bool pme_is_leaf(PageMapEntry pme, int level);
 
 static PageMapEntry *get_pml4_() { return (PageMapEntry *)ReadCR3(); }
 
@@ -20,7 +20,7 @@ PageMapEntry *page_find_entry(PageMapEntry *pml, int level, uint64_t vaddr, Page
 	int shift = (12 + (level - 1) * 9);
 	uint64_t entry_num = (vaddr >> shift) & (PAGE_MAP_TABLE_LEN - 1);
 	PageMapEntry *pme = &pml[entry_num];
-	// klog("%d %p %d %p", level, opt->vaddr, entry_num, pme);
+	// klog("find_entry lv=%d, vaddr=%p, entry_num=%d, pme=%p(%p)", level, vaddr, entry_num, pme, pme->raw);
 
 	if (!pme->x.present) {
 		if (callback) {
@@ -30,7 +30,7 @@ PageMapEntry *page_find_entry(PageMapEntry *pml, int level, uint64_t vaddr, Page
 		}
 	}
 
-	bool is_leaf = pme_is_leaf_(*pme, level);
+	bool is_leaf = pme_is_leaf(*pme, level);
 
 	if (is_leaf) {
 		return pme;
@@ -59,7 +59,7 @@ PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
 		PageMapEntry pme = pml[i];
 		if (!pme.x.present) continue;
 		num_copied++;
-		if (pme_is_leaf_(pme, level)) {
+		if (pme_is_leaf(pme, level)) {
 			new_pml[i] = pme;
 		} else {
 			PageMapEntry *child = copy_page_map_table_((PageMapEntry *)pme_addr(pme), level - 1);
@@ -75,37 +75,13 @@ PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4) { return copy_page_ma
 
 void page_init() {}
 
-static bool alloc_page_callback2_(int level, PageMapEntry *pme, void *data) {
-	uintptr_t page = physical_memory_alloc(1);
-	memset((void *)page, 0, PAGE_SIZE);
-	pme_set_addr(pme, page);
-	pme->x.present = 1;
-	pme->x.is_read = 1;
-	pme->x.is_user = 1;
-	// klog("alloc_page lv=%d, pme=%p(%p), addr=%p", level, pme, pme->raw, data);
-	return true;
-}
-
-void page_pme_alloc_addr(PageMapEntry *pml4, void *addr, int num_page, bool alloc, bool is_user) {
-	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
-
-	for (int i = 0; i < num_page; i++) {
-		uintptr_t target_addr = (uintptr_t)addr + PAGE_SIZE * i;
-		page_find_entry(pml4, 4, target_addr, alloc_page_callback2_, (void *)target_addr);
-	}
-}
-
-void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user) {
-	page_pme_alloc_addr(get_pml4_(), addr, num_page, alloc, is_user);
-}
-
 void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size) {
 	for (size_t i = 0; i < size; i++) {
 		uintptr_t addr_rest = ((uintptr_t)dest + i) & (PAGE_SIZE - 1);
 		PageMapEntry *pme = page_find_entry(dest_pml4, 4, (uint64_t)page_align((uint8_t *)dest + i), NULL, NULL);
 		kcheck(pme, "Page not mapped");
 		uint8_t *a = (uint8_t *)pme_addr(*pme) + addr_rest;
-		// klog("%lld, %p", i, a);
+		// klog("i=%lld, addr=%p, src=%p, dest=%p, pme=%llx, rest=%p", i, a, src, dest, pme->raw, addr_rest);
 		*a = ((uint8_t *)src)[i];
 	}
 }

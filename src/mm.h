@@ -22,7 +22,7 @@ typedef struct {
 } MemoryMap;
 
 MemoryMap *mm_new();
-MemoryBlock *mm_alloc(MemoryMap *mm, void *vaddr, int page_num, const PageAttribute *attr);
+MemoryBlock *mm_map(MemoryMap *mm, void *vaddr, int page_num, const PageAttribute *attr);
 void mm_free(MemoryMap *mm, MemoryBlock *block);
 MemoryBlock *mm_find_vaddr(MemoryMap *mm, void *vaddr);
 void mm_print(MemoryMap *mm);

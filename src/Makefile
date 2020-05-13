@@ -14,7 +14,7 @@ SRCS= \
 	gdt.c \
 	hpet.c \
 	interrupt.c \
-	interrupt_handler.c \
+	interrupt_handler.S \
 	main.c \
 	mem.c \
 	mm.c \
@@ -22,7 +22,7 @@ SRCS= \
 	page.c \
 	page_print.c \
 	pagefault.c \
-	pci.h \
+	pci.c \
 	physical_memory.c \
 	process.c \
 	serial.c \

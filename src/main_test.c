@@ -141,10 +141,9 @@ typedef void (*EntryPoint)();
 static void process_test2_() {
 
 	char *bin = (char *)0x0000100000000000ULL;
-	PageMapEntry *new_pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
+	PageMapEntry *new_pml4 = page_copy_page_map_table(page_current_pml4());
 	MemoryMap *mm = mm_new();
-	PageAttribute attr = {.is_user = true};
-	MemoryBlock *block = mm_map(mm, bin, 4, &attr);
+	MemoryBlock *block = mm_map(mm, bin, 4, MM_ATTR_USER);
 	kcheck0(mem_alloc_memory_block(new_pml4, block) == ERR_OK);
 
 	char *buf = (char *)physical_memory_alloc(10);
@@ -225,10 +224,9 @@ static void paging_test_() {
 // MemoryMap test.
 void mm_test_() {
 	MemoryMap *mm = mm_new();
-	PageAttribute attr = {.is_user = true};
-	MemoryBlock *b1 = mm_map(mm, (void *)0x0000200000000000, 1, &attr);
+	MemoryBlock *b1 = mm_map(mm, (void *)0x0000200000000000, 1, MM_ATTR_USER);
 
-	MemoryBlock *b2 = mm_map(mm, (void *)0x0000300000000000, 8, &attr);
+	MemoryBlock *b2 = mm_map(mm, (void *)0x0000300000000000, 8, MM_ATTR_USER);
 
 	mm_print(mm);
 
@@ -255,7 +253,7 @@ void mm_test_() {
 	}
 
 	{
-		mm_map(g_kernel_mm, (void *)0x0000200000000000, 1, &attr);
+		mm_map(g_kernel_mm, (void *)0x0000200000000000, 1, MM_ATTR_USER);
 		int *p = (int *)0x0000200000000000;
 		//*p = 1;
 	}

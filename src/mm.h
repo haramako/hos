@@ -2,16 +2,16 @@
 
 #include "common.h"
 
-typedef struct {
-	bool is_user;
-} PageAttribute;
+typedef enum {
+	MM_ATTR_USER = 1,
+} MemoryBlockAttribute;
 
 typedef struct {
 	uintptr_t vaddr_start;
 	uintptr_t vaddr_end;
 	uintptr_t *paddr;
 	uint64_t page_num;
-	PageAttribute attr;
+	MemoryBlockAttribute attr;
 } MemoryBlock;
 
 #define MM_BLOCK_LEN 256
@@ -22,7 +22,7 @@ typedef struct {
 } MemoryMap;
 
 MemoryMap *mm_new();
-MemoryBlock *mm_map(MemoryMap *mm, void *vaddr, int page_num, const PageAttribute *attr);
+MemoryBlock *mm_map(MemoryMap *mm, void *vaddr, size_t page_num, MemoryBlockAttribute attr);
 void mm_free(MemoryMap *mm, MemoryBlock *block);
 MemoryBlock *mm_find_vaddr(MemoryMap *mm, void *vaddr);
 void mm_print(MemoryMap *mm);

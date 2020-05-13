@@ -42,8 +42,7 @@ void mem_init() {
 	g_kernel_mm = mm_new();
 	kcheck0(g_kernel_mm);
 
-	PageAttribute attr = {0};
-	mm_map(g_kernel_mm, (void *)0xffff800000000000, num, &attr);
+	mm_map(g_kernel_mm, (void *)0xffff800000000000, num, MM_ATTR_USER);
 	mm_print(g_kernel_mm);
 }
 
@@ -61,13 +60,13 @@ static bool alloc_page_callback_(int level, PageMapEntry *pme, void *data) {
 	pme->x.present = 1;
 	pme->x.is_read = 1;
 	pme->x.is_user = 1;
-	klog("alloc_page lv=%d, pme=%p(%p), paddr=%p, vaddr=%p", level, pme, pme->raw, page, data);
+	// klog("alloc_page lv=%d, pme=%p(%p), paddr=%p, vaddr=%p", level, pme, pme->raw, page, data);
 	return true;
 }
 
 error_t mem_alloc_addr(PageMapEntry *pml4, MemoryMap *mm, void *vaddr) {
 	MemoryBlock *mb = mm_find_vaddr(mm, vaddr);
-	klog("block %p", mb);
+	// klog("block %p", mb);
 	if (mb) {
 		page_find_entry(pml4, 4, (uint64_t)vaddr, alloc_page_callback_, mb);
 		return ERR_OK;
@@ -78,7 +77,7 @@ error_t mem_alloc_addr(PageMapEntry *pml4, MemoryMap *mm, void *vaddr) {
 
 error_t mem_alloc_memory_block(PageMapEntry *pml4, MemoryBlock *mm) {
 	for (uintptr_t vaddr = mm->vaddr_start; vaddr < mm->vaddr_end; vaddr += PAGE_SIZE) {
-		klog("alloc block %p", vaddr);
+		// klog("alloc block %p", vaddr);
 		page_find_entry(pml4, 4, (uint64_t)vaddr, alloc_page_callback_, NULL);
 	}
 	return ERR_OK;

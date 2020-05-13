@@ -38,6 +38,18 @@ inline uint64_t canonical_addr(uint64_t addr) {
 
 inline uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.x.addr << 12); }
 inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr) { pme->x.addr = paddr >> 12; }
+inline uint64_t pme_mapped(PageMapEntry p) { return p.x.present; }
+inline uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
+inline bool pme_is_leaf_(PageMapEntry pme, int level) {
+	switch (level) {
+	case 1:
+		return true;
+	case 2:
+		return pme.x.page_size;
+	default:
+		return false;
+	}
+}
 
 const char *pme_flags(PageMapEntry pml);
 void pme_print(PageMapEntry *pml4);

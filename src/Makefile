@@ -20,6 +20,7 @@ SRCS= \
 	mm.c \
 	newlib_support.c \
 	page.h \
+	page_print.h \
 	pci.h \
 	physical_memory.c \
 	process.c \

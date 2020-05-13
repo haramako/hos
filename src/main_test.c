@@ -245,4 +245,10 @@ void mm_test_() {
 		MemoryBlock *b = mm_find_vaddr(mm, (void *)0x0000300000000000);
 		kcheck0(b == b2);
 	}
+
+	{
+		mm_alloc(g_kernel_mm, (void *)0x0000200000000000, 1, &attr);
+		int *p = (int *)0x0000200000000000;
+		*p = 1;
+	}
 }

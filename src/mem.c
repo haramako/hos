@@ -12,7 +12,7 @@ MemoryMap *g_kernel_mm;
 
 void mem_init() {
 	ktrace("Initialize kernel heap.");
-	const int num = 256;
+	const int num = 128;
 	uintptr_t block = canonical_addr(0xffff800000000000);
 
 	page_alloc_addr((void *)block, num, true, true);

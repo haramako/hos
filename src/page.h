@@ -44,6 +44,8 @@ void pme_print(PageMapEntry *pml4);
 
 inline void *page_align(void *addr) { return (void *)((uint64_t)addr & ~(PAGE_SIZE - 1)); }
 
+typedef bool (*Page_FindEntryCallback)(int level, PageMapEntry *entry, void *data);
+
 void page_init();
 void page_init_interrupt();
 PageMapEntry *page_current_pml4();

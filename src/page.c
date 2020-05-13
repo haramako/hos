@@ -2,6 +2,8 @@
 
 #include "asm.h"
 #include "interrupt.h"
+#include "mem.h"
+#include "mm.h"
 #include "physical_memory.h"
 
 extern inline uint64_t canonical_addr(uint64_t addr);
@@ -42,7 +44,7 @@ static bool pme_is_leaf_(PageMapEntry pme, int level) {
 }
 
 static inline bool pme_is_fixed_(PageMapEntry pme) { return pme.x.available & PME_MARK_FIXED; }
-static inline uint64_t pme_mapped(PageMapEntry p) { return p.x.present || (p.x.available & PME_MARK_MAPPED); }
+static inline uint64_t pme_mapped(PageMapEntry p) { return p.x.present; }
 static inline uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
 
 static void print_pml4_(PMEDisplayConfig *conf, PageMapEntry *pml4);
@@ -180,23 +182,22 @@ typedef struct FindEntryResult_ {
 	bool found;
 } FindEntryResult;
 
-FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
+PageMapEntry *find_entry_(PageMapEntry *pml, int level, uint64_t vaddr, Page_FindEntryCallback callback,
+						  void *callback_data) {
 	int shift = (12 + (level - 1) * 9);
-	uint64_t entry_num = (opt->vaddr >> shift) & (PAGE_MAP_TABLE_LEN - 1);
+	uint64_t entry_num = (vaddr >> shift) & (PAGE_MAP_TABLE_LEN - 1);
 	PageMapEntry *pme = &pml[entry_num];
 	// klog("%d %p %d %p", level, opt->vaddr, entry_num, pme);
 
 	if (!pme_mapped(*pme)) {
-		if (opt->map_if_not_found) {
-			pme->raw = 0;
-			pme->x.available |= PME_MARK_MAPPED;
-			ktrace("Init page map entry at %018p, level %d", pme, level);
+		if (callback) {
+			if (!callback(level - 1, pme, callback_data)) return NULL;
 		} else {
-			FindEntryResult result = {.entry = pme, .level = level - 1, 0};
-			return result;
+			return NULL;
 		}
 	}
 
+#if 0
 	if (opt->alloc && !pme->x.present) {
 		uintptr_t new_pml = physical_memory_alloc(1);
 		bzero((void *)new_pml, PAGE_SIZE);
@@ -208,23 +209,24 @@ FindEntryResult find_entry_(FindEntryOpt *opt, PageMapEntry *pml, int level) {
 		pme->x.is_read = true;
 		ktrace("Init page map entry at %018p, level %d, paddr=%018p", pme, level, new_pml);
 	}
+#endif
 
 	bool is_leaf = pme_is_leaf_(*pme, level);
 
 	if (is_leaf) {
-		uint64_t mask = (1 << shift) - 1;
-		uint64_t paddr = pme_addr(*pme) | (opt->vaddr & mask);
-		FindEntryResult result = {.found = true, .entry = pme, .level = level - 1, .paddr = paddr};
-		return result;
+		return pme;
 	} else {
-		return find_entry_(opt, (PageMapEntry *)(pme_addr(*pme)), level - 1);
+		return find_entry_((PageMapEntry *)(pme_addr(*pme)), level - 1, vaddr, callback, callback_data);
 	}
 }
 
 uintptr_t page_v2p(PageMapEntry *pml4, void *addr) {
-	FindEntryOpt opt = {.vaddr = (uint64_t)addr, .map_if_not_found = false};
-	FindEntryResult el = find_entry_(&opt, pml4, 4);
-	return el.paddr;
+	PageMapEntry *pme = find_entry_(pml4, 4, (uint64_t)addr, NULL, NULL);
+	if (pme) {
+		return pme_addr(*pme);
+	} else {
+		return 0;
+	}
 }
 
 PageMapEntry *copy_page_map_table_(PageMapEntry *pml, int level) {
@@ -266,30 +268,47 @@ void page_init() {
 	}
 }
 
+static bool alloc_page_callback_(int level, PageMapEntry *pme, void *data) {
+	uintptr_t page = physical_memory_alloc(1);
+	pme_set_addr(pme, page);
+	pme->x.present = 1;
+	pme->x.is_read = 1;
+	return true;
+}
+
 static void handler_page_fault_(uint64_t intcode, InterruptInfo *info) {
 	uint64_t addr = ReadCR2();
 	ktrace("Page Fault at %018p, target addr = %018p, error = %08x", info->int_ctx.rip, addr, info->error_code);
 	FindEntryOpt opt = {.vaddr = (uint64_t)page_align((void *)addr), .map_if_not_found = false, .alloc = true};
-	FindEntryResult r = find_entry_(&opt, get_pml4_(), 4);
+	// FindEntryResult r = find_entry_(get_pml4_(), page_4);
 	// klog("r=%p, pme=%s", r.paddr, pme_flags(*r.entry));
 
-	if (!r.found) {
+	MemoryBlock *mb = mm_find_vaddr(g_kernel_mm, (void *)addr);
+	klog("block %p", mb);
+	if (mb) {
+		find_entry_(get_pml4_(), 4, addr, alloc_page_callback_, mb);
+	} else {
 		kpanic("Page Fault.");
 	}
 }
 
 void page_init_interrupt() { interrupt_set_int_handler(0x0e, handler_page_fault_); }
 
+static bool alloc_page_callback2_(int level, PageMapEntry *pme, void *data) {
+	uintptr_t page = physical_memory_alloc(1);
+	pme_set_addr(pme, page);
+	pme->x.present = 1;
+	pme->x.is_read = 1;
+	klog("alloc_page lv=%d, pme=%p(%p), addr=%p", level, pme, pme->raw, data);
+	return true;
+}
+
 void page_pme_alloc_addr(PageMapEntry *pml4, void *addr, int num_page, bool alloc, bool is_user) {
 	kcheck((((uintptr_t)addr) & (PAGE_SIZE - 1)) == 0, "Invalid addr. addr must aligned page size.");
 
 	for (int i = 0; i < num_page; i++) {
-		FindEntryOpt opt = {.vaddr = (uint64_t)addr + ((uint64_t)i) * PAGE_SIZE,
-							.map_if_not_found = true,
-							.alloc = alloc,
-							.is_user = is_user};
-		FindEntryResult r = find_entry_(&opt, pml4, 4);
-		kcheck(r.found, "BUG");
+		uintptr_t target_addr = (uintptr_t)addr + PAGE_SIZE * i;
+		find_entry_(get_pml4_(), 4, target_addr, alloc_page_callback2_, (void *)target_addr);
 	}
 }
 
@@ -300,10 +319,9 @@ void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user) {
 void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size) {
 	for (size_t i = 0; i < size; i++) {
 		uintptr_t addr_rest = ((uintptr_t)dest + i) & (PAGE_SIZE - 1);
-		FindEntryOpt opt = {.vaddr = (uint64_t)page_align((uint8_t *)dest + i), .alloc = true};
-		FindEntryResult r = find_entry_(&opt, dest_pml4, 4);
-		kcheck(r.found, "Page not mapped");
-		uint8_t *a = (uint8_t *)r.paddr + addr_rest;
+		PageMapEntry *pme = find_entry_(dest_pml4, 4, (uint64_t)page_align((uint8_t *)dest + i), NULL, NULL);
+		kcheck(pme, "Page not mapped");
+		uint8_t *a = (uint8_t *)pme_addr(*pme) + addr_rest;
 		// klog("%lld, %p", i, a);
 		*a = ((uint8_t *)src)[i];
 	}

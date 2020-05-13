@@ -38,7 +38,6 @@ inline uint64_t canonical_addr(uint64_t addr) {
 
 inline uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.x.addr << 12); }
 inline void pme_set_addr(PageMapEntry *pme, uint64_t paddr) { pme->x.addr = paddr >> 12; }
-inline uint64_t pme_mapped(PageMapEntry p) { return p.x.present; }
 inline uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
 inline bool pme_is_leaf_(PageMapEntry pme, int level) {
 	switch (level) {
@@ -66,3 +65,5 @@ PageMapEntry *page_copy_page_map_table(PageMapEntry *pml4);
 void page_alloc_addr(void *addr, int num_page, bool alloc, bool is_user);
 void page_pme_alloc_addr(PageMapEntry *pml4, void *addr, int num_page, bool alloc, bool is_user);
 void page_memcpy(PageMapEntry *dest_pml4, void *dest, void *src, size_t size);
+PageMapEntry *page_find_entry(PageMapEntry *pml, int level, uint64_t vaddr, Page_FindEntryCallback callback,
+							  void *callback_data);

@@ -7,6 +7,7 @@
 #include "interrupt.h"
 #include "mem.h"
 #include "page.h"
+#include "pagefault.h"
 #include "pci.h"
 #include "physical_memory.h"
 #include "scheduler.h"
@@ -30,7 +31,7 @@ static void init_gdt_and_interrupt_() {
 	uintptr_t ist = physical_memory_alloc(stack_pages);
 	gdt_init(stack + stack_pages * PAGE_SIZE, ist + stack_pages * PAGE_SIZE);
 	interrupt_init();
-	page_init_interrupt();
+	pagefault_init();
 }
 
 static void init_process_and_scheduler_() {
@@ -88,7 +89,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	// fat_test_();
 	// process_test_()
-	// process_test2_();
+	process_test2_();
 	// process_test2_();
 	// process_test2_();
 	// test_malloc_();

@@ -24,6 +24,7 @@ static void print_pml4_(PMEDisplayConfig *conf, PageMapEntry *pml4) {
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry p4 = pml4[i];
 		uint64_t addr = canonical_addr(((uint64_t)i) << 39);
+		if (i < 1 || i >= 511) continue; // Fixed area.
 		if (!p4.x.present) continue;
 		if (conf->show_nonleaf)
 			klog("L4   : %018p~                                  %s %018p", addr, pme_flag_str(p4), pme_addr(p4));
@@ -64,7 +65,7 @@ static void print_pml2_(PMEDisplayConfig *conf, PageMapEntry *pml2, uint64_t bas
 
 		// Display merging.
 		uint64_t flags = pme_flag(p2) & conf->mask;
-		bool has_page = (pme_mapped(p2) && p2.x.page_size);
+		bool has_page = (p2.x.present && p2.x.page_size);
 
 		if (merge_start != -1 && (!has_page || (merge_flags != flags))) {
 			// Finish display merging.
@@ -78,12 +79,12 @@ static void print_pml2_(PMEDisplayConfig *conf, PageMapEntry *pml2, uint64_t bas
 			merge_flags = flags;
 		}
 
-		if (pme_mapped(p2) && p2.x.page_size) {
+		if (p2.x.present && p2.x.page_size) {
 			// klog("L2: %018p~%018p %10s %3d %s %018p", addr, addr + (1UL<<21) - 1, humanize_size(1UL<<21), 1,
 			// pme_flags(p2), pme_addr(p2) );
 		}
 
-		if (pme_mapped(p2) && !p2.x.page_size) {
+		if (p2.x.present && !p2.x.page_size) {
 			// 4KB page
 			if (conf->show_nonleaf)
 				klog("  L2 : %018p~                                  %s %018p", addr, pme_flag_str(p2), pme_addr(p2));
@@ -108,7 +109,7 @@ static void print_pml1_(PMEDisplayConfig *conf, PageMapEntry *pml1, uint64_t bas
 
 		// Display merging.
 		uint64_t flags = pme_flag(p1) & conf->mask;
-		bool has_page = pme_mapped(p1);
+		bool has_page = p1.x.present;
 
 		if (merge_start != -1 && (!has_page || (merge_flags != flags))) {
 			// Finish display merging.

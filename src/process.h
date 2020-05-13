@@ -3,6 +3,7 @@
 #include "common.h"
 
 #include "execution_context.h"
+#include "mm.h"
 
 typedef enum ProcessStatus_ {
 	kNotInitialized,
@@ -17,6 +18,7 @@ typedef struct Process_ {
 	ProcessStatus status;
 	int scheduler_index;
 	ExecutionContext *ctx;
+	MemoryMap *mm;
 
 	uint64_t number_of_ctx_switch;
 	uint64_t proc_time_femto_sec;

@@ -64,3 +64,5 @@ void scheduler_kill_current_process() {
 	s->current->status = kKilled;
 }
 #endif
+
+Process *scheduler_current_process() { return g_scheduler.current; }

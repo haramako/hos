@@ -17,6 +17,7 @@ extern Scheduler g_scheduler;
 void scheduler_init();
 void scheduler_register_process(Process *proc);
 Process *scheduler_switch_process();
+Process *scheduler_current_process();
 #if 0
 void scheduler_kill_current_process();
 #endif

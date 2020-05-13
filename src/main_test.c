@@ -142,7 +142,10 @@ static void process_test2_() {
 
 	char *bin = (char *)0x0000100000000000ULL;
 	PageMapEntry *new_pml4 = page_copy_page_map_table((PageMapEntry *)ReadCR3());
-	page_pme_alloc_addr(new_pml4, bin, 4, true, false);
+	MemoryMap *mm = mm_new();
+	PageAttribute attr = {.is_user = true};
+	mm_alloc(mm, bin, 4, &attr);
+	page_pme_alloc_addr(new_pml4, bin, 4, true, true);
 
 	char *buf = (char *)physical_memory_alloc(10);
 
@@ -153,6 +156,7 @@ static void process_test2_() {
 	kcheck(err == OK, "fat_read failed!");
 	Elf64_Ehdr *elf = (Elf64_Ehdr *)buf;
 
+	klog("H");
 	page_memcpy(new_pml4, bin, buf, file.size);
 
 	{
@@ -249,6 +253,6 @@ void mm_test_() {
 	{
 		mm_alloc(g_kernel_mm, (void *)0x0000200000000000, 1, &attr);
 		int *p = (int *)0x0000200000000000;
-		*p = 1;
+		//*p = 1;
 	}
 }

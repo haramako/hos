@@ -19,8 +19,9 @@ SRCS= \
 	mem.c \
 	mm.c \
 	newlib_support.c \
-	page.h \
-	page_print.h \
+	page.c \
+	page_print.c \
+	pagefault.c \
 	pci.h \
 	physical_memory.c \
 	process.c \

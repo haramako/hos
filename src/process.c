@@ -33,6 +33,7 @@ Process *process_create(ProcessCreateParam *p) {
 												  kRFlagsInterruptEnable, (uint64_t)(kernel_sp + p->kernel_stack_size));
 
 	Process *process = process_new(ctx);
+	process->mm = mm_new();
 
 	scheduler_register_process(process);
 

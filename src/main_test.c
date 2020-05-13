@@ -48,41 +48,6 @@ static void timer_test_() {
 	}
 }
 
-// Process test
-static void process_test_process1_() {
-	klog("[1]");
-	for (;;) {
-		hpet_busy_wait(1000);
-		console_write("1");
-	}
-}
-
-static void process_test_process2_() {
-	klog("[2]");
-	for (;;) {
-		hpet_busy_wait(1000);
-		console_write("2");
-	}
-}
-
-static void process_test_() {
-	{
-		ProcessCreateParam param = {.entry_point = process_test_process1_};
-		Process *p = process_create(&param);
-		process_print(p);
-	}
-	{
-		ProcessCreateParam param = {.entry_point = process_test_process2_};
-		Process *p = process_create(&param);
-		process_print(p);
-	}
-
-	for (;;) {
-		hpet_busy_wait(1000);
-		console_write(".");
-	}
-}
-
 // FAT test
 extern uint8_t _binary_fat_test_test_fat_start[];
 extern uint8_t _binary_fat_test_test_fat_size[];
@@ -138,7 +103,7 @@ static void fat_test_() {
 
 typedef void (*EntryPoint)();
 
-static void process_test2_() {
+static void process_test_one_() {
 
 	char *bin = (char *)0x0000100000000000ULL;
 	PageMapEntry *new_pml4 = page_copy_page_map_table(page_current_pml4());
@@ -155,10 +120,8 @@ static void process_test2_() {
 	kcheck(err == OK, "fat_read failed!");
 	Elf64_Ehdr *elf = (Elf64_Ehdr *)buf;
 
-	klog("H");
-	pme_print(new_pml4);
+	// pme_print(new_pml4);
 	page_memcpy(new_pml4, bin, buf, file.size);
-	klog("D");
 
 	{
 		EntryPoint entry_point = (EntryPoint)elf->e_entry;
@@ -167,7 +130,13 @@ static void process_test2_() {
 		ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
 		Process *p = process_create(&param);
 		process_print(p);
-		pme_print(new_pml4);
+		// pme_print(new_pml4);
+	}
+}
+
+static void process_test_() {
+	for (int i = 0; i < 3; i++) {
+		process_test_one_();
 	}
 }
 

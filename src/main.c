@@ -82,19 +82,17 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	bootfs_init();
 
-	// console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// test_virtual_memory_map_();
 	// paging_test_();
 
 	// fat_test_();
 	// process_test_()
-	process_test2_();
-	// process_test2_();
-	// process_test2_();
+	// process_test_();
 	// test_malloc_();
-	// pci_test();
-	mm_test_();
+	pci_test();
+	// mm_test_();
 
 	klog("Finish.");
 	StoreIntFlag(); // Start interrupt.

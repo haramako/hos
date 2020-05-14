@@ -1,8 +1,8 @@
 // Test code, included directory from main.c.
 #include <elf.h>
 
+#include "console.h"
 #include "fat.h"
-#include "mm.h"
 
 static void test_malloc_() {
 	int *a = (int *)malloc(4);

@@ -25,7 +25,7 @@ MemoryBlock *mm_map(MemoryMap *mm, void *vaddr, size_t page_num, MemoryBlockAttr
 	return block;
 }
 
-void mm_free(MemoryMap *mm, MemoryBlock *block) {
+void mm_unmap(MemoryMap *mm, MemoryBlock *block) {
 	for (int i = 0; i < MM_BLOCK_LEN; i++) {
 		if (mm->blocks[i] == block) {
 			mm->blocks[i] = NULL;

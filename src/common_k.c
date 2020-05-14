@@ -1,6 +1,8 @@
-#include "common_k.h"
+#include "common.h"
 
 #include <stdio.h>
+
+#include "console.h"
 
 void kpanic(const char *msg, ...) {
 	va_list vargs;

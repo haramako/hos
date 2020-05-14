@@ -1,5 +1,6 @@
 #include "syscall.h"
 
+#include "console.h"
 #include "gdt.h"
 
 void syscall_init() {

@@ -2,13 +2,6 @@
 
 #include "common.h"
 
-// Log lelvels
-#define CONSOLE_LOG_LEVEL_TRACE 0
-#define CONSOLE_LOG_LEVEL_INFO 1
-#define CONSOLE_LOG_LEVEL_WARN 2
-#define CONSOLE_LOG_LEVEL_ERROR 3
-#define CONSOLE_LOG_LEVEL_FATAL 4
-
 struct Serial;
 
 extern int g_console_log_level_;

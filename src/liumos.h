@@ -3,12 +3,7 @@
 #include "common.h"
 
 #include "acpi.h"
-#include "apic.h"
-#include "asm.h"
 #include "efi.h"
-#include "hpet.h"
-#include "process.h"
-//#include "sys_constant.h"
 
 #define kLAPICRegisterAreaPhysBase 0x00000000FEE00000ULL
 #define kLAPICRegisterAreaVirtBase 0xFFFFFFFFFEE00000ULL
@@ -66,17 +61,17 @@ typedef struct PACKED LiumOS_ {
 	Console *main_console;
 	KeyboardController *keyboard_ctrl;
 	LocalAPIC *bsp_local_apic;
-	CPUFeatureSet *cpu_features;
+	struct CPUFeatureSet *cpu_features;
 	PhysicalPageAllocator *dram_allocator;
 	KernelVirtualHeapAllocator *kernel_heap_allocator;
-	HPET *hpet;
+	struct HPET *hpet;
 	EFI_MemoryMap *efi_memory_map;
 	IA_PML4 *kernel_pml4;
 	/*Scheduler*/ void *scheduler;
 	/*ProcessController*/ void *proc_ctrl;
 	IDT *idt;
-	Process *root_process;
-	Process *sub_process;
+	struct Process_ *root_process;
+	struct Process_ *sub_process;
 	uint64_t time_slice_count;
 	bool is_multi_task_enabled;
 } LiumOS;

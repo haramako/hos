@@ -1,6 +1,6 @@
 #pragma once
 
-#include "console.h"
+//#include "console.h"
 
 typedef int error_t;
 
@@ -19,6 +19,14 @@ typedef int error_t;
 
 // in console.h. for logging.
 void console_log(int log_level, const char *fmt, ...);
+void console_printfn(const char *fmt, ...);
+
+// Log lelvels
+#define CONSOLE_LOG_LEVEL_TRACE 0
+#define CONSOLE_LOG_LEVEL_INFO 1
+#define CONSOLE_LOG_LEVEL_WARN 2
+#define CONSOLE_LOG_LEVEL_ERROR 3
+#define CONSOLE_LOG_LEVEL_FATAL 4
 
 // Logging unitilities.
 #define klog console_printfn

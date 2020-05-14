@@ -176,7 +176,6 @@ typedef struct PACKED SRAT_Lx2APICAffinity {
 static_assert(sizeof(SRAT_Lx2APICAffinity) == 24, "Invalid size.");
 
 typedef struct PACKED SRAT {
-
 	char signature[4];
 	uint32_t length;
 	uint8_t revision;
@@ -188,43 +187,6 @@ typedef struct PACKED SRAT {
 	uint32_t creator_revision;
 	uint32_t reserved[3];
 	SRAT_Entry entry[1];
-
-#if 0
-	constexpr static uint32_t kUnknownProximityDomain = 0xffffffffULL;
-	uint32_t GetProximityDomainForAddrRange(uint64_t paddr, uint64_t size) {
-		for (auto& it : *this) {
-			if (it.type != Entry::kTypeMemoryAffinity)
-				continue;
-			MemoryAffinity* e = reinterpret_cast<MemoryAffinity*>(&it);
-			if (e->base_address <= paddr && paddr < e->base_address + e->size &&
-				paddr + size <= e->base_address + e->size) {
-				return e->proximity_domain;
-			}
-		}
-		return kUnknownProximityDomain;
-	}
-	uint32_t GetProximityDomainForLocalAPIC(LocalAPIC & lapic) {
-		for (auto& it : *this) {
-			if (it.type != SRAT::Entry::kTypeLx2APICAffinity)
-				continue;
-			SRAT::Lx2APICAffinity* e = reinterpret_cast<SRAT::Lx2APICAffinity*>(&it);
-			if (e->x2apic_id != lapic.GetID())
-				continue;
-			return e->proximity_domain;
-		}
-		for (auto& it : *this) {
-			if (it.type != SRAT::Entry::kTypeLAPICAffinity)
-				continue;
-			SRAT::LAPICAffinity* e = reinterpret_cast<SRAT::LAPICAffinity*>(&it);
-			if (e->apic_id != lapic.GetID())
-				continue;
-			return e->proximity_domain_low | (e->proximity_domain_high[0] << 8) |
-				(e->proximity_domain_high[1] << 16) |
-				(e->proximity_domain_high[2] << 24);
-		}
-		return kUnknownProximityDomain;
-	}
-#endif
 } SRAT;
 static_assert(offsetof(SRAT, entry) == 48, "Invalid size.");
 
@@ -316,18 +278,5 @@ typedef struct PACKED FADT {
 	uint32_t smi_cmd;
 	uint8_t acpi_enable;
 	uint8_t acpi_disable;
-
-#if 0
-	uint16_t GetResetReg() {
-		return reinterpret_cast<uint64_t>(
-										  reinterpret_cast<GAS*>(reinterpret_cast<uint64_t>(this) + 116)
-										  ->address);
-	}
-	uint8_t GetResetValue() { return reinterpret_cast<uint8_t*>(this)[128]; }
-#endif
 } FADT;
 static_assert(sizeof(FADT) == 54, "Invalid size.");
-
-#if 0
-void DetectTables();
-#endif

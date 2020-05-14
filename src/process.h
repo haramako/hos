@@ -28,20 +28,6 @@ typedef struct Process_ {
 	uint64_t time_consumed_in_ctx_save_femto_sec;
 } Process;
 
-#if 0
-class ProcessController {
-  public:
-	ProcessController(KernelVirtualHeapAllocator &kernel_heap_allocator)
-		: last_id_(0), kernel_heap_allocator_(kernel_heap_allocator){};
-	Process &Create();
-	Process &RestoreFromPersistentProcessInfo(PersistentProcessInfo &pp_info);
-
-  private:
-	uint64_t last_id_;
-	KernelVirtualHeapAllocator &kernel_heap_allocator_;
-};
-#endif
-
 typedef struct ProcessCreateParam_ {
 	void (*entry_point)();
 	int priority;

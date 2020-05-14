@@ -25,16 +25,8 @@ void apic_new(LocalAPIC *a) {
 		base_msr = ReadMSR(MSRIndex_kLocalAPICBase);
 	}
 
-#if 0 // no virtual memory.
-	a->base_addr = (base_msr & GetPhysAddrMask()) & ~0xfffULL;
-	a->kernel_virt_base_addr = liumos->kernel_heap_allocator->MapPages<uint64_t>(
-																			   base_addr_, ByteSizeToPageSize(kRegisterAreaSize),
-																			   kPageAttrPresent | kPageAttrWritable | kPageAttrWriteThrough |
-																			   kPageAttrCacheDisable);
-#else
 	a->base_addr = base_msr & ~0xfffULL;
 	a->kernel_virt_base_addr = (uint64_t)a->base_addr;
-#endif
 	a->is_x2apic = (base_msr & (1 << 10));
 
 	CPUID cpuid;

@@ -13,4 +13,4 @@
 *.d
 githash.cc
 
-third_party*
+/html

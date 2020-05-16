@@ -227,3 +227,7 @@ void mm_test_() {
 		//*p = 1;
 	}
 }
+
+// SMP test.
+
+void smp_test_() { smp_init(); }

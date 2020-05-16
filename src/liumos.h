@@ -5,39 +5,14 @@
 #include "acpi.h"
 #include "efi.h"
 
-#define kLAPICRegisterAreaPhysBase 0x00000000FEE00000ULL
-#define kLAPICRegisterAreaVirtBase 0xFFFFFFFFFEE00000ULL
-#define kLAPICRegisterAreaByteSize 0x0000000000100000ULL
-
-#define kKernelBaseAddr 0xFFFFFFFF00000000ULL
-
-#define kKernelStackPagesForEachProcess 2
-
-// Dummy LuimOS class decralations
-typedef void EFIFile;
-typedef void ACPI_RSDT;
-typedef void ACPI_NFIT;
-typedef void ACPI_MADT;
-typedef void ACPI_SRAT;
-typedef void ACPI_SLIT;
-typedef void ACPI_FADT;
-typedef void PersistentMemoryManager;
-typedef void Sheet;
-typedef void Console;
-typedef void KeyboardController;
-typedef void PhysicalPageAllocator;
-typedef void KernelVirtualHeapAllocator;
-typedef void IA_PML4;
-typedef void IDT;
-
 // @liumos.c
 typedef struct PACKED LoaderInfo_ {
 	struct {
-		EFIFile *logo_ppm;
-		EFIFile *hello_bin;
-		EFIFile *pi_bin;
-		EFIFile *liumos_elf;
-		EFIFile *liumos_ppm;
+		void *logo_ppm;
+		void *hello_bin;
+		void *pi_bin;
+		void *liumos_elf;
+		void *liumos_ppm;
 	} files;
 	EFI *efi;
 } LoaderInfo;
@@ -47,31 +22,31 @@ typedef struct PACKED LoaderInfo_ {
 typedef struct PACKED LiumOS_ {
 	struct {
 		ACPI_RSDT *rsdt;
-		ACPI_NFIT *nfit;
-		ACPI_MADT *madt;
+		void *nfit;
+		void *madt;
 		ACPI_HPET *hpet;
-		ACPI_SRAT *srat;
-		ACPI_SLIT *slit;
-		ACPI_FADT *fadt;
+		void *srat;
+		void *slit;
+		void *fadt;
 	} acpi;
 	LoaderInfo loader_info;
-	PersistentMemoryManager *pmem[kNumOfPMEMManagers];
-	Sheet *vram_sheet;
-	Sheet *screen_sheet;
-	Console *main_console;
-	KeyboardController *keyboard_ctrl;
-	LocalAPIC *bsp_local_apic;
+	void *pmem[kNumOfPMEMManagers];
+	void *vram_sheet;
+	void *screen_sheet;
+	void *main_console;
+	void *keyboard_ctrl;
+	void *bsp_local_apic;
 	struct CPUFeatureSet *cpu_features;
-	PhysicalPageAllocator *dram_allocator;
-	KernelVirtualHeapAllocator *kernel_heap_allocator;
-	struct HPET *hpet;
+	void *dram_allocator;
+	void *kernel_heap_allocator;
+	void *hpet;
 	EFI_MemoryMap *efi_memory_map;
-	IA_PML4 *kernel_pml4;
+	void *kernel_pml4;
 	/*Scheduler*/ void *scheduler;
 	/*ProcessController*/ void *proc_ctrl;
-	IDT *idt;
-	struct Process_ *root_process;
-	struct Process_ *sub_process;
+	void *idt;
+	void *root_process;
+	void *sub_process;
 	uint64_t time_slice_count;
 	bool is_multi_task_enabled;
 } LiumOS;

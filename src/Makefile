@@ -28,6 +28,8 @@ SRCS= \
 	serial.c \
 	scheduler.c \
 	sleep_handler.S \
+	smp.c \
+	smp_trampoline.S \
 	syscall.c \
 	syscall_handler.S \
 	timer.c 
@@ -69,12 +71,17 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
+smp_trampoline_bin.o: smp_trampoline.S Makefile
+	$(LLVM_CC) -target x86_64-unknown-none-elf -c -o smp_trampoline2.o smp_trampoline.S
+	objcopy -O binary smp_trampoline2.o smp_trampoline.raw 
+	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 smp_trampoline.raw smp_trampoline_bin.o
+
 .PHONY: bootfs.o
 bootfs.o:
 	make -C .. bootfs
 
-LIUMOS.ELF : $(OBJS) kernel.ld Makefile bootfs.o
-	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) bootfs.o
+LIUMOS.ELF : $(OBJS) kernel.ld Makefile bootfs.o smp_trampoline_bin.o
+	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) bootfs.o smp_trampoline_bin.o
 
 run:
 	make -C .. run

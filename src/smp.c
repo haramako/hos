@@ -3,6 +3,7 @@
 #include "acpi.h"
 #include "apic.h"
 #include "liumos.h"
+#include "physical_memory.h"
 
 static void smp_boot_();
 
@@ -61,6 +62,7 @@ void smp_init() {
 	smp_boot_();
 }
 
+#define APIC_LDR 0xd0
 #define APIC_ICR_LOW 0x300
 #define APIC_ICR_HIGH 0x310
 #define APIC_ICR_INIT 0x00000500
@@ -68,10 +70,9 @@ void smp_init() {
 #define APIC_ICR_STARTUP 0x00000600
 #define APIC_ICR_SEND_PENDING 0x00001000
 
-extern uint8_t _binary_smp_trampoline_raw_start[];
-extern uint8_t _binary_smp_trampoline_raw_size[];
-
 #include "asm.h"
+
+int iii = 0;
 
 static void smp_boot_() {
 	// Send IPI.
@@ -80,9 +81,9 @@ static void smp_boot_() {
 	klog("CR3 %016lx", ReadCR3());
 
 	uint8_t *boot_bin = (uint8_t *)0x70000;
-	uint64_t bin_size = (uint64_t)_binary_smp_trampoline_raw_size;
+	uint64_t bin_size = _trampoline_end - _trampoline;
 	klog("bin_size %lld", bin_size);
-	memcpy(boot_bin, _binary_smp_trampoline_raw_start, bin_size);
+	memcpy(boot_bin, _trampoline, bin_size);
 
 	uint32_t icrl;
 	uint32_t icrh;
@@ -95,8 +96,8 @@ static void smp_boot_() {
 
 	klog("icr %x %x", icrh, icrl);
 
-	icrl = (icrl & ~0x000cdfff) | APIC_ICR_INIT | APIC_ICR_DEST_ALL_EX_SELF;
-	icrh = (icrh & 0x000fffff);
+	icrl = (icrl & ~0x000cdfff) | APIC_ICR_INIT /*| APIC_ICR_DEST_ALL_EX_SELF*/;
+	icrh = (icrh & 0x000fffff) | (1 << 24);
 
 	*(volatile uint32_t *)(apic_base + APIC_ICR_HIGH) = icrh;
 	*(volatile uint32_t *)(apic_base + APIC_ICR_LOW) = icrl;
@@ -107,6 +108,12 @@ static void smp_boot_() {
 
 	// Send SIPI
 
+	uintptr_t *entry_addr = (uintptr_t *)0x8000;
+	entry_addr[0] = (uintptr_t)smp_entry;
+	entry_addr[1] = physical_memory_alloc(1);
+	//*entry_addr = 0x4100000000000043;
+	klog("entry_addr %p", *entry_addr);
+
 	do {
 		icrl = *(volatile uint32_t *)(apic_base + APIC_ICR_LOW);
 		icrh = *(volatile uint32_t *)(apic_base + APIC_ICR_HIGH);
@@ -114,14 +121,22 @@ static void smp_boot_() {
 	} while (icrl & (APIC_ICR_SEND_PENDING));
 
 	const int vector = 0x70;
-	icrl = (icrl & ~0x000cdfff) | APIC_ICR_STARTUP | APIC_ICR_DEST_ALL_EX_SELF | vector;
-	icrh = (icrh & 0x000fffff);
+	icrl = (icrl & ~0x000cdfff) | APIC_ICR_STARTUP /*| APIC_ICR_DEST_ALL_EX_SELF*/ | vector;
+	icrh = (icrh & 0x000fffff) | (1 << 24);
 
 	*(volatile uint32_t *)(apic_base + APIC_ICR_HIGH) = icrh;
 	*(volatile uint32_t *)(apic_base + APIC_ICR_LOW) = icrl;
+
+	for (;;) {
+		for (int i = 0; i < 10000000; i++) {
+		}
+		klog("%d", iii);
+	}
 }
 
 void smp_entry() {
-	for (;;)
-		;
+	for (;;) {
+		iii++;
+		// klog("X");
+	}
 }

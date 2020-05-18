@@ -95,9 +95,12 @@ ap_entry32:
 	.align	16
 	.code64
 ap_entry64:
+	mov $0x43, %ax
 	mov $0x2f8, %dx
-	mov $0x44, %ax
 	outb %al, %dx
-	.loop2: jmp .loop2
+	//.loop2: jmp .loop2
+	movq 0x8000, %rdi
+	movq 0x8008, %rsp
+	jmp *%rdi
 
 _trampoline_end:

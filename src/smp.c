@@ -71,72 +71,102 @@ void smp_init() {
 #define APIC_ICR_SEND_PENDING 0x00001000
 
 #include "asm.h"
+#include "smp_trampoline.h"
 
-int iii = 0;
+typedef struct {
+	void (*entry)();
+	void *stack;
+} BootParam;
 
-static void smp_boot_() {
-	// Send IPI.
-	// See: https://ja.tech.jar.jp/ac/2018/day15.html
+static volatile int boot_ack_;
 
-	klog("CR3 %016lx", ReadCR3());
+void boot_processor_(int processor_id, void *stack) {
+	ktrace("Booting prosessor %d.", processor_id);
 
 	uint8_t *boot_bin = (uint8_t *)0x70000;
 	uint64_t bin_size = _trampoline_end - _trampoline;
-	klog("bin_size %lld", bin_size);
 	memcpy(boot_bin, _trampoline, bin_size);
 
-	uint32_t icrl;
-	uint32_t icrh;
-	volatile uint8_t *apic_base;
+	// Send IPI.
+	// See: https://ja.tech.jar.jp/ac/2018/day15.html
 
-	apic_base = (volatile uint8_t *)g_apic.base_addr;
+	uint32_t icrl = apic_read_reg(&g_apic, APIC_ICR_LOW);
+	uint32_t icrh = apic_read_reg(&g_apic, APIC_ICR_HIGH);
 
-	icrl = *(volatile uint32_t *)(apic_base + APIC_ICR_LOW);
-	icrh = *(volatile uint32_t *)(apic_base + APIC_ICR_HIGH);
-
-	klog("icr %x %x", icrh, icrl);
-
-	icrl = (icrl & ~0x000cdfff) | APIC_ICR_INIT /*| APIC_ICR_DEST_ALL_EX_SELF*/;
+	icrl = (icrl & ~0x000cdfff) | APIC_ICR_INIT;
 	icrh = (icrh & 0x000fffff) | (1 << 24);
 
-	*(volatile uint32_t *)(apic_base + APIC_ICR_HIGH) = icrh;
-	*(volatile uint32_t *)(apic_base + APIC_ICR_LOW) = icrl;
+	apic_write_reg(&g_apic, APIC_ICR_HIGH, icrh);
+	apic_write_reg(&g_apic, APIC_ICR_LOW, icrl);
 
-	klog("icr %x %x", icrh, icrl);
-
-	klog("init apic");
+	ktrace("IPI sent.");
 
 	// Send SIPI
+	boot_ack_ = 0;
 
-	uintptr_t *entry_addr = (uintptr_t *)0x8000;
-	entry_addr[0] = (uintptr_t)smp_entry;
-	entry_addr[1] = physical_memory_alloc(1);
+	BootParam *boot_param = (BootParam *)0x8000;
+	boot_param->entry = smp_entry;
+	boot_param->stack = stack;
 	//*entry_addr = 0x4100000000000043;
-	klog("entry_addr %p", *entry_addr);
+	// klog("entry_addr %p", *entry_addr);
 
 	do {
-		icrl = *(volatile uint32_t *)(apic_base + APIC_ICR_LOW);
-		icrh = *(volatile uint32_t *)(apic_base + APIC_ICR_HIGH);
+		icrl = apic_read_reg(&g_apic, APIC_ICR_LOW);
+		icrh = apic_read_reg(&g_apic, APIC_ICR_HIGH);
 		/* Wait until it's idle */
 	} while (icrl & (APIC_ICR_SEND_PENDING));
 
-	const int vector = 0x70;
-	icrl = (icrl & ~0x000cdfff) | APIC_ICR_STARTUP /*| APIC_ICR_DEST_ALL_EX_SELF*/ | vector;
+	icrl = (icrl & ~0x000cdfff) | APIC_ICR_STARTUP | TRAMPOLINE_VEC;
 	icrh = (icrh & 0x000fffff) | (1 << 24);
 
-	*(volatile uint32_t *)(apic_base + APIC_ICR_HIGH) = icrh;
-	*(volatile uint32_t *)(apic_base + APIC_ICR_LOW) = icrl;
+	apic_write_reg(&g_apic, APIC_ICR_HIGH, icrh);
+	apic_write_reg(&g_apic, APIC_ICR_LOW, icrl);
 
+	ktrace("SIPI sent.");
+
+	while (!boot_ack_)
+		;
+
+	ktrace("Boot acknowledged processor %d.", processor_id);
+}
+
+#include "mutex.h"
+
+atomic_int lock;
+
+volatile int n1;
+volatile int n2;
+
+static void smp_boot_() {
+	uintptr_t stack = physical_memory_alloc(1);
+	boot_processor_(1, (void *)(stack + PAGE_SIZE));
+
+	int i = 0;
 	for (;;) {
-		for (int i = 0; i < 10000000; i++) {
+		spinlock_lock(&lock);
+		if ((n1 - n2) != 0) {
+			klog("n1 %d %d", n1, n2);
 		}
-		klog("%d", iii);
+		spinlock_unlock(&lock);
+		i++;
+		if (i % 1000 == 0) {
+			klog("%d", i);
+		}
+		for (int i = 0; i < 1000; i++)
+			;
 	}
 }
 
 void smp_entry() {
+	boot_ack_ = 1;
 	for (;;) {
-		iii++;
-		// klog("X");
+		spinlock_lock(&lock);
+		n1++;
+		for (int i = 0; i < 1000; i++)
+			;
+		n2++;
+		spinlock_unlock(&lock);
+		for (int i = 0; i < 1000; i++)
+			;
 	}
 }

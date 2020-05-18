@@ -18,6 +18,7 @@ SRCS= \
 	main.c \
 	mem.c \
 	mm.c \
+	mutex.c \
 	newlib_support.c \
 	page.c \
 	page_print.c \

@@ -19,9 +19,10 @@
 _trampoline:
 	cli
 
-	mov $0x2f8, %dx
-	mov $0x42, %ax
-	outb %al, %dx
+	// Output to serial for debug.
+	//mov $0x2f8, %dx
+	//mov $0x42, %ax
+	//outb %al, %dx
 	
 	/* Calculate the base address */
 	xorl	%eax,%eax
@@ -82,23 +83,9 @@ gdtr:
 	.word	gdt.1 - gdt - 1	/* Limit */
 	.long	gdt- _trampoline + (TRAMPOLINE_VEC << 12)/* Base address */
 
-
-
-	.align	16
-	.code32
-ap_entry32:
-	mov $0x2f8, %dx
-	mov $0x43, %ax
-	outb %al, %dx
-	.loop: jmp .loop
-
 	.align	16
 	.code64
 ap_entry64:
-	mov $0x43, %ax
-	mov $0x2f8, %dx
-	outb %al, %dx
-	//.loop2: jmp .loop2
 	movq 0x8000, %rdi
 	movq 0x8008, %rsp
 	jmp *%rdi

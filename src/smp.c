@@ -71,9 +71,13 @@ void smp_init() {
 extern uint8_t _binary_smp_trampoline_raw_start[];
 extern uint8_t _binary_smp_trampoline_raw_size[];
 
+#include "asm.h"
+
 static void smp_boot_() {
 	// Send IPI.
 	// See: https://ja.tech.jar.jp/ac/2018/day15.html
+
+	klog("CR3 %016lx", ReadCR3());
 
 	uint8_t *boot_bin = (uint8_t *)0x70000;
 	uint64_t bin_size = (uint64_t)_binary_smp_trampoline_raw_size;

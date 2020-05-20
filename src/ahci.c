@@ -49,7 +49,7 @@ static void send_h2d_command_(AHCI *d, int port_num, int slot_num, FIS_REG_H2D *
 void ahci_init() {
 	PCI_DeviceInfo *pci = pci_find_device(0x01, 0x06);
 	assert(pci);
-	g_ahci = kalloc(AHCI);
+	g_ahci = talloc(AHCI);
 	kcheck(g_ahci, "Cant alloc g_ahci");
 
 	AHCI *d = g_ahci;
@@ -62,7 +62,7 @@ void ahci_init() {
 	AHCI_Capability *c = &d->capability;
 	klog("ports %d", c->x.number_of_ports);
 
-	d->ports = malloc_zero(sizeof(AHCI_Port) * c->x.number_of_ports);
+	d->ports = calloc(c->x.number_of_ports, sizeof(AHCI_Port));
 	for (int i = 0; i <= c->x.number_of_ports; i++) {
 		AHCI_HBA_PORT *p = &d->hba->ports[i];
 		AHCI_Port *port = &d->ports[i];

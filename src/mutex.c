@@ -9,9 +9,4 @@ void spinlock_lock(atomic_int *a) {
 	}
 }
 
-void spinlock_unlock(atomic_int *a) {
-	for (;;) {
-		atomic_int one = 1;
-		if (atomic_compare_exchange_strong(a, (void *)&one, 0)) break;
-	}
-}
+void spinlock_unlock(atomic_int *a) { atomic_store(a, 0); }

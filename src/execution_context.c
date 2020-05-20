@@ -3,7 +3,7 @@
 #include "gdt.h"
 
 ExecutionContext *execution_context_new(void (*rip)(), void *rsp, uint64_t cr3, uint64_t rflags, uint64_t kernel_rsp) {
-	ExecutionContext *ctx = kalloc(ExecutionContext);
+	ExecutionContext *ctx = talloc(ExecutionContext);
 	CPUContext *cc = &ctx->cpu_context;
 	cc->int_ctx.rip = (uint64_t)rip;
 	cc->int_ctx.cs = kUserCS64Selector;

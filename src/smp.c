@@ -32,7 +32,7 @@ typedef struct {
 } MPInfo;
 
 void smp_init() {
-	MPInfo *mp = kalloc(MPInfo);
+	MPInfo *mp = talloc(MPInfo);
 
 	ACPI_MADT *madt = find_rsdt_("APIC");
 	kcheck0(madt);

@@ -8,6 +8,7 @@
 
 // In stdlib.h
 void *malloc(size_t size);
+void *calloc(size_t n, size_t size);
 void free(void *p);
 
 #ifndef __clang__ // For avoid VS Code assertion errors.

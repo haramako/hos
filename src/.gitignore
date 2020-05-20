@@ -4,12 +4,9 @@
 *.o
 *.manifest
 *.swp
-*.gen.c
-*.gen.cc
 *.bin
 *.out
 *.gen.mk
-*.dump.txt
 *.d
 githash.cc
 *.png

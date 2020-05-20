@@ -50,7 +50,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	Disable8259PIC();
 
 	serial_init();
-	console_init(serial_get_port(1));
+	console_init(serial_get_port(1), g_liumos->vram_sheet);
 	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 
 	// Now you can use console_*().

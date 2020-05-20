@@ -4,10 +4,20 @@
 
 #include "asm.h"
 #include "serial.h"
+#include "sheet.h"
+#include "sheet_painter.h"
 
 static const int CONSOLE_BUF_SIZE = 8192;
 
 static Serial *com_;
+
+static Sheet *sh_;
+static int x_;
+static int y_;
+static int FONT_WIDTH = 8;
+static int FONT_HEIGHT = 16;
+static int FONT_COLS = 800 / 8;
+static int FONT_LINE_LEN = 600 / 16;
 
 int g_console_log_level_ = CONSOLE_LOG_LEVEL_INFO;
 
@@ -15,11 +25,34 @@ const char *LOG_LEVEL_NAMES[] = {
 	"T: ", "I: ", "W: ", "E: ", "F: ",
 };
 
-void console_init(Serial *console_serial) { com_ = console_serial; }
+void console_init(Serial *console_serial, Sheet *sh) {
+	com_ = console_serial;
+	sh_ = sh;
+	sheet_draw_rect(sh_, 0, 0, sh_->xsize, sh_->ysize, 0, true);
+}
 
 void console_write(const char *msg) {
-	for (; *msg != '\0'; msg++) {
-		serial_send_char(com_, *msg);
+	for (const char *c = msg; *c != '\0'; c++) {
+		serial_send_char(com_, *c);
+	}
+	for (const char *c = msg; *c != '\0'; c++) {
+		if (*c == '\n') {
+			x_ = 0;
+			++y_;
+		} else {
+			sheet_draw_character(sh_, *c, x_ * FONT_WIDTH, y_ * FONT_HEIGHT, true);
+			++x_;
+			if (x_ >= FONT_COLS) {
+				++y_;
+				x_ = 0;
+			}
+		}
+
+		// Scroll.
+		if (y_ >= FONT_LINE_LEN) {
+			sheet_scroll(sh_, FONT_HEIGHT, true);
+			--y_;
+		}
 	}
 }
 

@@ -3,10 +3,11 @@
 #include "common.h"
 
 struct Serial;
+struct Sheet_;
 
 extern int g_console_log_level_;
 
-void console_init(struct Serial *console_serial);
+void console_init(struct Serial *console_serial, struct Sheet_ *sh);
 void console_write(const char *msg);
 void console_vprintf(const char *fmt, va_list vargs);
 void console_printf(const char *fmt, ...);

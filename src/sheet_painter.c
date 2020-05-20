@@ -38,3 +38,9 @@ void sheet_draw_point(Sheet *sh, int px, int py, uint32_t col, bool do_flush) {
 	sh->buf[py * sh->pixels_per_scan_line + px] = col;
 	if (do_flush) sheet_flush(sh, px, py, 1, 1);
 }
+
+void sheet_scroll(Sheet *sh, int y, bool do_flush) {
+	sheet_block_transfer(sh, 0, 0, 0, y, sh->xsize, sh->ysize - y);
+	sheet_draw_rect(sh, 0, sh->ysize - y, sh->xsize, y, 0, false);
+	if (do_flush) sheet_flush(sh, 0, 0, sh->xsize, sh->ysize);
+}

@@ -236,6 +236,16 @@ void smp_test_() { smp_init(); }
 
 void sheet_test_() {
 	Sheet *sh = g_liumos->vram_sheet;
-	sheet_draw_rect(sh, 10, 10, 100, 100, 0xffffff, true);
+	sheet_draw_rect(sh, 10, 10, 10, 10, 0xffffff, true);
 	sheet_draw_character(sh, 'A', 200, 200, true);
+	// sheet_scroll(sh, 16, true);
+
+	for (int i = 0; i < 1000; i++) {
+		console_printf("HOGE %d, ", i);
+		if (i % 100 == 0) {
+			klog("WI");
+		}
+		for (int j = 0; j < 1000000; ++j) {
+		}
+	}
 }

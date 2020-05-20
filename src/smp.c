@@ -152,7 +152,7 @@ static void smp_boot_() {
 		if (i % 1000 == 0) {
 			klog("%d", i);
 		}
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < 10; i++)
 			;
 	}
 }

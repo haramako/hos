@@ -222,3 +222,7 @@ __attribute__((ms_abi)) void AsmIntHandler21(void);
 __attribute__((ms_abi)) void AsmIntHandler28(void);
 __attribute__((ms_abi)) void AsmIntHandlerNotImplemented(void);
 __attribute__((ms_abi)) void Disable8259PIC(void);
+
+inline void asm_pause() { __asm__("pause"); }
+inline void asm_cli() { __asm__("cli"); }
+inline void asm_sei() { __asm__("sti"); }

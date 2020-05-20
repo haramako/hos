@@ -6,6 +6,7 @@ SRCS= \
 	ahci.c \
 	apic.c \
 	asm.S \
+	asm_inline.c \
 	console.c \
 	common_k.c \
 	efi.c \

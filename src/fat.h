@@ -1,9 +1,9 @@
-#ifndef __FAT_H__
-#define __FAT_H__
+#pragma once
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <sys/types.h>
+#include "common.h"
+//#include <stdint.h>
+//#include <stdlib.h>
+//#include <sys/types.h>
 
 typedef uint64_t cluster_t;
 #define SECTOR_SIZE 512
@@ -121,5 +121,3 @@ error_t fat_read(struct fat *fs, struct fat_file *file, offset_t off, void *buf,
 error_t fat_opendir(struct fat *fs, struct fat_dir *dir, const char *path);
 void fat_closedir(struct fat *fs, struct fat_dir *dir);
 struct fat_dirent *fat_readdir(struct fat *fs, struct fat_dir *dir);
-
-#endif

@@ -94,7 +94,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	// test_malloc_();
 	// pci_test();
 	// mm_test_();
-	smp_test_();
+	// smp_test_();
 
 	klog("Finish.");
 	StoreIntFlag(); // Start interrupt.

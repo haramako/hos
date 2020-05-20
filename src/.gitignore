@@ -12,5 +12,6 @@
 *.dump.txt
 *.d
 githash.cc
+*.png
 
 /html

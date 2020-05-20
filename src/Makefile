@@ -11,6 +11,7 @@ SRCS= \
 	common_k.c \
 	efi.c \
 	execution_context.c \
+	font.gen.c \
 	fat.c \
 	gdt.c \
 	hpet.c \
@@ -29,6 +30,8 @@ SRCS= \
 	process.c \
 	serial.c \
 	scheduler.c \
+	sheet.c \
+	sheet_painter.c \
 	sleep_handler.S \
 	smp.c \
 	smp_trampoline.S \
@@ -103,5 +106,6 @@ format :
 depgraph:
 	rexdep --format dot --pattern '^\s*#include\s*"(\S+)"' *.h | grep -v 'common.h' | dot -Tpng -o deps_header.png
 	rexdep --format dot --pattern '^\s*#include\s*"(\S+)"' *.h | dot -Tpng -o deps_header_all.png
+	rexdep --format dot --pattern '^\s*#include\s*"(\S+)"' *.[ch] | grep -vE 'common.h|main.c|asm' | sed -E 's/\.(h|c)//g' | dot -Tpng -o deps_all.png
 
 -include $(DEPS)

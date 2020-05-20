@@ -231,3 +231,11 @@ void mm_test_() {
 // SMP test.
 
 void smp_test_() { smp_init(); }
+
+// Sheet test.
+
+void sheet_test_() {
+	Sheet *sh = g_liumos->vram_sheet;
+	sheet_draw_rect(sh, 10, 10, 100, 100, 0xffffff, true);
+	sheet_draw_character(sh, 'A', 200, 200, true);
+}

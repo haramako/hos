@@ -12,6 +12,8 @@
 #include "physical_memory.h"
 #include "scheduler.h"
 #include "serial.h"
+#include "sheet.h"
+#include "sheet_painter.h"
 #include "smp.h"
 #include "syscall.h"
 #include "timer.h"
@@ -95,6 +97,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	// pci_test();
 	// mm_test_();
 	// smp_test_();
+	sheet_test_();
 
 	klog("Finish.");
 	StoreIntFlag(); // Start interrupt.

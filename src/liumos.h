@@ -31,7 +31,7 @@ typedef struct PACKED LiumOS_ {
 	} acpi;
 	LoaderInfo loader_info;
 	void *pmem[kNumOfPMEMManagers];
-	void *vram_sheet;
+	struct Sheet_ *vram_sheet;
 	void *screen_sheet;
 	void *main_console;
 	void *keyboard_ctrl;

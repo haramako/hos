@@ -76,11 +76,6 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
-#smp_trampoline_bin.o: smp_trampoline.S Makefile
-#	$(LLVM_CC) -target x86_64-unknown-none-elf -c -o smp_trampoline2.o smp_trampoline.S
-#	objcopy -O binary smp_trampoline2.o smp_trampoline.raw 
-#	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 smp_trampoline.raw smp_trampoline_bin.o
-
 .PHONY: bootfs.o
 bootfs.o:
 	make -C .. bootfs

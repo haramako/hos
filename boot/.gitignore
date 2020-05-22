@@ -1,0 +1,14 @@
+*.lib
+*.elf
+*.ELF
+*.o
+*.manifest
+*.swp
+*.bin
+*.out
+*.gen.mk
+*.d
+githash.cc
+*.png
+
+/html

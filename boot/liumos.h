@@ -6,16 +6,6 @@
 #include "efi.h"
 
 // @liumos.c
-typedef struct PACKED LoaderInfo_ {
-	struct {
-		void *logo_ppm;
-		void *hello_bin;
-		void *pi_bin;
-		void *liumos_elf;
-		void *liumos_ppm;
-	} files;
-	EFI *efi;
-} LoaderInfo;
 
 #define kNumOfPMEMManagers 4
 
@@ -32,7 +22,6 @@ typedef struct PACKED LiumOS_ {
 		void *slit;
 		void *fadt;
 	} acpi;
-	LoaderInfo loader_info;
 	void *pmem[kNumOfPMEMManagers];
 	struct Sheet_ *vram_sheet;
 	void *screen_sheet;

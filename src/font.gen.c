@@ -1,6 +1,5 @@
 #include <stdint.h>
-extern uint8_t font[0x100][16];
-uint8_t font[0x100][16] = {
+const uint8_t font[0x100][16] = {
 	{
 		0x00,
 		0x00,

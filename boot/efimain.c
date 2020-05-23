@@ -38,7 +38,7 @@ void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
 	g_image_handle = image_handle;
 	sys_ = system_table;
 	// efi_.Init(image_handle, system_table);
-	liumos_.loader_info.efi = &efi_;
+	// liumos_.loader_info.efi = &efi_;
 
 	liumos->acpi.rsdt = GetConfigurationTableByUUID(&kACPITableGUID);
 	// assert(liumos->acpi.rsdt);
@@ -53,7 +53,7 @@ void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
 
 	FileProtocol *root = efi_file_root();
 	efi_file_load(&liumos_elf_file, root, "LIUMOS.ELF");
-	liumos_.loader_info.files.liumos_elf = &liumos_elf_file;
+	// liumos_.loader_info.files.liumos_elf = &liumos_elf_file;
 
 	print_hex("file buf: ", (uint64_t)liumos_elf_file.buf_pages);
 	print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));

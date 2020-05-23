@@ -28,30 +28,32 @@ const char *LOG_LEVEL_NAMES[] = {
 void console_init(Serial *console_serial, Sheet *sh) {
 	com_ = console_serial;
 	sh_ = sh;
-	sheet_draw_rect(sh_, 0, 0, sh_->xsize, sh_->ysize, 0, true);
+	if (sh_) sheet_draw_rect(sh_, 0, 0, sh_->xsize, sh_->ysize, 0, true);
 }
 
 void console_write(const char *msg) {
 	for (const char *c = msg; *c != '\0'; c++) {
 		serial_send_char(com_, *c);
 	}
-	for (const char *c = msg; *c != '\0'; c++) {
-		if (*c == '\n') {
-			x_ = 0;
-			++y_;
-		} else {
-			sheet_draw_character(sh_, *c, x_ * FONT_WIDTH, y_ * FONT_HEIGHT, true);
-			++x_;
-			if (x_ >= FONT_COLS) {
-				++y_;
+	if (sh_) {
+		for (const char *c = msg; *c != '\0'; c++) {
+			if (*c == '\n') {
 				x_ = 0;
+				++y_;
+			} else {
+				sheet_draw_character(sh_, *c, x_ * FONT_WIDTH, y_ * FONT_HEIGHT, true);
+				++x_;
+				if (x_ >= FONT_COLS) {
+					++y_;
+					x_ = 0;
+				}
 			}
-		}
 
-		// Scroll.
-		if (y_ >= FONT_LINE_LEN) {
-			sheet_scroll(sh_, FONT_HEIGHT, true);
-			--y_;
+			// Scroll.
+			if (y_ >= FONT_LINE_LEN) {
+				sheet_scroll(sh_, FONT_HEIGHT, true);
+				--y_;
+			}
 		}
 	}
 }

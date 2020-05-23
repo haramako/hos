@@ -1,13 +1,11 @@
 #include "console.h"
 
-EFI efi_;
-EFI_Handle g_image_handle;
-EFI_SystemTable *sys_;
+#include "efi_util.h"
 
 void print(const char *c) {
-	wchar_t buf[1024];
+	wchar_t buf[256];
 	int i = 0;
-	for (i = 0; i < 1024 && *c != '\0'; i++, c++) {
+	for (i = 0; i < 256 && *c != '\0'; i++, c++) {
 		buf[i] = (wchar_t)*c;
 	}
 	buf[i] = u'\0';

@@ -45,14 +45,14 @@ static void init_process_and_scheduler_() {
 }
 
 void kernel_entry(LiumOS *liumos_passed) {
-	
 	g_liumos = liumos_passed;
 
 	Disable8259PIC();
 
 	serial_init();
+	serial_send_char(serial_get_port(1), 'Z');
 	console_init(serial_get_port(1), g_liumos->vram_sheet);
-	//console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
+	// console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// Now you can use console_*().

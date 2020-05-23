@@ -3,7 +3,7 @@
 #include "asm.h"
 
 // @font.gen.c
-extern uint8_t font[0x100][16];
+extern const uint8_t font[0x100][16];
 
 void sheet_draw_character(Sheet *sh, char c, int px, int py, bool do_flush) {
 	if (!sh->buf) return;

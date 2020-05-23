@@ -39,6 +39,7 @@ typedef struct EFI_MemoryDescriptor_ {
 	UINTN number_of_pages;
 	UINTN attribute;
 } EFI_MemoryDescriptor;
+static_assert(sizeof(EFI_MemoryDescriptor) == 40, "Invalid size.");
 
 int efi_memory_map_get_count(EFI_MemoryMap *mm);
 EFI_MemoryDescriptor *efi_memory_map_get_descriptor(EFI_MemoryMap *mm, int idx);

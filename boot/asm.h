@@ -194,6 +194,7 @@ __attribute__((ms_abi)) void WriteDataAndExtraSegmentSelectors(uint16_t);
 __attribute__((ms_abi)) uint64_t ReadCR2(void);
 __attribute__((ms_abi)) uint64_t ReadCR3(void);
 __attribute__((ms_abi)) uint64_t asm_read_cr0(void);
+__attribute__((ms_abi)) void asm_write_cr0(uint64_t);
 __attribute__((ms_abi)) uint64_t asm_read_cr1(void);
 __attribute__((ms_abi)) void WriteCR3(uint64_t);
 __attribute__((ms_abi)) uint64_t CompareAndSwap(uint64_t *, uint64_t);
@@ -206,7 +207,7 @@ __attribute__((ms_abi)) void RepeatStore4Bytes(size_t count, const void *dst, ui
 __attribute__((ms_abi)) void RepeatMove8Bytes(size_t count, const void *dst, const void *src);
 __attribute__((ms_abi)) void RepeatStore8Bytes(size_t count, const void *dst, uint64_t data);
 __attribute__((ms_abi)) void CLFlushOptimized(const void *);
-__attribute__((ms_abi)) void JumpToKernel(void *kernel_entry_point, void *vram_sheet, uint64_t kernel_stack_pointer);
+__attribute__((ms_abi)) void JumpToKernel(void *kernel_entry_point, void *data, uint64_t kernel_stack_pointer);
 __attribute__((ms_abi)) void AsmSyscallHandler(void);
 __attribute__((ms_abi)) void AsmIntHandler00_DivideError(void);
 __attribute__((ms_abi)) void AsmIntHandler03(void);
@@ -223,6 +224,6 @@ __attribute__((ms_abi)) void AsmIntHandler28(void);
 __attribute__((ms_abi)) void AsmIntHandlerNotImplemented(void);
 __attribute__((ms_abi)) void Disable8259PIC(void);
 
-inline void asm_pause() { __asm__("pause"); }
-inline void asm_cli() { __asm__("cli"); }
-inline void asm_sei() { __asm__("sti"); }
+// inline void asm_pause() { __asm__("pause"); }
+// inline void asm_cli() { __asm__("cli"); }
+// inline void asm_sei() { __asm__("sti"); }

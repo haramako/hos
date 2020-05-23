@@ -14,9 +14,9 @@ typedef union PACKED PageMapEntry_ {
 		int dummy0 : 1;
 		int page_size : 1;
 		int ignored : 1;
-		uint8_t available : 3;
-		uint64_t addr : 36;
-		uint64_t dummy1 : 16;
+		int available : 3;
+		// int addr : 32;
+		// int dummy1 : 16;
 	} x;
 } PageMapEntry;
 

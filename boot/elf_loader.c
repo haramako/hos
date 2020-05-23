@@ -2,6 +2,7 @@
 
 #include <elf.h>
 
+#include "asm.h"
 #include "console.h"
 #include "efi_util.h"
 #include "page.h"
@@ -56,7 +57,32 @@ static const Elf64_Ehdr *parse_elf_(EFI_File *file, Elf64_Phdr **out_code, Elf64
 	return ehdr;
 }
 
-void elf_load_kernel(EFI_File *file) {
+void efi_memory_map_init2(EFI_MemoryMap *m) {
+	print("1");
+	m->bytes_used = sizeof(m->buf);
+	print("2");
+	EFI_Status status =
+		sys_->boot_services->GetMemoryMap(&m->bytes_used, m->buf, &m->key, &m->descriptor_size, &m->descriptor_version);
+	print("3");
+	if (status != Status_kSuccess) {
+		print_hex("Failed to get memory map, status = ", status);
+		panic("");
+	}
+	print("4");
+}
+
+typedef struct Serial {
+	uint16_t port;
+} Serial;
+
+void serial_init();
+Serial *serial_get_port(int serial_num);
+void serial_new(Serial *s, uint16_t port);
+void serial_send_char(Serial *s, char c);
+
+typedef void (*entry_point_t)();
+
+void elf_load_kernel(EFI_File *file, LiumOS *liumos) {
 	Elf64_Phdr *code;
 	Elf64_Phdr *data;
 
@@ -66,15 +92,76 @@ void elf_load_kernel(EFI_File *file) {
 	}
 
 	uint8_t *code_buf = efi_allocate_pages_addr(code->p_vaddr, byte_size_to_page_size(code->p_filesz));
-	uint8_t *data_buf = efi_allocate_pages_addr(data->p_vaddr, byte_size_to_page_size(data->p_filesz));
+	uint8_t *data_buf = efi_allocate_pages_addr(data->p_vaddr, byte_size_to_page_size(data->p_memsz));
 
+	uint64_t cr0 = asm_read_cr0();
+	print_hex("cr0 ", cr0);
+	cr0 &= ~(1 << 16);
+	asm_write_cr0(cr0);
+	print_hex("cr0 ", asm_read_cr0());
+
+	print_hex("func ", (int64_t)elf_load_kernel);
 	print_hex("code ", code->p_filesz);
+	print_hex("code ", code->p_memsz);
 	print_hex("data ", data->p_filesz);
+	print_hex("data ", data->p_memsz);
+
 	memcpy(code_buf, (uint8_t *)file->buf_pages + code->p_offset, code->p_filesz);
 	memcpy(data_buf, (uint8_t *)file->buf_pages + data->p_offset, data->p_filesz);
 
 	void *entry_point = (void *)ehdr->e_entry;
 	print_hex("Entry address: ", (uint64_t)entry_point);
+	print_hex("      head   : ", *(uint64_t *)entry_point);
 
-	// JumpToKernel(entry_point, liumos, kernel_main_stack_pointer);
+	print("hoge\n");
+
+	efi_memory_map_init2(&g_efi_memory_map);
+	print("5\n");
+
+	Status status;
+	do {
+		status = sys_->boot_services->ExitBootServices(g_image_handle, g_efi_memory_map.key);
+	} while (status != Status_kSuccess);
+
+	entry_point_t ep = (entry_point_t)entry_point;
+	ep();
+
+	for (;;)
+		;
+
+	print("fuga\n");
+
+	JumpToKernel(entry_point, liumos, 0);
+	print("hoge\n");
+}
+
+static Serial com_[2];
+
+void serial_init() {
+	serial_new(&com_[0], 0x3f8);
+	serial_new(&com_[1], 0x2f8);
+}
+
+Serial *serial_get_port(int serial_num) { return &com_[serial_num]; }
+
+void serial_new(Serial *s, uint16_t port) {
+	// https://wiki.osdev.org/Serial_Ports
+	s->port = port;
+	WriteIOPort8(s->port + 1, 0x00);	  // Disable all interrupts
+	WriteIOPort8(s->port + 3, 0x80);	  // Enable DLAB (set baud rate divisor)
+	const uint16_t baud_divisor = 0x0001; // baud rate = (115200 / baud_divisor)
+	WriteIOPort8(s->port + 0, baud_divisor & 0xff);
+	WriteIOPort8(s->port + 1, baud_divisor >> 8);
+	WriteIOPort8(s->port + 3, 0x03); // 8 bits, no parity, one stop bit
+	WriteIOPort8(s->port + 2,
+				 0xC7);				 // Enable FIFO, clear them, with 14-byte threshold
+	WriteIOPort8(s->port + 4, 0x0B); // IRQs enabled, RTS/DSR set
+}
+
+bool serial_is_transmit_empty(Serial *s) { return ReadIOPort8(s->port + 5) & 0x20; }
+
+void serial_send_char(Serial *s, char c) {
+	while (!serial_is_transmit_empty(s))
+		;
+	WriteIOPort8(s->port, c);
 }

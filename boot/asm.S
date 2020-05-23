@@ -191,6 +191,11 @@ WriteCR3:
 	mov cr3, rcx
 	ret
 
+.global asm_write_cr0
+asm_write_cr0:
+	mov cr0, rcx
+	ret
+	
 .global CompareAndSwap
 CompareAndSwap:
 	// rcx: target addr
@@ -298,7 +303,7 @@ JumpToKernel:
 	// convert calling convention from Microsoft x64 to SystemV AMD64
 	push rbp
 	mov rbp, rsp
-	mov rsp, r8
+	//mov rsp, r8
 
 	mov rdi, rdx
 	call rcx

@@ -35,7 +35,8 @@ void efi_memory_map_init(EFI_MemoryMap *m) {
 
 void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
 	liumos = &liumos_;
-	g_image_handle = image_handle, sys_ = system_table;
+	g_image_handle = image_handle;
+	sys_ = system_table;
 	// efi_.Init(image_handle, system_table);
 	liumos_.loader_info.efi = &efi_;
 
@@ -57,7 +58,7 @@ void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
 	print_hex("file buf: ", (uint64_t)liumos_elf_file.buf_pages);
 	print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
 
-	elf_load_kernel(&liumos_elf_file);
+	elf_load_kernel(&liumos_elf_file, &liumos_);
 
 	do {
 		status = sys_->boot_services->ExitBootServices(image_handle, g_efi_memory_map.key);

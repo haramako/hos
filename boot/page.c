@@ -5,8 +5,10 @@
 #include "efi_util.h"
 #include "util.h"
 
-static uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.x.addr << 12); }
-static void pme_set_addr(PageMapEntry *pme, uint64_t paddr) { pme->x.addr = paddr >> 12; }
+static uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.raw & 0x0000FFFFFFFFF000); }
+static void pme_set_addr(PageMapEntry *pme, uint64_t paddr) {
+	pme->raw = (pme->raw & 0xFFF) | (paddr & 0x0000FFFFFFFFF000);
+}
 // static uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
 static bool pme_is_leaf(PageMapEntry pme, int level) {
 	switch (level) {
@@ -49,7 +51,8 @@ PageMapEntry *page_current_pml4() { return (PageMapEntry *)ReadCR3(); }
 static bool map_callback_(int level, PageMapEntry *pme, void *data) {
 	uintptr_t page = (uintptr_t)efi_allocate_pages(1);
 
-	// print_hex("Map paddr ", (uint64_t)data);
+	// print_hex("Map level ", level);
+	// print_hex("Map vaddr ", (uint64_t)data);
 
 	memset((void *)page, 0, PAGE_SIZE);
 	// pme->raw = 0;

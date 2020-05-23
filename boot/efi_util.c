@@ -61,7 +61,7 @@ void *efi_allocate_pages(size_t pages) {
 
 void *efi_allocate_pages_addr(uintptr_t addr, size_t pages) {
 	uintptr_t allocated = (uintptr_t)efi_allocate_pages(pages);
-	print_hex("pages ", pages);
+	// print_hex("Allocate pages ", pages);
 	page_map_addr(allocated, addr, (int)pages);
 	return (void *)addr;
 }

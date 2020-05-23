@@ -43,11 +43,12 @@ run : # files
 	$(QEMU) $(QEMU_ARGS)
 
 runc : files
-	$(QEMU) $(QEMU_ARGS) -nographic
+	$(QEMU) $(QEMU_ARGS) -gdb tcp::1192 -nographic
 
 clean :
 	rm -rf mnt
 	make -C src clean
 
 format :
-	make -C src format
+	cd src && clang-format -i *.c *.h && gtags
+	cd boot && clang-format -i *.c *.h && gtags

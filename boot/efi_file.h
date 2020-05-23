@@ -2,20 +2,13 @@
 
 #include "common.h"
 
-#define kFileNameSize 255
+#include "efi.h"
 
 typedef struct {
-	#if 0
- public:
-  const uint8_t* GetBuf() { return buf_pages_; }
-  uint64_t GetFileSize() { return file_size_; }
-
- private:
-  static constexpr int kFileNameSize = 16;
-	#endif
-  char file_name_[kFileNameSize + 1];
-  uint64_t file_size_;
-  uint8_t* buf_pages_;
+	char file_name[kFileNameSize + 1];
+	uint64_t file_size;
+	uint8_t *buf_pages;
 } EFI_File;
 
-//static void Load(EFIFile& dst, const wchar_t* file_name);
+void efi_file_load(EFI_File *f, FileProtocol *dir, const char *file_name);
+FileProtocol *efi_file_root();

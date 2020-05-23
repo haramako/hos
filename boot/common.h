@@ -1,10 +1,10 @@
 #pragma once
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 
 // In stdlib.h
 void *malloc(size_t size);

@@ -1,7 +1,14 @@
-#include "efi_file.h"
+#include "efi_util.h"
 
 #include "console.h"
 #include "efi.h"
+#include "page.h"
+#include "util.h"
+
+EFI efi_;
+EFI_Handle g_image_handle;
+EFI_SystemTable *sys_;
+EFI_MemoryMap g_efi_memory_map;
 
 static const GUID kFileInfoGUID = {0x09576e92, 0x6d3f, 0x11d2, {0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b}};
 
@@ -17,6 +24,14 @@ static const GUID kFileSystemInfoGUID = {
 
 static const GUID kLoadedImageProtocolGUID = {
 	0x5B1B31A1, 0x9562, 0x11d2, {0x8E, 0x3F, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}};
+
+void check_status(Status status, const char *msg) {
+	if (status != Status_kSuccess) {
+		print(msg);
+		print_hex(", status = ", status);
+		panic("");
+	}
+}
 
 FileProtocol *efi_open_file(FileProtocol *dir, char *path) {
 	wchar_t wpath[kFileNameSize];
@@ -37,16 +52,19 @@ FileProtocol *efi_open_file(FileProtocol *dir, char *path) {
 	return file;
 }
 
-#if 0
-void strncpy(char *dest, const char *src, size_t size){
-	for( size_t i=0; i<size && *src != '\0'; i++){
-		*dest++ = *src++;
-	}
-	*dest = '\0';
+void *efi_allocate_pages(size_t pages) {
+	void *data;
+	Status status = sys_->boot_services->AllocatePages(kAnyPages, kLoaderData, pages, &data);
+	check_status(status, "AllocatePages() failed.");
+	return data;
 }
-#endif
 
-void *efi_allocate_pages(size_t pages) { return NULL; }
+void *efi_allocate_pages_addr(uintptr_t addr, size_t pages) {
+	uintptr_t allocated = (uintptr_t)efi_allocate_pages(pages);
+	print_hex("pages ", pages);
+	page_map_addr(allocated, addr, (int)pages);
+	return (void *)addr;
+}
 
 Status efi_handle_protocol(Handle handle, GUID *guid, void **out) {
 	return sys_->boot_services->HandleProtocol(g_image_handle, guid, out);
@@ -78,9 +96,9 @@ void efi_file_load(EFI_File *f, FileProtocol *dir, const char *file_name) {
 	file->GetInfo(file, &kFileInfoGUID, &info_size, (uint8_t *)&info);
 
 	UINTN buf_size = info.file_size;
-	void *buf_pages = efi_allocate_pages(byte_size_to_page_size(buf_size));
+	f->buf_pages = efi_allocate_pages(byte_size_to_page_size(buf_size));
 
-	Status status = file->Read(file, &buf_size, buf_pages);
+	Status status = file->Read(file, &buf_size, f->buf_pages);
 	check_status(status, "Read failed.");
 
 	// assert(buf_size == info.file_size);

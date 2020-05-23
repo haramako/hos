@@ -24,7 +24,7 @@ LDFLAGS= \
 	-entry:efi_main 
 
 BOOTX64.EFI : *.c *.h Makefile
-	$(LLVM_CC) $(CFLAGS) -c *.c
+	$(LLVM_CC) $(CFLAGS) -c *.c *.S
 	$(LLVM_LLD_LINK) $(LDFLAGS) -out:BOOTX64.EFI *.o
 	cp BOOTX64.EFI ../dist/EFI/BOOT
 

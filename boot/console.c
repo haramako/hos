@@ -33,36 +33,9 @@ void print_hex(char *msg, uint64_t n) {
 	print("\n");
 }
 
-int memcmp(const void *a, const void *b, size_t size) {
-	uint8_t *a_ = (uint8_t *)a;
-	uint8_t *b_ = (uint8_t *)b;
-	for (size_t i = 0; i < size; i++) {
-		int cmp = b_[i] - a_[i];
-		if (cmp != 0) return cmp;
-	}
-	return 0;
-}
-
-void panic(const char *msg) {
+NORETURN void panic(const char *msg) {
 	print(msg);
 	print("\n");
 	for (;;)
 		;
-}
-
-size_t byte_size_to_page_size(size_t size) { return size / 4096; }
-
-wchar_t *str2wstr(wchar_t *dest, const char *src, size_t size) {
-	wchar_t *orig_dest = dest;
-	for (size_t i = 0; i < size && *src != '\0'; i++) {
-		*dest++ = *src++;
-	}
-	*dest = '\0';
-	return orig_dest;
-}
-
-void check_status(Status status, const char *msg) {
-	if (status != Status_kSuccess) {
-		panic(msg);
-	}
 }

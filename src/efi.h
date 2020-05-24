@@ -3,6 +3,7 @@
 #include "common.h"
 
 #define UINTN uintptr_t
+static_assert(sizeof(UINTN) == 8, "Invalid size.");
 
 #define kBufferSize 0x8000
 
@@ -10,6 +11,7 @@ typedef struct EFI_MemoryMap_ {
 	uintptr_t key;
 	uintptr_t bytes_used;
 	uintptr_t descriptor_size;
+	uint32_t descriptor_version;
 	uint8_t buf[kBufferSize];
 } EFI_MemoryMap;
 
@@ -30,7 +32,9 @@ typedef enum MemoryType_ {
 	kPalCode,
 	kPersistentMemory,
 	kMaxMemoryType,
-} MemoryType;
+} MemoryType__;
+
+typedef uint32_t MemoryType;
 
 typedef struct EFI_MemoryDescriptor_ {
 	MemoryType type;

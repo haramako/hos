@@ -4,6 +4,7 @@
 #include "guid.h"
 
 #define UINTN uintptr_t
+static_assert(sizeof(UINTN) == 8, "Invalid size.");
 
 #define kBufferSize 0x8000
 

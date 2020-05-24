@@ -14,7 +14,7 @@ void physical_memory_init(EFI_MemoryMap *memory_map) {
 	int len = efi_memory_map_get_count(memory_map);
 	for (int i = 0; i < len; i++) {
 		EFI_MemoryDescriptor *desc = efi_memory_map_get_descriptor(memory_map, i);
-		ktrace("pg %d", desc->number_of_pages);
+		ktrace("pg %d %p %p %d", desc->number_of_pages, desc->physical_start, desc->attribute, desc->type);
 		if (desc->type != kConventionalMemory) continue;
 		physical_memory_add_page(desc->physical_start, desc->number_of_pages);
 	}

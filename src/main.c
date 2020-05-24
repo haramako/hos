@@ -50,10 +50,8 @@ void kernel_entry(LiumOS *liumos_passed) {
 	Disable8259PIC();
 
 	serial_init();
-	serial_send_char(serial_get_port(1), 'Z');
 	console_init(serial_get_port(1), g_liumos->vram_sheet);
-	// console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
-	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 
 	// Now you can use console_*().
 
@@ -99,7 +97,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	// pci_test();
 	// mm_test_();
 	// smp_test_();
-	sheet_test_();
+	// sheet_test_();
 
 	klog("Finish.");
 	StoreIntFlag(); // Start interrupt.

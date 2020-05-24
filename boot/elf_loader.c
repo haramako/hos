@@ -67,17 +67,6 @@ void efi_memory_map_init2(EFI_MemoryMap *m) {
 	}
 }
 
-typedef struct Serial {
-	uint16_t port;
-} Serial;
-
-void serial_init();
-Serial *serial_get_port(int serial_num);
-void serial_new(Serial *s, uint16_t port);
-void serial_send_char(Serial *s, char c);
-
-typedef void (*entry_point_t)();
-
 void elf_load_kernel(EFI_File *file, LiumOS *liumos) {
 	Elf64_Phdr *code;
 	Elf64_Phdr *data;
@@ -90,30 +79,14 @@ void elf_load_kernel(EFI_File *file, LiumOS *liumos) {
 	uint8_t *code_buf = efi_allocate_pages_addr(code->p_vaddr, byte_size_to_page_size(code->p_filesz));
 	uint8_t *data_buf = efi_allocate_pages_addr(data->p_vaddr, byte_size_to_page_size(data->p_memsz));
 
-	uint64_t cr0 = asm_read_cr0();
-	print_hex("cr0 ", cr0);
-	cr0 &= ~(1 << 16);
-	asm_write_cr0(cr0);
-	print_hex("cr0 ", asm_read_cr0());
-
-	print_hex("func ", (int64_t)elf_load_kernel);
-	print_hex("code ", code->p_filesz);
-	print_hex("code ", code->p_memsz);
-	print_hex("data ", data->p_filesz);
-	print_hex("data ", data->p_memsz);
-
 	memcpy(code_buf, (uint8_t *)file->buf_pages + code->p_offset, code->p_filesz);
 	memcpy(data_buf, (uint8_t *)file->buf_pages + data->p_offset, data->p_filesz);
 
 	void *entry_point = (void *)ehdr->e_entry;
 	print_hex("Entry address: ", (uint64_t)entry_point);
-	print_hex("      head   : ", *(uint64_t *)entry_point);
-
-	print("hoge\n");
 
 	efi_memory_map_init2(&g_efi_memory_map);
 	print("5\n");
-	// print_hex("mdesc ", g_efi_memory_map.descriptor_size);
 
 	liumos->efi_memory_map = &g_efi_memory_map;
 
@@ -123,36 +96,6 @@ void elf_load_kernel(EFI_File *file, LiumOS *liumos) {
 	} while (status != Status_kSuccess);
 
 	JumpToKernel(entry_point, liumos, 0);
-	print("hoge\n");
-}
-
-static Serial com_[2];
-
-void serial_init() {
-	serial_new(&com_[0], 0x3f8);
-	serial_new(&com_[1], 0x2f8);
-}
-
-Serial *serial_get_port(int serial_num) { return &com_[serial_num]; }
-
-void serial_new(Serial *s, uint16_t port) {
-	// https://wiki.osdev.org/Serial_Ports
-	s->port = port;
-	WriteIOPort8(s->port + 1, 0x00);	  // Disable all interrupts
-	WriteIOPort8(s->port + 3, 0x80);	  // Enable DLAB (set baud rate divisor)
-	const uint16_t baud_divisor = 0x0001; // baud rate = (115200 / baud_divisor)
-	WriteIOPort8(s->port + 0, baud_divisor & 0xff);
-	WriteIOPort8(s->port + 1, baud_divisor >> 8);
-	WriteIOPort8(s->port + 3, 0x03); // 8 bits, no parity, one stop bit
-	WriteIOPort8(s->port + 2,
-				 0xC7);				 // Enable FIFO, clear them, with 14-byte threshold
-	WriteIOPort8(s->port + 4, 0x0B); // IRQs enabled, RTS/DSR set
-}
-
-bool serial_is_transmit_empty(Serial *s) { return ReadIOPort8(s->port + 5) & 0x20; }
-
-void serial_send_char(Serial *s, char c) {
-	while (!serial_is_transmit_empty(s))
+	for (;;)
 		;
-	WriteIOPort8(s->port, c);
 }

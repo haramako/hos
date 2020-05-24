@@ -3,7 +3,7 @@
 #include "efi_util.h"
 
 void print(const char *c) {
-	wchar_t buf[256];
+	wchar_t buf[257];
 	int i = 0;
 	for (i = 0; i < 256 && *c != '\0'; i++, c++) {
 		buf[i] = (wchar_t)*c;

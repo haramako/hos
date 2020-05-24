@@ -54,6 +54,7 @@ NEWLIB_INC_PATH=../third_party_root/include
 NEWLIB_LIB_PATH=../third_party_root/lib
 
 CFLAGS= \
+	-g \
 	-std=c11 \
 	-target x86_64-unknown-none-elf \
 	-fno-stack-protector -fno-exceptions -fshort-wchar \

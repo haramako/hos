@@ -76,6 +76,8 @@ FileProtocol *efi_file_root() {
 	LoadedImageProtocol *loaded_image;
 	status = efi_handle_protocol(g_image_handle, &kLoadedImageProtocolGUID, (void **)&loaded_image);
 	check_status(status, "Can't get LoadedImageProtocol.");
+	print_hex("image ", (uint64_t)loaded_image->image_base);
+	print_hex("image ", (uint64_t)efi_file_root);
 
 	SimpleFileSystemProtocol *simple_fs;
 	status = sys_->boot_services->HandleProtocol(loaded_image->device_handle, &kSimpleFileSystemProtocolGUID,

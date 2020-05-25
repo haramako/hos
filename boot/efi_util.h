@@ -2,6 +2,7 @@
 
 #include "common.h"
 
+#include "boot_param.h"
 #include "efi.h"
 
 extern EFI efi_;

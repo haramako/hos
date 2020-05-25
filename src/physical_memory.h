@@ -1,7 +1,10 @@
 #pragma once
 
 #include "common.h"
+
 #include "efi/memory_map.h"
+
+struct EFI_MemoryMap_;
 
 #define PHYSICAL_MEMORY_BLOCK_LEN 128
 
@@ -16,7 +19,7 @@ typedef struct PhysicalMemory_ {
 } PhysicalMemory;
 
 PhysicalMemory *physical_memory_instance();
-void physical_memory_init(EFI_MemoryMap *memory_map);
+void physical_memory_init(struct EFI_MemoryMap_ *memory_map);
 uintptr_t physical_memory_alloc(uintptr_t pages);
 
 uintptr_t physmem_v2p(void *addr);

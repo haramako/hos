@@ -1,9 +1,10 @@
 #pragma once
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#include <assert.h> // Must include after stdint.h
 
 #ifndef __clang__ // For avoid VS Code assertion errors.
 #define static_assert(...)

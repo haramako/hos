@@ -1,6 +1,8 @@
 #include "physical_memory.h"
 
 #include "asm.h"
+#include "boot_param.h"
+#include "memory_map_util.h"
 #include "page.h"
 
 static PhysicalMemory pm_;

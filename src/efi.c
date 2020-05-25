@@ -2,6 +2,7 @@
 
 #include "boot_param.h"
 #include "common.h"
+#include "memory_map_util.h"
 
 int efi_memory_map_get_count(EFI_MemoryMap *mm) { return (int)(mm->bytes_used / mm->descriptor_size); }
 

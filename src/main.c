@@ -8,6 +8,7 @@
 #include "hpet.h"
 #include "interrupt.h"
 #include "mem.h"
+#include "memory_map_util.h"
 #include "page.h"
 #include "pagefault.h"
 #include "pci.h"

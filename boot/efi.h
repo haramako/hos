@@ -1,7 +1,8 @@
 #pragma once
 
 #include "common.h"
-#include "guid.h"
+#include "efi/guid.h"
+#include "efi/memory_map.h"
 
 #define UINTN uintptr_t
 static_assert(sizeof(UINTN) == 8, "Invalid size.");
@@ -10,44 +11,7 @@ static_assert(sizeof(UINTN) == 8, "Invalid size.");
 
 typedef UINTN EFI_Status;
 
-typedef struct EFI_MemoryMap_ {
-	uintptr_t key;
-	uintptr_t bytes_used;
-	uintptr_t descriptor_size;
-	uint32_t descriptor_version;
-	uint8_t buf[kBufferSize];
-} EFI_MemoryMap;
-
-typedef enum MemoryType_ {
-	kReserved,
-	kLoaderCode,
-	kLoaderData,
-	kBootServicesCode,
-	kBootServicesData,
-	kRuntimeServicesCode,
-	kRuntimeServicesData,
-	kConventionalMemory,
-	kUnusableMemory,
-	kACPIReclaimMemory,
-	kACPIMemoryNVS,
-	kMemoryMappedIO,
-	kMemoryMappedIOPortSpace,
-	kPalCode,
-	kPersistentMemory,
-	kMaxMemoryType,
-} MemoryType__;
-
 typedef UINTN AllocateType;
-
-typedef uint32_t MemoryType;
-
-typedef struct EFI_MemoryDescriptor_ {
-	MemoryType type;
-	UINTN physical_start;
-	UINTN virtual_start;
-	UINTN number_of_pages;
-	UINTN attribute;
-} EFI_MemoryDescriptor;
 
 // Dummy decralations
 typedef void *EFI_Handle;

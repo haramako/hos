@@ -3,7 +3,7 @@
 #include "common.h"
 
 #include "apic.h"
-#include "guid.h"
+#include "efi/guid.h"
 
 #define kDescriptionHeaderSize 36
 

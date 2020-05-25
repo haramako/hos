@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include <stdint.h>
 
 typedef struct PACKED GUID_ {
 	uint32_t id1;

@@ -16,6 +16,8 @@ CFLAGS= \
 	-nostdlibinc \
 	-std=c11 \
 	$(CLANG_WARNINGS) \
+	-I. \
+	-I./include \
 	-I../third_party_root/include
 
 LDFLAGS= \
@@ -23,7 +25,7 @@ LDFLAGS= \
 	-subsystem:efi_application \
 	-entry:efi_main 
 
-BOOTX64.EFI : *.c *.h *.S Makefile
+BOOTX64.EFI : *.c *.h *.S include/*.h Makefile
 	$(LLVM_CC) $(CFLAGS) -O0 -c *.c *.S
 	$(LLVM_LLD_LINK) $(LDFLAGS) -out:BOOTX64.EFI *.o
 	cp BOOTX64.EFI ../dist/EFI/BOOT

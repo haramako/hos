@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "efi.h"
+#include "efi/memory_map.h"
 
 #define PHYSICAL_MEMORY_BLOCK_LEN 128
 

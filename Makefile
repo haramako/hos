@@ -51,4 +51,4 @@ clean :
 
 format :
 	cd src && clang-format -i *.c *.h && gtags
-	cd boot && clang-format -i *.c *.h && gtags
+	cd boot && clang-format -i *.c *.h include/*.h && gtags

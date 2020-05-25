@@ -1,6 +1,7 @@
-#include "efi.h"
+#include "efi/memory_map.h"
 
-#include "liumos.h"
+#include "boot_param.h"
+#include "common.h"
 
 int efi_memory_map_get_count(EFI_MemoryMap *mm) { return (int)(mm->bytes_used / mm->descriptor_size); }
 

@@ -1,6 +1,6 @@
 #include "interrupt.h"
 
-#include "liumos.h"
+#include "boot_param.h"
 
 #define INTERRUPT_LEN 0x100
 

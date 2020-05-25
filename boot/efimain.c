@@ -1,8 +1,8 @@
 //#include "asm.h"
+#include "boot_param.h"
 #include "common.h"
 #include "console.h"
 #include "efi.h"
-#include "liumos.h"
 
 #include "efi_util.h"
 #include "elf_loader.h"

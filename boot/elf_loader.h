@@ -2,7 +2,7 @@
 
 #include "common.h"
 
+#include "boot_param.h"
 #include "efi_util.h"
-#include "liumos.h"
 
 void elf_load_kernel(EFI_File *file, LiumOS *liumos);

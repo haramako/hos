@@ -7,7 +7,7 @@
 
 #define kDescriptionHeaderSize 36
 
-typedef struct PACKED {
+typedef struct PACKED ACPI_RSDT_ {
 	char signature[8];
 	uint8_t checksum;
 	uint8_t oem_id[6];

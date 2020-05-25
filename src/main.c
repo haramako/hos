@@ -1,6 +1,7 @@
-#include "liumos.h"
+#include "boot_param.h"
 
 #include "ahci.h"
+#include "apic.h"
 #include "asm.h"
 #include "gdt.h"
 #include "hpet.h"
@@ -51,7 +52,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	serial_init();
 	console_init(serial_get_port(1), g_liumos->vram_sheet);
-	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// Now you can use console_*().
 
@@ -71,7 +72,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 
 	// Now ready to interrupt (but interrupt flag is not set).
 
-	hpet_init((HPET_RegisterSpace *)g_liumos->acpi.hpet->base_address.address);
+	// hpet_init((HPET_RegisterSpace *)g_liumos->acpi.hpet->base_address.address);
 	timer_init();
 
 	init_process_and_scheduler_();

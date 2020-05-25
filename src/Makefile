@@ -61,6 +61,7 @@ CFLAGS= \
 	-mno-red-zone -mcmodel=large \
 	-nostdlib \
 	-D__ELF__ -D_LDBL_EQ_DBL \
+	-I../boot/include \
 	-I$(NEWLIB_INC_PATH) \
 	$(CLANG_WARNINGS) $(C_STD)
 

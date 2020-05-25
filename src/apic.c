@@ -1,7 +1,7 @@
 #include "apic.h"
 
 #include "asm.h"
-#include "liumos.h"
+#include "boot_param.h"
 
 LocalAPIC g_apic;
 
@@ -37,8 +37,6 @@ void apic_new(LocalAPIC *a) {
 	ktrace("  is mapped at 0x%016llx", a->kernel_virt_base_addr);
 	ktrace("  in kernel. mode: %s", (a->is_x2apic ? "x2APIC" : "xAPIC"));
 	ktrace("  id %d", a->id);
-
-	g_liumos->bsp_local_apic = a;
 }
 
 void apic_send_end_of_interrupt(LocalAPIC *a) {

@@ -2,7 +2,7 @@
 
 #include "acpi.h"
 #include "apic.h"
-#include "liumos.h"
+#include "boot_param.h"
 #include "physical_memory.h"
 
 static void smp_boot_();

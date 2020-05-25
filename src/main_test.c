@@ -14,11 +14,11 @@ static void test_malloc_() {
 	klog("a = %p\nb= %p\nc= %p", (void *)a, (void *)b, c);
 
 	klog("KernelEntry %016llx", hpet_init);
-	klog("g_liumos     %016llx", g_liumos);
+	klog("g_liumos     %016llx", g_boot_param);
 	klog("n   _       %016llx", &n);
 }
 
-static void test_memory_map_() { efi_memory_map_print(g_liumos->efi_memory_map); }
+static void test_memory_map_() { efi_memory_map_print(g_boot_param->efi_memory_map); }
 
 // Timer test
 static void timer_test_callback1_(TimerParam *p, void *data) { klog("call_periodic"); }
@@ -222,7 +222,7 @@ void smp_test_() { smp_init(); }
 // Sheet test.
 
 void sheet_test_() {
-	Sheet *sh = g_liumos->vram_sheet;
+	Sheet *sh = g_boot_param->vram_sheet;
 	sheet_draw_rect(sh, 10, 10, 10, 10, 0xffffff, true);
 	sheet_draw_character(sh, 'A', 200, 200, true);
 	// sheet_scroll(sh, 16, true);

@@ -227,7 +227,7 @@ typedef struct PACKED GAS {
 } GAS;
 static_assert(sizeof(GAS) == 12, "Invalid size.");
 
-typedef struct PACKED ACPI_HPET {
+typedef struct PACKED ACPI_HPET_ {
 	char signature[4];
 	uint32_t length;
 	uint8_t revision;

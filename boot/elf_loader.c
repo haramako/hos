@@ -67,7 +67,7 @@ void efi_memory_map_init2(EFI_MemoryMap *m) {
 	}
 }
 
-void elf_load_kernel(EFI_File *file, LiumOS *liumos) {
+void elf_load_kernel(EFI_File *file, BootParam *boot_param) {
 	Elf64_Phdr *code;
 	Elf64_Phdr *data;
 
@@ -88,14 +88,14 @@ void elf_load_kernel(EFI_File *file, LiumOS *liumos) {
 	efi_memory_map_init2(&g_efi_memory_map);
 	print("5\n");
 
-	liumos->efi_memory_map = &g_efi_memory_map;
+	boot_param->efi_memory_map = &g_efi_memory_map;
 
 	Status status;
 	do {
 		status = sys_->boot_services->ExitBootServices(g_image_handle, g_efi_memory_map.key);
 	} while (status != Status_kSuccess);
 
-	JumpToKernel(entry_point, liumos, 0);
+	JumpToKernel(entry_point, boot_param, 0);
 	for (;;)
 		;
 }

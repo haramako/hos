@@ -8,10 +8,9 @@
 #include "elf_loader.h"
 #include "util.h"
 
-LiumOS *liumos;
 EFI_File liumos_elf_file;
 
-LiumOS liumos_;
+BootParam boot_param_;
 
 static const GUID kACPITableGUID = {0x8868e871, 0xe4f1, 0x11d3, {0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81}};
 
@@ -34,20 +33,19 @@ void efi_memory_map_init(EFI_MemoryMap *m) {
 }
 
 void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
-	liumos = &liumos_;
 	g_image_handle = image_handle;
 	sys_ = system_table;
 	// efi_.Init(image_handle, system_table);
 	// liumos_.loader_info.efi = &efi_;
 
-	liumos->acpi.rsdt = GetConfigurationTableByUUID(&kACPITableGUID);
+	boot_param_.rsdt = GetConfigurationTableByUUID(&kACPITableGUID);
 	// assert(liumos->acpi.rsdt);
 
 	print("\nStart bootloader.\n");
 
-	print_hex("RSDT: ", (uint64_t)liumos->acpi.rsdt);
+	print_hex("RSDT: ", (uint64_t)boot_param_.rsdt);
 
-	liumos->efi_memory_map = &g_efi_memory_map;
+	boot_param_.efi_memory_map = &g_efi_memory_map;
 	efi_memory_map_init(&g_efi_memory_map);
 	EFI_Status status;
 
@@ -58,7 +56,7 @@ void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
 	print_hex("file buf: ", (uint64_t)liumos_elf_file.buf_pages);
 	print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
 
-	elf_load_kernel(&liumos_elf_file, &liumos_);
+	elf_load_kernel(&liumos_elf_file, &boot_param_);
 
 	do {
 		status = sys_->boot_services->ExitBootServices(image_handle, g_efi_memory_map.key);

@@ -3,12 +3,13 @@
 #include "acpi.h"
 #include "apic.h"
 #include "boot_param.h"
+#include "global.h"
 #include "physical_memory.h"
 
 static void smp_boot_();
 
 void *find_rsdt_(const char *signature) {
-	ACPI_XSDT *xsdt = g_liumos->acpi.rsdt->xsdt;
+	ACPI_XSDT *xsdt = g_boot_param->rsdt->xsdt;
 	const int rsdt_num = (xsdt->length - kDescriptionHeaderSize) >> 3;
 	for (int i = 0; i < rsdt_num; i++) {
 		if (strncmp(xsdt->entry[i]->signature, signature, 4) == 0) {
@@ -76,7 +77,7 @@ void smp_init() {
 typedef struct {
 	void (*entry)();
 	void *stack;
-} BootParam;
+} SMPBootParam;
 
 static volatile int boot_ack_;
 
@@ -104,7 +105,7 @@ void boot_processor_(int processor_id, void *stack) {
 	// Send SIPI
 	boot_ack_ = 0;
 
-	BootParam *boot_param = (BootParam *)0x8000;
+	SMPBootParam *boot_param = (SMPBootParam *)0x8000;
 	boot_param->entry = smp_entry;
 	boot_param->stack = stack;
 	//*entry_addr = 0x4100000000000043;

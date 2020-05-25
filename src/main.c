@@ -1,5 +1,6 @@
 #include "boot_param.h"
 
+#include "acpi.h"
 #include "ahci.h"
 #include "apic.h"
 #include "asm.h"
@@ -19,9 +20,9 @@
 #include "syscall.h"
 #include "timer.h"
 
-#include "main_test.c" // Include test source.
+BootParam *g_boot_param;
 
-LiumOS *g_liumos;
+#include "main_test.c" // Include test source.
 
 static void pci_test() {
 	pci_init();
@@ -45,13 +46,13 @@ static void init_process_and_scheduler_() {
 	hpet_set_timer_ns(1, 100 * MSEC, HPET_TC_ENABLE | HPET_TC_USE_PERIODIC_MODE);
 }
 
-void kernel_entry(LiumOS *liumos_passed) {
-	g_liumos = liumos_passed;
+void kernel_entry(BootParam *boot_param_passed) {
+	g_boot_param = boot_param_passed;
 
 	Disable8259PIC();
 
 	serial_init();
-	console_init(serial_get_port(1), g_liumos->vram_sheet);
+	console_init(serial_get_port(1), g_boot_param->vram_sheet);
 	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// Now you can use console_*().
@@ -61,7 +62,7 @@ void kernel_entry(LiumOS *liumos_passed) {
 	kinfo("Kernel Start");
 
 	syscall_init();
-	physical_memory_init(g_liumos->efi_memory_map);
+	physical_memory_init(g_boot_param->efi_memory_map);
 	page_init();
 	mem_init();
 

@@ -7,8 +7,6 @@
 
 Handle g_image_handle;
 SystemTable *sys_;
-EFI_MemoryMap g_efi_memory_map;
-GraphicsOutputProtocol *g_efi_graphics_output_protocol;
 
 static const GUID kFileInfoGUID = {0x09576e92, 0x6d3f, 0x11d2, {0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b}};
 
@@ -45,16 +43,10 @@ FileProtocol *efi_open_file(FileProtocol *dir, char *path) {
 	FileProtocol *file = NULL;
 	Status status = dir->Open(dir, &file, str2wstr(wpath, path, kFileNameSize), kRead, 0);
 	if (status != Status_kSuccess || !file) {
-		print("filename: ");
-#if 0
-		while (path && *path) {
-			PutChar(*path);
-			path++;
-		}
-#endif
-		if (status != Status_kSuccess) {
-			panic("Failed to open file.");
-		}
+		print("Failed to open file ");
+		print(path);
+		print("\n");
+		panic("");
 	}
 	return file;
 }
@@ -82,8 +74,8 @@ FileProtocol *efi_file_root() {
 	LoadedImageProtocol *loaded_image;
 	status = efi_handle_protocol(g_image_handle, &kLoadedImageProtocolGUID, (void **)&loaded_image);
 	check_status(status, "Can't get LoadedImageProtocol.");
-	print_hex("image ", (uint64_t)loaded_image->image_base);
-	print_hex("image ", (uint64_t)efi_file_root);
+	// print_hex("image ", (uint64_t)loaded_image->image_base);
+	// print_hex("image ", (uint64_t)efi_file_root);
 
 	SimpleFileSystemProtocol *simple_fs;
 	status = sys_->boot_services->HandleProtocol(loaded_image->device_handle, &kSimpleFileSystemProtocolGUID,

@@ -43,7 +43,7 @@ void mem_init() {
 	kcheck0(g_kernel_mm);
 
 	mm_map(g_kernel_mm, (void *)0xffff800000000000, num, MM_ATTR_USER);
-	mm_print(g_kernel_mm);
+	// mm_print(g_kernel_mm);
 }
 
 uintptr_t mem_sbrk(int diff) {

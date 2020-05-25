@@ -7,7 +7,6 @@
 
 extern Handle g_image_handle;
 extern SystemTable *sys_;
-extern EFI_MemoryMap g_efi_memory_map;
 
 typedef struct {
 	uint64_t file_size;

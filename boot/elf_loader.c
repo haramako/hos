@@ -57,17 +57,7 @@ static const Elf64_Ehdr *parse_elf_(EFI_File *file, Elf64_Phdr **out_code, Elf64
 	return ehdr;
 }
 
-void efi_memory_map_init2(EFI_MemoryMap *m) {
-	m->bytes_used = sizeof(m->buf);
-	Status status =
-		sys_->boot_services->GetMemoryMap(&m->bytes_used, m->buf, &m->key, &m->descriptor_size, &m->descriptor_version);
-	if (status != Status_kSuccess) {
-		print_hex("Failed to get memory map, status = ", status);
-		panic("");
-	}
-}
-
-void elf_load_kernel(EFI_File *file, BootParam *boot_param) {
+void elf_load_kernel(EFI_File *file, ELFImage *out_image) {
 	Elf64_Phdr *code;
 	Elf64_Phdr *data;
 
@@ -76,26 +66,15 @@ void elf_load_kernel(EFI_File *file, BootParam *boot_param) {
 		panic("Can't load ELF.");
 	}
 
-	uint8_t *code_buf = efi_allocate_pages_addr(code->p_vaddr, byte_size_to_page_size(code->p_filesz));
+	uint8_t *code_buf = efi_allocate_pages_addr(code->p_vaddr, byte_size_to_page_size(code->p_memsz));
 	uint8_t *data_buf = efi_allocate_pages_addr(data->p_vaddr, byte_size_to_page_size(data->p_memsz));
 
 	memcpy(code_buf, (uint8_t *)file->buf_pages + code->p_offset, code->p_filesz);
 	memcpy(data_buf, (uint8_t *)file->buf_pages + data->p_offset, data->p_filesz);
 
-	void *entry_point = (void *)ehdr->e_entry;
-	print_hex("Entry address: ", (uint64_t)entry_point);
-
-	efi_memory_map_init2(&g_efi_memory_map);
-	print("5\n");
-
-	boot_param->efi_memory_map = &g_efi_memory_map;
-
-	Status status;
-	do {
-		status = sys_->boot_services->ExitBootServices(g_image_handle, g_efi_memory_map.key);
-	} while (status != Status_kSuccess);
-
-	asm_jump_to_kernel(entry_point, boot_param, 0);
-	for (;;)
-		;
+	out_image->code = code_buf;
+	out_image->data = data_buf;
+	out_image->code_size = code->p_memsz;
+	out_image->data_size = data->p_memsz;
+	out_image->entry_point = (void *)ehdr->e_entry;
 }

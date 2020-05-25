@@ -1,8 +1,7 @@
+#include "asm.h"
 #include "boot_param.h"
-#include "common.h"
 #include "console.h"
 #include "efi.h"
-
 #include "efi_util.h"
 #include "elf_loader.h"
 #include "util.h"
@@ -10,6 +9,7 @@
 EFI_File liumos_elf_file;
 
 BootParam boot_param_;
+EFI_MemoryMap efi_memory_map_;
 
 static const GUID kACPITableGUID = {0x8868e871, 0xe4f1, 0x11d3, {0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81}};
 
@@ -35,6 +35,8 @@ void efi_memory_map_init(EFI_MemoryMap *m) {
 }
 
 void efi_main(Handle image_handle, SystemTable *system_table) {
+	Status status;
+
 	g_image_handle = image_handle;
 	sys_ = system_table;
 
@@ -42,15 +44,11 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 
 	print("\nStart bootloader.\n");
 
-	print_hex("RSDT: ", (uint64_t)boot_param_.rsdt);
-
-	boot_param_.efi_memory_map = &g_efi_memory_map;
-	efi_memory_map_init(&g_efi_memory_map);
-	Status status;
+	// print_hex("RSDT: ", (uint64_t)boot_param_.rsdt);
 
 	// Get graphics info.
 	GraphicsOutputProtocol *graphics = (GraphicsOutputProtocol *)efi_locate_protocol(&kGraphicsOutputProtocolGUID);
-	print_hex("Graphics: ", (uint64_t)graphics);
+	// print_hex("Graphics: ", (uint64_t)graphics);
 	boot_param_.graphics.vram = (void *)graphics->mode->frame_buffer_base;
 	boot_param_.graphics.width = graphics->mode->info->horizontal_resolution;
 	boot_param_.graphics.height = graphics->mode->info->vertical_resolution;
@@ -59,15 +57,22 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 	FileProtocol *root = efi_file_root();
 	efi_file_load(&liumos_elf_file, root, "LIUMOS.ELF");
 
-	print_hex("file buf: ", (uint64_t)liumos_elf_file.buf_pages);
+	// print_hex("Kernel image: ", (uint64_t)liumos_elf_file.buf_pages);
 	// print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
 
-	elf_load_kernel(&liumos_elf_file, &boot_param_);
+	ELFImage elf_image;
+	elf_load_kernel(&liumos_elf_file, &elf_image);
+
+	// boot_param_->elf_image = elf_image;
+
+	efi_memory_map_init(&efi_memory_map_);
+	boot_param_.efi_memory_map = &efi_memory_map_;
 
 	do {
-		status = sys_->boot_services->ExitBootServices(image_handle, g_efi_memory_map.key);
+		status = sys_->boot_services->ExitBootServices(g_image_handle, efi_memory_map_.key);
 	} while (status != Status_kSuccess);
 
-	for (;;)
-		;
+	asm_jump_to_kernel(elf_image.entry_point, &boot_param_, 0);
+
+	panic("Must not return from kernel.");
 }

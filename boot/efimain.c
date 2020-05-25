@@ -1,4 +1,3 @@
-//#include "asm.h"
 #include "boot_param.h"
 #include "common.h"
 #include "console.h"
@@ -24,7 +23,7 @@ void *GetConfigurationTableByUUID(const GUID *guid) {
 
 void efi_memory_map_init(EFI_MemoryMap *m) {
 	m->bytes_used = sizeof(m->buf);
-	EFI_Status status =
+	Status status =
 		sys_->boot_services->GetMemoryMap(&m->bytes_used, m->buf, &m->key, &m->descriptor_size, &m->descriptor_version);
 	if (status != Status_kSuccess) {
 		print_hex("Failed to get memory map, status = ", status);
@@ -32,14 +31,11 @@ void efi_memory_map_init(EFI_MemoryMap *m) {
 	}
 }
 
-void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
+void efi_main(Handle image_handle, SystemTable *system_table) {
 	g_image_handle = image_handle;
 	sys_ = system_table;
-	// efi_.Init(image_handle, system_table);
-	// liumos_.loader_info.efi = &efi_;
 
 	boot_param_.rsdt = GetConfigurationTableByUUID(&kACPITableGUID);
-	// assert(liumos->acpi.rsdt);
 
 	print("\nStart bootloader.\n");
 
@@ -47,11 +43,10 @@ void efi_main(EFI_Handle image_handle, EFI_SystemTable *system_table) {
 
 	boot_param_.efi_memory_map = &g_efi_memory_map;
 	efi_memory_map_init(&g_efi_memory_map);
-	EFI_Status status;
+	Status status;
 
 	FileProtocol *root = efi_file_root();
 	efi_file_load(&liumos_elf_file, root, "LIUMOS.ELF");
-	// liumos_.loader_info.files.liumos_elf = &liumos_elf_file;
 
 	print_hex("file buf: ", (uint64_t)liumos_elf_file.buf_pages);
 	print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));

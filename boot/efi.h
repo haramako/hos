@@ -7,14 +7,8 @@
 #define UINTN uintptr_t
 static_assert(sizeof(UINTN) == 8, "Invalid size.");
 
-#define kBufferSize 0x8000
-
-typedef UINTN EFI_Status;
-
 typedef UINTN AllocateType;
 
-// Dummy decralations
-typedef void *EFI_Handle;
 typedef void *Handle;
 typedef void GraphicsOutputProtocol;
 typedef void SimpleTextInputProtocol;
@@ -24,67 +18,35 @@ typedef UINTN Status;
 #define Status_kBufferTooSmall 0x8000000000000005
 #define Status_kNotFound 0x800000000000000E
 
-typedef struct EFI_TableHeader_ {
+typedef struct TableHeader_ {
 	uint64_t signature;
 	uint32_t revision;
 	uint32_t header_size;
 	uint32_t crc32;
 	uint32_t reserved;
-} EFI_TableHeader;
-static_assert(sizeof(EFI_TableHeader) == 24, "Invalid size.");
+} TableHeader;
+static_assert(sizeof(TableHeader) == 24, "Invalid size.");
 
 typedef struct BootServices {
-	EFI_TableHeader header;
-	Status (*RaiseTPL)();
-	Status (*RestoreTPL)();
+	TableHeader header;
+	uint64_t _buf_0[2];
 	Status (*AllocatePages)(AllocateType, MemoryType, UINTN pages, void **mem);
 	Status (*FreePages)();
 	Status (*GetMemoryMap)(UINTN *memory_map_size, uint8_t *, UINTN *map_key, UINTN *descriptor_size,
 						   uint32_t *descriptor_version);
-	uint64_t (*AllocatePool)(MemoryType, uint64_t, void **);
-	uint64_t (*FreePool)(void *Buffer);
-	uint64_t (*CreateEvent)(unsigned int Type, uint64_t NotifyTpl, void (*NotifyFunction)(void *Event, void *Context),
-							void *NotifyContext, void *Event);
-	// uint64_t (*SetTimer)(void* Event, TimerDelay, uint64_t TriggerTime);
-	void *SetTimer;
-	uint64_t (*WaitForEvent)(uint64_t NumberOfEvents, void **Event, uint64_t *Index);
-	Status (*SignalEvent)();
-	Status (*CloseEvent)();
-	Status (*CheckEvent)();
-	// Protocol Handler Services
-	uint64_t _buf5[3];
+	uint64_t _buf5_0[11];
 	Status (*HandleProtocol)(Handle, const GUID *, void **);
 	uint64_t _buf5_1[2];
 	Status (*LocateHandle)();
-	uint64_t _buf5_2[2];
-// Image Services
-#if 0
-	uint64_t (*LoadImage)(unsigned char BootPolicy,
-                          void* ParentImageHandle,
-                          DevicePathProtocol*,
-                          void* SourceBuffer,
-                          uint64_t SourceSize,
-                          void** ImageHandle);
-#else
-	void *LoadImage;
-#endif
-	uint64_t (*StartImage)(void *ImageHandle, uint64_t *ExitDataSize, unsigned short **ExitData);
-	uint64_t _buf6[2];
+	uint64_t _buf5_2[6];
 	Status (*ExitBootServices)(void *image_handle, UINTN map_key);
-	uint64_t _buf7[2];
-	uint64_t (*SetWatchdogTimer)(uint64_t Timeout, uint64_t WatchdogCode, uint64_t DataSize,
-								 unsigned short *WatchdogData);
-	uint64_t _buf8[2];
+	uint64_t _buf7[5];
 	uint64_t (*OpenProtocol)(void *Handle, GUID *Protocol, void **Interface, void *AgentHandle, void *ControllerHandle,
 							 unsigned int Attributes);
 	uint64_t _buf9[2];
-	uint64_t _buf10[2];
+	uint64_t _buf10[9];
 	uint64_t (*LocateProtocol)(const GUID *Protocol, void *Registration, void **Interface);
-	uint64_t _buf10_2[2];
-	uint64_t _buf11;
-	void (*CopyMem)(void *Destination, void *Source, uint64_t Length);
-	void (*SetMem)(void *Buffer, uint64_t Size, unsigned char Value);
-	uint64_t _buf12;
+	uint64_t _buf10_2[6];
 } BootServices;
 
 typedef struct ConfigurationTable_ {
@@ -113,33 +75,31 @@ typedef struct SimpleTextOutputProtocol {
 
 typedef enum { EfiResetCold, EfiResetWarm, EfiResetShutdown, EfiResetPlatformSpecific } ResetType;
 
-typedef struct EFI_RuntimeServices_ {
+typedef struct RuntimeServices_ {
 	char _buf_rs1[24];
 	uint64_t _buf_rs2[4];
 
 	int (*set_virtual_address_map)(UINTN memory_map_size, UINTN descriptor_size, UINTN descriptor_version,
 								   void *virtual_map);
-	void (*convert_pointer)(); // dummy
-	uint64_t _buf_rs4[3];
-	uint64_t _buf_rs5;
+	uint64_t _buf_rs4[5];
 	void (*reset_system)(ResetType, uint64_t reset_status, uint64_t data_size, void *);
-} EFI_RuntimeServices;
+} RuntimeServices;
 
-typedef struct EFI_SystemTable_ {
-	EFI_TableHeader header;
+typedef struct SystemTable_ {
+	TableHeader header;
 	wchar_t *firmware_vendor;
 	uint32_t firmware_revision;
-	EFI_Handle console_in_handle;
+	Handle console_in_handle;
 	SimpleTextInputProtocol *con_in;
-	EFI_Handle console_out_handle;
+	Handle console_out_handle;
 	SimpleTextOutputProtocol *con_out;
-	EFI_Handle standard_error_handle;
+	Handle standard_error_handle;
 	SimpleTextOutputProtocol *std_err;
-	EFI_RuntimeServices *runtime_services;
+	RuntimeServices *runtime_services;
 	BootServices *boot_services;
 	UINTN number_of_table_entries;
 	ConfigurationTable *configuration_table;
-} EFI_SystemTable;
+} SystemTable;
 
 typedef uint64_t FileProtocolModes;
 #define kRead 1ULL
@@ -193,7 +153,7 @@ typedef struct SimpleFileSystemProtocol {
 typedef struct LoadedImageProtocol {
 	uint32_t revision;
 	Handle parent_handle;
-	EFI_SystemTable *system_table;
+	SystemTable *system_table;
 	Handle device_handle;
 	struct _DEVICE_PATH_PROTOCOL *file_path;
 	void *reserved;
@@ -211,26 +171,3 @@ enum {
 	kMaxAddress,
 	kAddress,
 };
-
-#define EFI_MEMORY_UC 0x0000000000000001
-#define EFI_MEMORY_WC 0x0000000000000002
-#define EFI_MEMORY_WT 0x0000000000000004
-#define EFI_MEMORY_WB 0x0000000000000008
-#define EFI_MEMORY_UCE 0x0000000000000010
-#define EFI_MEMORY_WP 0x0000000000001000
-#define EFI_MEMORY_RP 0x0000000000002000
-#define EFI_MEMORY_XP 0x0000000000004000
-#define EFI_MEMORY_NV 0x0000000000008000
-#define EFI_MEMORY_MORE_RELIABLE 0x0000000000010000
-#define EFI_MEMORY_RO 0x0000000000020000
-#define EFI_MEMORY_SP 0x0000000000040000
-#define EFI_MEMORY_CPU_CRYPTO 0x0000000000080000
-#define EFI_MEMORY_RUNTIME 0x8000000000000000
-
-typedef struct EFI_ {
-	EFI_Handle image_handle;
-	EFI_SystemTable *system_table;
-	GraphicsOutputProtocol *graphics_output_protocol;
-	SimpleFileSystemProtocol *simple_fs;
-	FileProtocol *root_file;
-} EFI;

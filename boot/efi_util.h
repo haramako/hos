@@ -5,9 +5,8 @@
 #include "boot_param.h"
 #include "efi.h"
 
-extern EFI efi_;
-extern EFI_Handle g_image_handle;
-extern EFI_SystemTable *sys_;
+extern Handle g_image_handle;
+extern SystemTable *sys_;
 extern EFI_MemoryMap g_efi_memory_map;
 
 typedef struct {

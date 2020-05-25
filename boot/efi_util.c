@@ -5,9 +5,8 @@
 #include "page.h"
 #include "util.h"
 
-EFI efi_;
-EFI_Handle g_image_handle;
-EFI_SystemTable *sys_;
+Handle g_image_handle;
+SystemTable *sys_;
 EFI_MemoryMap g_efi_memory_map;
 
 static const GUID kFileInfoGUID = {0x09576e92, 0x6d3f, 0x11d2, {0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b}};
@@ -61,7 +60,6 @@ void *efi_allocate_pages(size_t pages) {
 
 void *efi_allocate_pages_addr(uintptr_t addr, size_t pages) {
 	uintptr_t allocated = (uintptr_t)efi_allocate_pages(pages);
-	// print_hex("Allocate pages ", pages);
 	page_map_addr(allocated, addr, (int)pages);
 	return (void *)addr;
 }
@@ -103,6 +101,5 @@ void efi_file_load(EFI_File *f, FileProtocol *dir, const char *file_name) {
 	Status status = file->Read(file, &buf_size, f->buf_pages);
 	check_status(status, "Read failed.");
 
-	// assert(buf_size == info.file_size);
 	f->file_size = info.file_size;
 }

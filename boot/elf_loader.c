@@ -59,7 +59,7 @@ static const Elf64_Ehdr *parse_elf_(EFI_File *file, Elf64_Phdr **out_code, Elf64
 
 void efi_memory_map_init2(EFI_MemoryMap *m) {
 	m->bytes_used = sizeof(m->buf);
-	EFI_Status status =
+	Status status =
 		sys_->boot_services->GetMemoryMap(&m->bytes_used, m->buf, &m->key, &m->descriptor_size, &m->descriptor_version);
 	if (status != Status_kSuccess) {
 		print_hex("Failed to get memory map, status = ", status);
@@ -95,7 +95,7 @@ void elf_load_kernel(EFI_File *file, BootParam *boot_param) {
 		status = sys_->boot_services->ExitBootServices(g_image_handle, g_efi_memory_map.key);
 	} while (status != Status_kSuccess);
 
-	JumpToKernel(entry_point, boot_param, 0);
+	asm_jump_to_kernel(entry_point, boot_param, 0);
 	for (;;)
 		;
 }

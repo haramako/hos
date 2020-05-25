@@ -9,7 +9,7 @@ static uint64_t pme_addr(PageMapEntry pme) { return canonical_addr(pme.raw & 0x0
 static void pme_set_addr(PageMapEntry *pme, uint64_t paddr) {
 	pme->raw = (pme->raw & 0xFFF) | (paddr & 0x0000FFFFFFFFF000);
 }
-// static uint64_t pme_flag(PageMapEntry p) { return p.raw & ((1LLU << 12) - 1); }
+
 static bool pme_is_leaf(PageMapEntry pme, int level) {
 	switch (level) {
 	case 1:
@@ -26,8 +26,6 @@ PageMapEntry *page_find_entry(PageMapEntry *pml, int level, uint64_t vaddr, Page
 	int shift = (12 + (level - 1) * 9);
 	uint64_t entry_num = (vaddr >> shift) & (PAGE_MAP_TABLE_LEN - 1);
 	PageMapEntry *pme = &pml[entry_num];
-	// print_hex("find ", level);
-	// klog("find_entry lv=%d, vaddr=%p, entry_num=%d, pme=%p(%p)", level, vaddr, entry_num, pme, pme->raw);
 
 	if (!pme->x.present) {
 		if (callback) {
@@ -46,20 +44,15 @@ PageMapEntry *page_find_entry(PageMapEntry *pml, int level, uint64_t vaddr, Page
 	}
 }
 
-PageMapEntry *page_current_pml4() { return (PageMapEntry *)ReadCR3(); }
+PageMapEntry *page_current_pml4() { return (PageMapEntry *)asm_read_cr3(); }
 
 static bool map_callback_(int level, PageMapEntry *pme, void *data) {
 	uintptr_t page = (uintptr_t)efi_allocate_pages(1);
 
-	// print_hex("Map level ", level);
-	// print_hex("Map vaddr ", (uint64_t)data);
-
 	memset((void *)page, 0, PAGE_SIZE);
-	// pme->raw = 0;
 	pme_set_addr(pme, page);
 	pme->x.present = 1;
 	pme->x.is_read = 1;
-	// klog("alloc_page lv=%d, pme=%p(%p), addr=%p", level, pme, pme->raw, data);
 	return true;
 }
 
@@ -68,13 +61,10 @@ void page_map_addr(uintptr_t paddr, uintptr_t vaddr, int num_page) {
 	PageMapEntry *new_pml4 = (PageMapEntry *)efi_allocate_pages(1);
 
 	memcpy(new_pml4, pml4, 4096);
-	// print_hex("pml4 ", (uintptr_t)pml4);
-	// print_hex("new_pml4 ", (uintptr_t)new_pml4);
-	WriteCR3((uint64_t)new_pml4);
+	asm_write_cr3((uint64_t)new_pml4);
 
 	for (int i = 0; i < num_page; i++) {
 		uintptr_t target_addr = vaddr + PAGE_SIZE * i;
-		// print_hex("allocate ", i);
 		page_find_entry(new_pml4, 4, target_addr, map_callback_, (void *)target_addr);
 	}
 }

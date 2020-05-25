@@ -74,7 +74,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 
 	// Now ready to interrupt (but interrupt flag is not set).
 
-	// hpet_init((HPET_RegisterSpace *)g_liumos->acpi.hpet->base_address.address);
+	hpet_init();
 	timer_init();
 
 	init_process_and_scheduler_();
@@ -94,7 +94,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 	// paging_test_();
 
 	// fat_test_();
-	// process_test_()
+	// process_test_();
 	// process_test_();
 	// test_malloc_();
 	// pci_test();

@@ -1,23 +1,12 @@
 #include "smp.h"
 
 #include "acpi.h"
+#include "acpi_util.h"
 #include "apic.h"
 #include "boot_param.h"
-#include "global.h"
 #include "physical_memory.h"
 
 static void smp_boot_();
-
-void *find_rsdt_(const char *signature) {
-	ACPI_XSDT *xsdt = g_boot_param->rsdt->xsdt;
-	const int rsdt_num = (xsdt->length - kDescriptionHeaderSize) >> 3;
-	for (int i = 0; i < rsdt_num; i++) {
-		if (strncmp(xsdt->entry[i]->signature, signature, 4) == 0) {
-			return (void *)xsdt->entry[i];
-		}
-	}
-	return NULL;
-}
 
 typedef struct {
 	uint8_t id;
@@ -35,7 +24,7 @@ typedef struct {
 void smp_init() {
 	MPInfo *mp = talloc(MPInfo);
 
-	ACPI_MADT *madt = find_rsdt_("APIC");
+	ACPI_MADT *madt = acpi_find_rsdt("APIC");
 	kcheck0(madt);
 
 	uint8_t *entry = madt->entries;

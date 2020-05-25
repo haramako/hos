@@ -1,5 +1,7 @@
 #include "hpet.h"
 
+#include "acpi.h"
+#include "acpi_util.h"
 #include "apic.h"
 #include "asm.h"
 #include "interrupt.h"
@@ -14,7 +16,10 @@ static uint8_t get_num_of_timers_(uint64_t cap) { return (cap >> 8) & 0b11111; }
 
 HPET g_hpet;
 
-void hpet_init(HPET_RegisterSpace *registers) {
+void hpet_init() {
+	ACPI_HPET *hpet = acpi_find_rsdt("HPET");
+	HPET_RegisterSpace *registers = (HPET_RegisterSpace *)hpet->base_address.address;
+
 	g_hpet.registers = registers;
 	g_hpet.femtosecond_per_count = registers->general_capabilities_and_id >> 32;
 	uint64_t general_config = registers->general_configuration;

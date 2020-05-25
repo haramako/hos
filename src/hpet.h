@@ -36,7 +36,7 @@ typedef struct HPET_ {
 
 extern HPET g_hpet;
 
-void hpet_init(HPET_RegisterSpace *registers);
+void hpet_init();
 void hpet_set_timer_ms(int timer_index, uint64_t milliseconds, HPET_TimerConfig flags);
 void hpet_set_timer_ns(int timer_index, uint64_t nanoseconds, HPET_TimerConfig flags);
 uint64_t hpet_read_main_counter_value();

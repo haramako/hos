@@ -3,6 +3,7 @@ default: LIUMOS.ELF
 include ../common.mk
 
 SRCS= \
+	acpi_util.c \
 	ahci.c \
 	apic.c \
 	asm.S \

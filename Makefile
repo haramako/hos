@@ -21,12 +21,14 @@ QEMU_ARGS=\
 	-serial stdio \
 	-device qemu-xhci -device usb-mouse -device usb-kbd
 
+BOOTFS = dist/BOOTFS.IMG
+
 src/LIUMOS.ELF : .FORCE
 	make -C src LIUMOS.ELF
 
 .FORCE :
 
-files : src/LIUMOS.ELF .FORCE
+files : src/LIUMOS.ELF bootfs .FORCE
 	-rm -rf mnt
 	mkdir -p mnt/
 	cp -a dist/* mnt
@@ -35,9 +37,11 @@ files : src/LIUMOS.ELF .FORCE
 .PHONY: bootfs
 bootfs:
 	make -C app/hello
-	make -C fat_test
-	objcopy -I binary -O elf64-x86-64 -B i386:x86-64 fat_test/test.fat src/bootfs.o
-
+	mkdir -p fd
+	cp app/hello/hello.elf fd
+	rm -f $(BOOTFS)
+	mformat -t 256 -h 1 -s 64 -C -i $(BOOTFS) ::
+	mcopy -i $(BOOTFS) fd/* ::
 
 run : # files
 	$(QEMU) $(QEMU_ARGS)

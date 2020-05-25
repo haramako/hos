@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #define kBufferSize 0x8000
 
@@ -23,4 +24,6 @@ typedef struct {
 	struct ACPI_RSDT_ *rsdt;
 	EFI_MemoryMap *efi_memory_map;
 	BootParam_Graphics graphics;
+	uint8_t *bootfs_buf;
+	size_t bootfs_size;
 } BootParam;

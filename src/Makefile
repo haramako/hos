@@ -79,12 +79,8 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
-.PHONY: bootfs.o
-bootfs.o:
-	make -C .. bootfs
-
-LIUMOS.ELF : $(OBJS) kernel.ld Makefile bootfs.o
-	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS) bootfs.o
+LIUMOS.ELF : $(OBJS) kernel.ld Makefile
+	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS)
 
 run:
 	make -C .. run

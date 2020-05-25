@@ -36,9 +36,6 @@ static void timer_test_() {
 }
 
 // FAT test
-extern uint8_t _binary_fat_test_test_fat_start[];
-extern uint8_t _binary_fat_test_test_fat_size[];
-
 typedef struct {
 	uint8_t *fs_bin;
 	uint64_t fs_size;
@@ -57,8 +54,8 @@ static struct fat fs;
 
 static void bootfs_init() {
 	FAT_UserData *data = malloc(sizeof(FAT_UserData));
-	data->fs_bin = _binary_fat_test_test_fat_start;
-	data->fs_size = (uint64_t)_binary_fat_test_test_fat_size;
+	data->fs_bin = g_boot_param->bootfs_buf;
+	data->fs_size = g_boot_param->bootfs_size;
 
 	error_t err = fat_probe(&fs, blk_read_, blk_write_, data);
 	assert(err == OK);

@@ -6,7 +6,8 @@
 #include "elf_loader.h"
 #include "util.h"
 
-EFI_File liumos_elf_file;
+EFI_File kernel_elf_file;
+EFI_File bootfs_file;
 
 BootParam boot_param_;
 EFI_MemoryMap efi_memory_map_;
@@ -54,16 +55,21 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 	boot_param_.graphics.height = graphics->mode->info->vertical_resolution;
 	boot_param_.graphics.pixels_per_scan_line = graphics->mode->info->pixels_per_scan_line;
 
+	// Load kernel elf.
 	FileProtocol *root = efi_file_root();
-	efi_file_load(&liumos_elf_file, root, "LIUMOS.ELF");
+	efi_file_load(&kernel_elf_file, root, "LIUMOS.ELF");
 
 	// print_hex("Kernel image: ", (uint64_t)liumos_elf_file.buf_pages);
 	// print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
 
 	ELFImage elf_image;
-	elf_load_kernel(&liumos_elf_file, &elf_image);
+	elf_load_kernel(&kernel_elf_file, &elf_image);
 
-	// boot_param_->elf_image = elf_image;
+	// Load bootfs.
+	efi_file_load(&bootfs_file, root, "BOOTFS.IMG");
+
+	boot_param_.bootfs_buf = bootfs_file.buf;
+	boot_param_.bootfs_size = bootfs_file.file_size;
 
 	efi_memory_map_init(&efi_memory_map_);
 	boot_param_.efi_memory_map = &efi_memory_map_;

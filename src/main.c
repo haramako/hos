@@ -58,7 +58,6 @@ void kernel_entry(BootParam *boot_param_passed) {
 
 	// Now you can use console_*().
 
-	console_write("\n");
 	kinfo("=======================");
 	kinfo("Kernel Start");
 
@@ -84,7 +83,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 	// =========================
 
 	kinfo("Kernel Ready!");
-	kinfo("Time %lld", hpet_read_main_counter_value());
+	// kinfo("Time %lld", hpet_read_main_counter_value());
 
 	bootfs_init();
 
@@ -102,7 +101,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 	// smp_test_();
 	// sheet_test_();
 
-	klog("Finish.");
+	kinfo("Finish.");
 	StoreIntFlag(); // Start interrupt.
 	Die();
 }

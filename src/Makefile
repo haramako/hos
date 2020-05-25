@@ -1,4 +1,4 @@
-default: LIUMOS.ELF
+default: KERNEL.ELF
 
 include ../common.mk
 
@@ -79,8 +79,8 @@ LDFLAGS= \
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
-LIUMOS.ELF : $(OBJS) kernel.ld Makefile
-	$(LLVM_LD_LLD) $(LDFLAGS) -o LIUMOS.ELF -e kernel_entry -T kernel.ld $(OBJS)
+KERNEL.ELF : $(OBJS) kernel.ld Makefile
+	$(LLVM_LD_LLD) $(LDFLAGS) -o KERNEL.ELF -e kernel_entry -T kernel.ld $(OBJS)
 
 run:
 	make -C .. run

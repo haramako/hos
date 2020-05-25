@@ -10,7 +10,6 @@ static_assert(sizeof(UINTN) == 8, "Invalid size.");
 typedef UINTN AllocateType;
 
 typedef void *Handle;
-typedef void SimpleTextInputProtocol;
 
 typedef UINTN Status;
 #define Status_kSuccess 0x0
@@ -26,7 +25,7 @@ typedef struct TableHeader_ {
 } TableHeader;
 static_assert(sizeof(TableHeader) == 24, "Invalid size.");
 
-typedef struct BootServices {
+typedef struct {
 	TableHeader header;
 	uint64_t _buf_0[2];
 	Status (*AllocatePages)(AllocateType, MemoryType, UINTN pages, void **mem);
@@ -35,20 +34,14 @@ typedef struct BootServices {
 						   uint32_t *descriptor_version);
 	uint64_t _buf5_0[11];
 	Status (*HandleProtocol)(Handle, const GUID *, void **);
-	uint64_t _buf5_1[2];
-	Status (*LocateHandle)();
-	uint64_t _buf5_2[6];
+	uint64_t _buf5_1[9];
 	Status (*ExitBootServices)(void *image_handle, UINTN map_key);
-	uint64_t _buf7[5];
-	uint64_t (*OpenProtocol)(void *Handle, GUID *Protocol, void **Interface, void *AgentHandle, void *ControllerHandle,
-							 unsigned int Attributes);
-	uint64_t _buf9[2];
-	uint64_t _buf10[2];
+	uint64_t _buf7[10];
 	uint64_t (*LocateProtocol)(const GUID *Protocol, void *Registration, void **Interface);
 	uint64_t _buf10_2[6];
 } BootServices;
 
-typedef struct ConfigurationTable_ {
+typedef struct {
 	GUID vendor_guid;
 	void *vendor_table;
 } ConfigurationTable;
@@ -56,45 +49,22 @@ typedef struct ConfigurationTable_ {
 typedef struct SimpleTextOutputProtocol {
 	uint64_t _buf;
 	uint64_t (*output_string)(struct SimpleTextOutputProtocol *, const wchar_t *);
-	uint64_t (*test_string)(struct SimpleTextOutputProtocol *, wchar_t *);
-	uint64_t (*query_mode)(struct SimpleTextOutputProtocol *, wchar_t *, uint64_t *columns, uint64_t *rows);
-	uint64_t (*set_mode)(struct SimpleTextOutputProtocol *, uint64_t);
-	uint64_t (*set_attribute)(struct SimpleTextOutputProtocol *, uint64_t Attribute);
-	uint64_t (*clear_screen)(struct SimpleTextOutputProtocol *);
-	uint64_t _buf4[2];
-	struct SIMPLE_TEXT_OUTPUT_MODE {
-		int MaxMode;
-		int Mode;
-		int Attribute;
-		int CursorColumn;
-		int CursorRow;
-		uint8_t CursorVisible;
-	} * Mode;
+	uint64_t _buf4[8];
 } SimpleTextOutputProtocol;
 
 typedef enum { EfiResetCold, EfiResetWarm, EfiResetShutdown, EfiResetPlatformSpecific } ResetType;
-
-typedef struct RuntimeServices_ {
-	char _buf_rs1[24];
-	uint64_t _buf_rs2[4];
-
-	int (*set_virtual_address_map)(UINTN memory_map_size, UINTN descriptor_size, UINTN descriptor_version,
-								   void *virtual_map);
-	uint64_t _buf_rs4[5];
-	void (*reset_system)(ResetType, uint64_t reset_status, uint64_t data_size, void *);
-} RuntimeServices;
 
 typedef struct SystemTable_ {
 	TableHeader header;
 	wchar_t *firmware_vendor;
 	uint32_t firmware_revision;
 	Handle console_in_handle;
-	SimpleTextInputProtocol *con_in;
+	struct SimpleTextInputProtocol *con_in;
 	Handle console_out_handle;
 	SimpleTextOutputProtocol *con_out;
 	Handle standard_error_handle;
 	SimpleTextOutputProtocol *std_err;
-	RuntimeServices *runtime_services;
+	struct RuntimeServices *runtime_services;
 	BootServices *boot_services;
 	UINTN number_of_table_entries;
 	ConfigurationTable *configuration_table;
@@ -105,18 +75,8 @@ typedef uint64_t FileProtocolModes;
 
 #define kFileNameSize 16
 
-typedef struct Time {
-	uint16_t Year;  // 1900 – 9999
-	uint8_t Month;  // 1 – 12
-	uint8_t Day;	// 1 – 31
-	uint8_t Hour;   // 0 – 23
-	uint8_t Minute; // 0 – 59
-	uint8_t Second; // 0 – 59
-	uint8_t Pad1;
-	uint32_t Nanosecond; // 0 – 999,999,999
-	uint16_t TimeZone;   // -1440 to 1440 or 2047
-	uint8_t Daylight;
-	uint8_t Pad2;
+typedef struct {
+	uint8_t dummy[16];
 } Time;
 
 typedef struct FileInfo {

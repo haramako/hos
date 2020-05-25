@@ -2,13 +2,9 @@ default: src/LIUMOS.ELF
 
 include common.mk
 
+BOOTFS=dist/BOOTFS.IMG
 OVMF=ovmf/bios64.bin
-
-ifeq ($(OS),Windows_NT)
-QEMU="C:\Program Files\qemu\qemu-system-x86_64"
-else
 QEMU=qemu-system-x86_64
-endif
 
 QEMU_ARGS=\
 	-bios $(OVMF) \
@@ -19,39 +15,42 @@ QEMU_ARGS=\
 	-drive format=raw,file=fat:rw:mnt \
 	-serial tcp::1234,server,nowait \
 	-serial stdio \
+	-gdb tcp::1192 \
 	-device qemu-xhci -device usb-mouse -device usb-kbd
 
-BOOTFS = dist/BOOTFS.IMG
 
-src/LIUMOS.ELF : .FORCE
-	make -C src LIUMOS.ELF
+src/KERNEL.ELF : .FORCE
+	$(MAKE) -C src KERNEL.ELF
 
 .FORCE :
 
-files : src/LIUMOS.ELF bootfs .FORCE
+files : src/KERNEL.ELF boot/BOOTX64.EFI $(BOOTFS) .FORCE
 	-rm -rf mnt
 	mkdir -p mnt/
 	cp -a dist/* mnt
-	cp src/LIUMOS.ELF mnt/LIUMOS.ELF
+	cp src/KERNEL.ELF mnt/KERNEL.ELF
 
-.PHONY: bootfs
-bootfs:
-	make -C app/hello
+boot/BOOTX64.EFI:
+	$(MAKE) -C boot BOOTX64.EFI
+
+$(BOOTFS):
+	$(MAKE) -C app/hello
 	mkdir -p fd
 	cp app/hello/hello.elf fd
 	rm -f $(BOOTFS)
 	mformat -t 256 -h 1 -s 64 -C -i $(BOOTFS) ::
 	mcopy -i $(BOOTFS) fd/* ::
 
-run : # files
+run : files
 	$(QEMU) $(QEMU_ARGS)
 
 runc : files
-	$(QEMU) $(QEMU_ARGS) -gdb tcp::1192 -nographic
+	$(QEMU) $(QEMU_ARGS) -nographic
 
 clean :
 	rm -rf mnt
 	make -C src clean
+	make -C boot clean
 
 format :
 	cd src && clang-format -i *.c *.h && gtags

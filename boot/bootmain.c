@@ -57,10 +57,7 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 
 	// Load kernel elf.
 	FileProtocol *root = efi_file_root();
-	efi_file_load(&kernel_elf_file, root, "LIUMOS.ELF");
-
-	// print_hex("Kernel image: ", (uint64_t)liumos_elf_file.buf_pages);
-	// print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
+	efi_file_load(&kernel_elf_file, root, "KERNEL.ELF");
 
 	ELFImage elf_image;
 	elf_load_kernel(&kernel_elf_file, &elf_image);

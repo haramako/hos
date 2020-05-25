@@ -37,12 +37,11 @@ static const Elf64_Ehdr *ensure_loadable_(const uint8_t *buf) {
 }
 
 static const Elf64_Ehdr *parse_elf_(EFI_File *file, Elf64_Phdr **out_code, Elf64_Phdr **out_data) {
-	const uint8_t *buf = (uint8_t *)file->buf_pages;
-	const Elf64_Ehdr *ehdr = ensure_loadable_(buf);
+	const Elf64_Ehdr *ehdr = ensure_loadable_(file->buf);
 	if (!ehdr) panic("Invalid ELF.");
 
 	for (int i = 0; i < ehdr->e_phnum; i++) {
-		const Elf64_Phdr *phdr = (Elf64_Phdr *)(buf + ehdr->e_phoff + ehdr->e_phentsize * i);
+		const Elf64_Phdr *phdr = (Elf64_Phdr *)(file->buf + ehdr->e_phoff + ehdr->e_phentsize * i);
 		if (phdr->p_type != PT_LOAD) continue;
 
 		if (phdr->p_flags & PF_X) {
@@ -67,8 +66,8 @@ void elf_load_kernel(EFI_File *file, ELFImage *out_image) {
 	uint8_t *code_buf = efi_allocate_pages_addr(code->p_vaddr, byte_size_to_page_size(code->p_memsz));
 	uint8_t *data_buf = efi_allocate_pages_addr(data->p_vaddr, byte_size_to_page_size(data->p_memsz));
 
-	memcpy(code_buf, (uint8_t *)file->buf_pages + code->p_offset, code->p_filesz);
-	memcpy(data_buf, (uint8_t *)file->buf_pages + data->p_offset, data->p_filesz);
+	memcpy(code_buf, file->buf + code->p_offset, code->p_filesz);
+	memcpy(data_buf, file->buf + data->p_offset, data->p_filesz);
 
 	out_image->code = code_buf;
 	out_image->data = data_buf;

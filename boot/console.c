@@ -14,7 +14,7 @@ void print(const char *c) {
 		}
 	}
 	buf[i] = u'\0';
-	sys_->con_out->output_string(sys_->con_out, buf);
+	g_sys->con_out->output_string(g_sys->con_out, buf);
 }
 
 void print_hex_(uint64_t n) {

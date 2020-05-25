@@ -17,17 +17,17 @@ static const GUID kGraphicsOutputProtocolGUID = {
 	0x9042a9de, 0x23dc, 0x4a38, {0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a}};
 
 void *GetConfigurationTableByUUID(const GUID *guid) {
-	for (int i = 0; i < (int)sys_->number_of_table_entries; i++) {
-		if (memcmp(guid, &sys_->configuration_table[i].vendor_guid, sizeof(GUID)) == 0)
-			return sys_->configuration_table[i].vendor_table;
+	for (int i = 0; i < (int)g_sys->number_of_table_entries; i++) {
+		if (memcmp(guid, &g_sys->configuration_table[i].vendor_guid, sizeof(GUID)) == 0)
+			return g_sys->configuration_table[i].vendor_table;
 	}
 	return NULL;
 }
 
 void efi_memory_map_init(EFI_MemoryMap *m) {
 	m->bytes_used = sizeof(m->buf);
-	Status status =
-		sys_->boot_services->GetMemoryMap(&m->bytes_used, m->buf, &m->key, &m->descriptor_size, &m->descriptor_version);
+	Status status = g_sys->boot_services->GetMemoryMap(&m->bytes_used, m->buf, &m->key, &m->descriptor_size,
+													   &m->descriptor_version);
 	if (status != Status_kSuccess) {
 		print_hex("Failed to get memory map, status = ", status);
 		panic("");
@@ -38,7 +38,7 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 	Status status;
 
 	g_image_handle = image_handle;
-	sys_ = system_table;
+	g_sys = system_table;
 
 	boot_param_.rsdt = GetConfigurationTableByUUID(&kACPITableGUID);
 
@@ -69,7 +69,7 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 	boot_param_.efi_memory_map = &efi_memory_map_;
 
 	do {
-		status = sys_->boot_services->ExitBootServices(g_image_handle, efi_memory_map_.key);
+		status = g_sys->boot_services->ExitBootServices(g_image_handle, efi_memory_map_.key);
 	} while (status != Status_kSuccess);
 
 	asm_jump_to_kernel(elf_image.entry_point, &boot_param_, 0);

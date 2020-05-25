@@ -13,6 +13,9 @@ BootParam boot_param_;
 
 static const GUID kACPITableGUID = {0x8868e871, 0xe4f1, 0x11d3, {0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81}};
 
+static const GUID kGraphicsOutputProtocolGUID = {
+	0x9042a9de, 0x23dc, 0x4a38, {0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a}};
+
 void *GetConfigurationTableByUUID(const GUID *guid) {
 	for (int i = 0; i < (int)sys_->number_of_table_entries; i++) {
 		if (memcmp(guid, &sys_->configuration_table[i].vendor_guid, sizeof(GUID)) == 0)
@@ -45,11 +48,19 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 	efi_memory_map_init(&g_efi_memory_map);
 	Status status;
 
+	// Get graphics info.
+	GraphicsOutputProtocol *graphics = (GraphicsOutputProtocol *)efi_locate_protocol(&kGraphicsOutputProtocolGUID);
+	print_hex("Graphics: ", (uint64_t)graphics);
+	boot_param_.graphics.vram = (void *)graphics->mode->frame_buffer_base;
+	boot_param_.graphics.width = graphics->mode->info->horizontal_resolution;
+	boot_param_.graphics.height = graphics->mode->info->vertical_resolution;
+	boot_param_.graphics.pixels_per_scan_line = graphics->mode->info->pixels_per_scan_line;
+
 	FileProtocol *root = efi_file_root();
 	efi_file_load(&liumos_elf_file, root, "LIUMOS.ELF");
 
 	print_hex("file buf: ", (uint64_t)liumos_elf_file.buf_pages);
-	print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
+	// print_hex("file: ", *((uint64_t *)liumos_elf_file.buf_pages));
 
 	elf_load_kernel(&liumos_elf_file, &boot_param_);
 

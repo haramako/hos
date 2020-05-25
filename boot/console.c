@@ -3,10 +3,15 @@
 #include "efi_util.h"
 
 void print(const char *c) {
-	wchar_t buf[257];
-	int i = 0;
-	for (i = 0; i < 256 && *c != '\0'; i++, c++) {
-		buf[i] = (wchar_t)*c;
+	wchar_t buf[256];
+	size_t i = 0;
+	for (i = 0; i < (sizeof(buf) - 1) && *c != '\0'; c++) {
+		if (*c == '\n') {
+			buf[i++] = '\n';
+			buf[i++] = '\r';
+		} else {
+			buf[i++] = (wchar_t)*c;
+		}
 	}
 	buf[i] = u'\0';
 	sys_->con_out->output_string(sys_->con_out, buf);

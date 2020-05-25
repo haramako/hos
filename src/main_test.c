@@ -222,6 +222,7 @@ void smp_test_() { smp_init(); }
 // Sheet test.
 
 void sheet_test_() {
+#if 0
 	Sheet *sh = g_boot_param->vram_sheet;
 	sheet_draw_rect(sh, 10, 10, 10, 10, 0xffffff, true);
 	sheet_draw_character(sh, 'A', 200, 200, true);
@@ -235,4 +236,5 @@ void sheet_test_() {
 		for (int j = 0; j < 1000000; ++j) {
 		}
 	}
+#endif
 }

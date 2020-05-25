@@ -16,6 +16,7 @@ typedef struct {
 
 void check_status(Status status, const char *msg);
 
+void *efi_locate_protocol(GUID *guid);
 void *efi_allocate_pages(size_t pages);
 void *efi_allocate_pages_addr(uintptr_t addr, size_t pages);
 void efi_file_load(EFI_File *f, FileProtocol *dir, const char *file_name);

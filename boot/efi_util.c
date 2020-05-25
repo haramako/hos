@@ -8,6 +8,7 @@
 Handle g_image_handle;
 SystemTable *sys_;
 EFI_MemoryMap g_efi_memory_map;
+GraphicsOutputProtocol *g_efi_graphics_output_protocol;
 
 static const GUID kFileInfoGUID = {0x09576e92, 0x6d3f, 0x11d2, {0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b}};
 
@@ -30,6 +31,13 @@ void check_status(Status status, const char *msg) {
 		print_hex(", status = ", status);
 		panic("");
 	}
+}
+
+void *efi_locate_protocol(GUID *guid) {
+	void *protocol = NULL;
+	Status status = sys_->boot_services->LocateProtocol(guid, NULL, &protocol);
+	check_status(status, "Can't locate protocol.");
+	return protocol;
 }
 
 FileProtocol *efi_open_file(FileProtocol *dir, char *path) {

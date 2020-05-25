@@ -53,7 +53,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 	Disable8259PIC();
 
 	serial_init();
-	console_init(serial_get_port(1), g_boot_param->vram_sheet);
+	console_init(serial_get_port(1), &g_boot_param->graphics);
 	console_set_log_level(CONSOLE_LOG_LEVEL_INFO);
 
 	// Now you can use console_*().

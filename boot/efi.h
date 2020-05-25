@@ -10,7 +10,6 @@ static_assert(sizeof(UINTN) == 8, "Invalid size.");
 typedef UINTN AllocateType;
 
 typedef void *Handle;
-typedef void GraphicsOutputProtocol;
 typedef void SimpleTextInputProtocol;
 
 typedef UINTN Status;
@@ -44,7 +43,7 @@ typedef struct BootServices {
 	uint64_t (*OpenProtocol)(void *Handle, GUID *Protocol, void **Interface, void *AgentHandle, void *ControllerHandle,
 							 unsigned int Attributes);
 	uint64_t _buf9[2];
-	uint64_t _buf10[9];
+	uint64_t _buf10[2];
 	uint64_t (*LocateProtocol)(const GUID *Protocol, void *Registration, void **Interface);
 	uint64_t _buf10_2[6];
 } BootServices;
@@ -171,3 +170,27 @@ enum {
 	kMaxAddress,
 	kAddress,
 };
+
+typedef struct {
+	uint64_t _buf[3];
+	struct ModeInfo {
+		uint32_t max_mode;
+		uint32_t mode;
+		struct {
+			uint32_t version;
+			uint32_t horizontal_resolution;
+			uint32_t vertical_resolution;
+			uint32_t pixel_format;
+			struct {
+				uint32_t red_mask;
+				uint32_t green_mask;
+				uint32_t blue_mask;
+				uint32_t reserved_mask;
+			} pixel_info;
+			uint32_t pixels_per_scan_line;
+		} * info;
+		UINTN size_of_info;
+		void *frame_buffer_base;
+		UINTN frame_buffer_size;
+	} * mode;
+} GraphicsOutputProtocol;

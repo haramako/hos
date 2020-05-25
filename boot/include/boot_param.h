@@ -12,9 +12,15 @@ typedef struct EFI_MemoryMap_ {
 	uint8_t buf[kBufferSize];
 } EFI_MemoryMap;
 
+typedef struct BootParam_Graphics_ {
+	uint32_t *vram;
+	uint32_t width;
+	uint32_t height;
+	uint32_t pixels_per_scan_line;
+} BootParam_Graphics;
+
 typedef struct {
 	struct ACPI_RSDT_ *rsdt;
-	struct Sheet_ *vram_sheet;
-	// struct CPUFeatureSet *cpu_features;
 	EFI_MemoryMap *efi_memory_map;
+	BootParam_Graphics graphics;
 } BootParam;

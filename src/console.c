@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "asm.h"
+#include "boot_param.h"
 #include "serial.h"
 #include "sheet.h"
 #include "sheet_painter.h"
@@ -11,6 +12,7 @@ static const int CONSOLE_BUF_SIZE = 8192;
 
 static Serial *com_;
 
+static Sheet sh__;
 static Sheet *sh_;
 static int x_;
 static int y_;
@@ -25,9 +27,14 @@ const char *LOG_LEVEL_NAMES[] = {
 	"T: ", "I: ", "W: ", "E: ", "F: ",
 };
 
-void console_init(Serial *console_serial, Sheet *sh) {
+void console_init(Serial *console_serial, BootParam_Graphics *g) {
 	com_ = console_serial;
-	sh_ = sh;
+	sh_ = &sh__;
+	memset(sh_, 0, sizeof(Sheet));
+	sh_->buf = g->vram;
+	sh_->xsize = g->width;
+	sh_->ysize = g->height;
+	sh_->pixels_per_scan_line = g->pixels_per_scan_line;
 	if (sh_) sheet_draw_rect(sh_, 0, 0, sh_->xsize, sh_->ysize, 0, true);
 }
 

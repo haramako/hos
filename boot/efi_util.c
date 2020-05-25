@@ -23,7 +23,7 @@ static const GUID kFileSystemInfoGUID = {
 static const GUID kLoadedImageProtocolGUID = {
 	0x5B1B31A1, 0x9562, 0x11d2, {0x8E, 0x3F, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B}};
 
-void check_status(Status status, const char *msg) {
+void efi_check_status(Status status, const char *msg) {
 	if (status != Status_kSuccess) {
 		print(msg);
 		print_hex(", status = ", status);
@@ -34,7 +34,7 @@ void check_status(Status status, const char *msg) {
 void *efi_locate_protocol(GUID *guid) {
 	void *protocol = NULL;
 	Status status = sys_->boot_services->LocateProtocol(guid, NULL, &protocol);
-	check_status(status, "Can't locate protocol.");
+	efi_check_status(status, "Can't locate protocol.");
 	return protocol;
 }
 
@@ -54,7 +54,7 @@ FileProtocol *efi_open_file(FileProtocol *dir, char *path) {
 void *efi_allocate_pages(size_t pages) {
 	void *data;
 	Status status = sys_->boot_services->AllocatePages(kAnyPages, kLoaderData, pages, &data);
-	check_status(status, "AllocatePages() failed.");
+	efi_check_status(status, "AllocatePages() failed.");
 	return data;
 }
 
@@ -73,18 +73,18 @@ FileProtocol *efi_file_root() {
 
 	LoadedImageProtocol *loaded_image;
 	status = efi_handle_protocol(g_image_handle, &kLoadedImageProtocolGUID, (void **)&loaded_image);
-	check_status(status, "Can't get LoadedImageProtocol.");
+	efi_check_status(status, "Can't get LoadedImageProtocol.");
 	// print_hex("image ", (uint64_t)loaded_image->image_base);
 	// print_hex("image ", (uint64_t)efi_file_root);
 
 	SimpleFileSystemProtocol *simple_fs;
 	status = sys_->boot_services->HandleProtocol(loaded_image->device_handle, &kSimpleFileSystemProtocolGUID,
 												 (void **)&simple_fs);
-	check_status(status, "Can't get SimpleFileSystemProtocol.");
+	efi_check_status(status, "Can't get SimpleFileSystemProtocol.");
 
 	FileProtocol *root;
 	simple_fs->OpenVolume(simple_fs, &root);
-	check_status(status, "OpenVolume() failed.");
+	efi_check_status(status, "OpenVolume() failed.");
 	return root;
 }
 
@@ -99,7 +99,7 @@ void efi_file_load(EFI_File *f, FileProtocol *dir, const char *file_name) {
 	f->buf_pages = efi_allocate_pages(byte_size_to_page_size(buf_size));
 
 	Status status = file->Read(file, &buf_size, f->buf_pages);
-	check_status(status, "Read failed.");
+	efi_check_status(status, "Read failed.");
 
 	f->file_size = info.file_size;
 }

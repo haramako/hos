@@ -2,10 +2,8 @@
 
 #include <elf.h>
 
-#include "asm.h"
 #include "console.h"
 #include "efi_util.h"
-#include "page.h"
 #include "util.h"
 
 typedef struct PhdrInfo {

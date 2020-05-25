@@ -13,7 +13,7 @@ typedef struct {
 	uint8_t *buf_pages;
 } EFI_File;
 
-void check_status(Status status, const char *msg);
+void efi_check_status(Status status, const char *msg);
 
 void *efi_locate_protocol(GUID *guid);
 void *efi_allocate_pages(size_t pages);

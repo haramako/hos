@@ -30,7 +30,7 @@ files : src/KERNEL.ELF boot/BOOTX64.EFI $(BOOTFS) .FORCE
 	cp -a dist/* mnt
 	cp src/KERNEL.ELF mnt/KERNEL.ELF
 
-boot/BOOTX64.EFI:
+boot/BOOTX64.EFI: .FORCE
 	$(MAKE) -C boot BOOTX64.EFI
 
 $(BOOTFS):
@@ -49,8 +49,8 @@ runc : files
 
 clean :
 	rm -rf mnt
-	make -C src clean
-	make -C boot clean
+	$(MAKE) -C src clean
+	$(MAKE) -C boot clean
 
 format :
 	cd src && clang-format -i *.c *.h && gtags

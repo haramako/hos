@@ -56,6 +56,7 @@ NEWLIB_LIB_PATH=../third_party_root/lib
 
 CFLAGS= \
 	-g \
+	-O2 \
 	-std=c11 \
 	-target x86_64-unknown-none-elf \
 	-fno-stack-protector -fno-exceptions -fshort-wchar \
@@ -74,7 +75,7 @@ LDFLAGS= \
 # Kernel rules
 
 %.o : %.c Makefile
-	$(LLVM_CC) $(CFLAGS) -MD -g -c $*.c
+	$(LLVM_CC) $(CFLAGS) -MD -c $*.c
 
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S

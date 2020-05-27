@@ -1,7 +1,7 @@
 #include "hpet.h"
 
 #include "acpi.h"
-#include "acpi_util.h"
+#include "acpi/hpet.h"
 #include "apic.h"
 #include "asm.h"
 #include "interrupt.h"

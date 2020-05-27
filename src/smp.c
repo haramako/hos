@@ -1,7 +1,7 @@
 #include "smp.h"
 
 #include "acpi.h"
-#include "acpi_util.h"
+#include "acpi/madt.h"
 #include "apic.h"
 #include "boot_param.h"
 #include "physical_memory.h"

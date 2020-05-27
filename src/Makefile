@@ -3,7 +3,7 @@ default: KERNEL.ELF
 include ../common.mk
 
 SRCS= \
-	acpi_util.c \
+	acpi.c \
 	ahci.c \
 	apic.c \
 	asm.S \
@@ -63,6 +63,7 @@ CFLAGS= \
 	-mno-red-zone -mcmodel=large \
 	-nostdlib \
 	-D__ELF__ -D_LDBL_EQ_DBL \
+	-I. \
 	-I../boot/include \
 	-I$(NEWLIB_INC_PATH) \
 	$(CLANG_WARNINGS) $(C_STD)

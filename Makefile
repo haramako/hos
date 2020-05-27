@@ -1,4 +1,4 @@
-default: src/LIUMOS.ELF
+default: files
 
 include common.mk
 

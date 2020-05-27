@@ -95,10 +95,6 @@ clean :
 	-rm -rf *.o
 	-rm -rf *.d
 
-format :
-	clang-format -i *.c *.h
-	-gtags
-
 depgraph:
 	rexdep --format dot --pattern '^\s*#include\s*"(\S+)"' *.h | grep -v 'common.h' | dot -Tpng -o deps_header.png
 	rexdep --format dot --pattern '^\s*#include\s*"(\S+)"' *.h | dot -Tpng -o deps_header_all.png

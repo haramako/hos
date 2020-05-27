@@ -11,12 +11,12 @@ typedef struct PACKED ACPI_MADT {
 	uint8_t entries[];
 } ACPI_MADT;
 
-typedef enum ACPI_MADTEntryType {
+typedef enum {
 	ACPI_MADT_ENTRY_PROCESSOR_LOCAL_APIC = 0x0,
 	ACPI_MADT_ENTRY_IO_APIC = 0x1,
 	ACPI_MADT_ENTRY_INTERRUPT_SOURCE_OVERRIDE = 0x2,
 	ACPI_MADT_ENTRY_LOCAL_APIC_NMI = 0x4,
-} ACPI_MADTEntryType;
+} ACPI_MADT_EntryType;
 
 typedef struct PACKED {
 	uint8_t processor_id;

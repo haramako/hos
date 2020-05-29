@@ -50,6 +50,11 @@ void process_print(Process *p) {
 	klog("   rsp: %016p", p->ctx->cpu_context.int_ctx.rsp);
 }
 
+void process_exit(Process *p, int exit_code) {
+	p->status = kKilled;
+	p->exit_code = exit_code;
+}
+
 //============================================================
 // Context switch
 //============================================================
@@ -83,6 +88,7 @@ void process_timer_handler(uint64_t intcode, InterruptInfo *info) {
 	Process *proc = g_scheduler.current;
 	Process *next_proc = scheduler_switch_process();
 	if (!next_proc) return; // no need to switching context.
+	// klog("switch from %018p -> %018p", proc, next_proc);
 	process_switch_context(info, proc, next_proc);
 }
 

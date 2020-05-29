@@ -19,6 +19,7 @@ typedef struct Process_ {
 	int scheduler_index;
 	ExecutionContext *ctx;
 	MemoryMap *mm;
+	int exit_code;
 
 	uint64_t number_of_ctx_switch;
 	uint64_t proc_time_femto_sec;
@@ -38,6 +39,7 @@ typedef struct ProcessCreateParam_ {
 
 Process *process_new(ExecutionContext *ctx);
 Process *process_create(ProcessCreateParam *p);
+void process_exit(Process *p, int exit_code);
 
 void process_notify_contextsaving(Process *p);
 void process_print(Process *p);

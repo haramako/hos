@@ -4,6 +4,7 @@ void exit(int);
 
 void _start(){
 	write(1, "Hello, world!\n", 14);
-	//exit(0);
+	exit(0);
+	//write(1, "exited!\n", 8);
 	for(;;);
 }

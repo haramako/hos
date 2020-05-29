@@ -33,7 +33,7 @@ files : src/KERNEL.ELF boot/BOOTX64.EFI $(BOOTFS) .FORCE
 boot/BOOTX64.EFI: .FORCE
 	$(MAKE) -C boot BOOTX64.EFI
 
-$(BOOTFS):
+$(BOOTFS): .FORCE
 	$(MAKE) -C app/hello
 	mkdir -p fd
 	cp app/hello/hello.elf fd

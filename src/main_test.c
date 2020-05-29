@@ -113,13 +113,13 @@ static void process_test_one_() {
 
 		ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
 		Process *p = process_create(&param);
-		process_print(p);
+		// process_print(p);
 		// pme_print(new_pml4);
 	}
 }
 
-static void process_test_() {
-	for (int i = 0; i < 3; i++) {
+static void process_test_(int n) {
+	for (int i = 0; i < n; i++) {
 		process_test_one_();
 	}
 }

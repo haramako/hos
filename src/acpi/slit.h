@@ -2,6 +2,7 @@
 
 #include "acpi/rsdt.h"
 
+// SLIT: System Locality Distance Information
 typedef struct PACKED SLIT {
 	ACPI_SDTHeader h;
 

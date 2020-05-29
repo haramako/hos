@@ -235,3 +235,34 @@ void sheet_test_() {
 	}
 #endif
 }
+
+// Shutdown test.
+// See: [ACPI で電源を切る - 借り初めのひみつきち](https://neriring.hatenablog.jp/entry/2019/03/09/133206)
+#include "acpi/fadt.h"
+
+void acpi_dsdt_find(const ACPI_DSDT *dsdt, const char *signature) {
+	const uint8_t *p = dsdt->entry;
+	size_t len = (dsdt->h.length - sizeof(ACPI_SDTHeader));
+	char buf[128];
+	memcpy(buf, p, MIN(len, sizeof(buf)));
+	buf[len] = '\0';
+	klog("RSDT %s %ld %ld", buf, len, sizeof(ACPI_SDTHeader));
+}
+
+void shutdown_test0_() {
+	ACPI_FADT *fadt = (ACPI_FADT *)acpi_find_rsdt("FACP");
+	klog("fadt %p", fadt);
+	klog("smi_cmd %d", fadt->smi_cmd);
+	WriteIOPort8(fadt->smi_cmd, fadt->acpi_enable);
+	while ((ReadIOPort8(fadt->pm1a_cnt_blk) & 1) == 0) {
+		klog("loop.");
+	}
+
+	klog("dsdt %p", (uintptr_t)fadt->dsdt);
+	klog("x_dsdt %p", fadt->x_dsdt);
+
+	acpi_dsdt_find((ACPI_DSDT *)((uintptr_t)fadt->dsdt), NULL);
+}
+
+#include "efi/runtime_services.h"
+void shutdown_test_() { g_boot_param->efi_runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL); }

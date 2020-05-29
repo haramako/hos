@@ -71,6 +71,9 @@ void efi_main(Handle image_handle, SystemTable *system_table) {
 	efi_memory_map_init(&efi_memory_map_);
 	boot_param_.efi_memory_map = &efi_memory_map_;
 
+	boot_param_.efi_runtime_services = g_sys->runtime_services;
+	// g_sys->runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL);
+
 	do {
 		status = g_sys->boot_services->ExitBootServices(g_image_handle, efi_memory_map_.key);
 	} while (status != Status_kSuccess);

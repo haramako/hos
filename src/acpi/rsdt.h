@@ -36,3 +36,8 @@ typedef struct PACKED ACPI_XSDT_ {
 
 	struct ACPI_SDTHeader_ *entry[];
 } ACPI_XSDT;
+
+typedef struct PACKED ACPI_DSDT_ {
+	ACPI_SDTHeader h;
+	uint8_t entry[];
+} ACPI_DSDT;

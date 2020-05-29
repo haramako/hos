@@ -3,6 +3,7 @@
 #include "common.h"
 #include "efi/guid.h"
 #include "efi/memory_map.h"
+#include "efi/runtime_services.h"
 
 #define UINTN uintptr_t
 static_assert(sizeof(UINTN) == 8, "Invalid size.");
@@ -52,8 +53,6 @@ typedef struct SimpleTextOutputProtocol {
 	uint64_t _buf4[8];
 } SimpleTextOutputProtocol;
 
-typedef enum { EfiResetCold, EfiResetWarm, EfiResetShutdown, EfiResetPlatformSpecific } ResetType;
-
 typedef struct SystemTable_ {
 	TableHeader header;
 	wchar_t *firmware_vendor;
@@ -64,7 +63,7 @@ typedef struct SystemTable_ {
 	SimpleTextOutputProtocol *con_out;
 	Handle standard_error_handle;
 	SimpleTextOutputProtocol *std_err;
-	struct RuntimeServices *runtime_services;
+	EFI_RuntimeServices *runtime_services;
 	BootServices *boot_services;
 	UINTN number_of_table_entries;
 	ConfigurationTable *configuration_table;

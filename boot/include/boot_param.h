@@ -26,4 +26,5 @@ typedef struct {
 	BootParam_Graphics graphics;
 	uint8_t *bootfs_buf;
 	size_t bootfs_size;
+	struct EFI_RuntimeServices_ *efi_runtime_services;
 } BootParam;

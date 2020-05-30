@@ -54,9 +54,9 @@ char to_hex(char n);
 char *dump_bytes(void *p_, size_t size);
 
 inline uint64_t int_merge64(uint32_t high, uint32_t low) { return ((uint64_t)low) | ((uint64_t)high << 32); }
-
 inline uint32_t uint64_high(uint64_t n) { return (uint32_t)(n >> 32); }
-
 inline uint32_t uint64_low(uint64_t n) { return (uint32_t)n; }
 
 #define talloc(type) ((type *)calloc(1, sizeof(type)))
+
+void kbreakpoint();

@@ -99,7 +99,8 @@ void kernel_entry(BootParam *boot_param_passed) {
 	// mm_test_();
 	// smp_test_();
 	// sheet_test_();
-	shutdown_test_();
+	kbreakpoint();
+	// shutdown_test_();
 
 	kinfo("Finish.");
 	StoreIntFlag(); // Start interrupt.

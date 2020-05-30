@@ -63,3 +63,5 @@ char *dump_bytes(void *p_, size_t size) {
 extern inline uint64_t int_merge64(uint32_t high, uint32_t low);
 extern inline uint32_t uint64_high(uint64_t n);
 extern inline uint32_t uint64_low(uint64_t n);
+
+void kbreakpoint() {}

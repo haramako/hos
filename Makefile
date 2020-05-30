@@ -55,3 +55,6 @@ clean :
 format :
 	cd src && clang-format -i *.c *.h **/*.h && gtags
 	cd boot && clang-format -i *.c *.h **/*.h && gtags
+
+gdb:
+	gdb -x debug_kernel.gdb

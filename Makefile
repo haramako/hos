@@ -2,7 +2,7 @@ default: files
 
 include common.mk
 
-BOOTFS=dist/BOOTFS.IMG
+BOOTFS=mnt/BOOTFS.IMG
 OVMF=ovmf/bios64.bin
 QEMU=qemu-system-x86_64
 
@@ -25,15 +25,15 @@ src/KERNEL.ELF : .FORCE
 .FORCE :
 
 files : src/KERNEL.ELF boot/BOOTX64.EFI $(BOOTFS) .FORCE
-	-rm -rf mnt
-	mkdir -p mnt/
-	cp -a dist/* mnt
+	mkdir -p mnt/EFI/BOOT
+	cp boot/BOOTX64.EFI mnt/EFI/BOOT/BOOTX64.EFI
 	cp src/KERNEL.ELF mnt/KERNEL.ELF
 
 boot/BOOTX64.EFI: .FORCE
 	$(MAKE) -C boot BOOTX64.EFI
 
 $(BOOTFS): .FORCE
+	mkdir -p mnt
 	$(MAKE) -C app/hello
 	mkdir -p fd
 	cp app/hello/hello.elf fd

@@ -53,7 +53,7 @@ clean :
 	$(MAKE) -C boot clean
 
 format :
-	cd src && clang-format -i *.c *.h **/*.h && gtags
+	cd src && clang-format -i *.c *.h **/*.h **/*.c && gtags
 	cd boot && clang-format -i *.c *.h **/*.h && gtags
 
 gdb:

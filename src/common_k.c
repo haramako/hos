@@ -3,6 +3,8 @@
 #include <stdio.h>
 
 #include "console.h"
+#include "efi/runtime_services.h" // for shutdown
+#include "global.h"
 
 void kpanic(const char *msg, ...) {
 	va_list vargs;
@@ -65,3 +67,5 @@ extern inline uint32_t uint64_high(uint64_t n);
 extern inline uint32_t uint64_low(uint64_t n);
 
 void kbreakpoint() {}
+
+void kshutdown() { g_boot_param->efi_runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL); }

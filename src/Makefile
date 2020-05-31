@@ -37,6 +37,9 @@ SRCS= \
 	smp.c \
 	smp_trampoline.S \
 	syscall.c \
+	syscall/syscall_exit.c \
+	syscall/syscall_write.c \
+	syscall/syscall_shutdown.c \
 	syscall_handler.S \
 	timer.c 
 
@@ -76,12 +79,14 @@ LDFLAGS= \
 # Kernel rules
 
 %.o : %.c Makefile
-	$(LLVM_CC) $(CFLAGS) -MD -c $*.c
+	$(LLVM_CC) $(CFLAGS) -MD -o $*.o -c $*.c
 
 %.o : %.S Makefile
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
 KERNEL.ELF : $(OBJS) kernel.ld Makefile
+	echo $(OBJS)
+	echo $(DEPS)
 	$(LLVM_LD_LLD) $(LDFLAGS) -o KERNEL.ELF -e kernel_entry -T kernel.ld $(OBJS)
 
 run:

@@ -5,7 +5,7 @@ include ../../common.mk
 TARGET = hello.elf
 SRCS = hello.c syscall.S
 
-CFLAGS= -std=c11 -target x86_64-unknown-none-elf -nostdlib -nostdinc -fno-builtin -Wall -Wpedantic -Wextra -Werror
+CFLAGS= -std=c11 -target x86_64-unknown-none-elf -nostdlib -nostdinc -fno-builtin -Wall -Wpedantic -Wextra -Werror -I../../src/include
 
 LDFLAGS=-static
 

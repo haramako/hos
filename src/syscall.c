@@ -1,21 +1,37 @@
 #include "syscall.h"
 
+#include "include/syscall.h"
+
 #include "console.h"
 #include "gdt.h"
-
 #include "process.h"
 #include "scheduler.h"
 
-#define SYSCALL_WRITE 1
-#define SYSCALL_EXIT 60
-#define SYSCALL_MAX 255
-
 typedef void (*SyscallHandlerFunc)(uint64_t *args);
 
-void syscall_write(uint64_t *args);
-void syscall_exit(uint64_t *args);
+SyscallHandlerFunc syscall_handlers_[SYS_MAX];
 
-SyscallHandlerFunc syscall_handlers_[SYSCALL_MAX];
+void syscall_noation(uint64_t *args);
+void syscall_chdir(uint64_t *args);
+void syscall_close(uint64_t *args);
+void syscall_creat(uint64_t *args);
+void syscall_dup(uint64_t *args);
+void syscall_exit(uint64_t *args);
+void syscall_fstat(uint64_t *args);
+void syscall_lseek(uint64_t *args);
+void syscall_mkdir(uint64_t *args);
+void syscall_open(uint64_t *args);
+void syscall_read(uint64_t *args);
+void syscall_rename(uint64_t *args);
+void syscall_rmdir(uint64_t *args);
+void syscall_stat(uint64_t *args);
+void syscall_time(uint64_t *args);
+void syscall_write(uint64_t *args);
+
+void syscall_brk(uint64_t *args);
+void syscall_getdents(uint64_t *args);
+
+void syscall_shutdown(uint64_t *args);
 
 void syscall_init() {
 	uint64_t star = ((uint64_t)kKernelCSSelector) << 32;
@@ -31,14 +47,16 @@ void syscall_init() {
 
 	// Initialize syscall handlers.
 	memset(syscall_handlers_, 0, sizeof(syscall_handlers_));
-	syscall_handlers_[SYSCALL_WRITE] = syscall_write;
-	syscall_handlers_[SYSCALL_EXIT] = syscall_exit;
+
+	syscall_handlers_[SYS_EXIT] = syscall_exit;
+	syscall_handlers_[SYS_WRITE] = syscall_write;
+	syscall_handlers_[SYS_SHUTDOWN] = syscall_shutdown;
 }
 
 __attribute__((ms_abi)) void SyscallHandler(uint64_t *args) {
 	uint64_t idx = args[0];
 
-	if (idx > SYSCALL_MAX) {
+	if (idx > SYS_MAX) {
 		kpanic("Unknown syscall!");
 	}
 
@@ -47,22 +65,4 @@ __attribute__((ms_abi)) void SyscallHandler(uint64_t *args) {
 		kpanic("Unknown syscall!");
 	}
 	handler(args);
-}
-
-void syscall_write(uint64_t *args) {
-	const uint64_t fd = args[1];
-	const char *buf = (char *)args[2];
-	uint64_t nbyte = args[3];
-	// klog("write %ld, %p, %ld", fd, buf, nbyte);
-	if (fd != 1) {
-		kpanic("Only stdout is supported for now.");
-	}
-	console_write(buf);
-}
-
-void syscall_exit(uint64_t *args) {
-	const uint64_t exit_code = args[1];
-	Process *p = scheduler_current_process();
-	ktrace("EXIT");
-	process_exit(p, (int)exit_code);
 }

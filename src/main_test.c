@@ -263,6 +263,3 @@ void shutdown_test0_() {
 
 	acpi_dsdt_find((ACPI_DSDT *)((uintptr_t)fadt->dsdt), NULL);
 }
-
-#include "efi/runtime_services.h"
-void shutdown_test_() { g_boot_param->efi_runtime_services->reset_system(EfiResetShutdown, 0, 0, NULL); }

@@ -60,3 +60,4 @@ inline uint32_t uint64_low(uint64_t n) { return (uint32_t)n; }
 #define talloc(type) ((type *)calloc(1, sizeof(type)))
 
 void kbreakpoint();
+void kshutdown();

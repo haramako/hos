@@ -35,11 +35,9 @@ boot/BOOTX64.EFI: .FORCE
 $(BOOTFS): .FORCE
 	mkdir -p mnt
 	$(MAKE) -C app/hello
-	mkdir -p fd
-	cp app/hello/hello.elf fd
 	rm -f $(BOOTFS)
 	mformat -t 256 -h 1 -s 64 -C -i $(BOOTFS) ::
-	mcopy -i $(BOOTFS) fd/* ::
+	mcopy -i $(BOOTFS) app/hello/hello.elf bootfs_data/* ::
 
 run : files
 	$(QEMU) $(QEMU_ARGS)

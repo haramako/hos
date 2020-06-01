@@ -5,11 +5,14 @@ include ../../common.mk
 TARGET = hello.elf
 SRCS = hello.c syscall.S
 
-CFLAGS= -std=c11 -target x86_64-unknown-none-elf -nostdlib -fno-builtin -Wall -Wpedantic -Wextra -I../../src/include -I../../third_party_root/include -D__ELF__ -D_LDBL_EQ_DBL
+CFLAGS= -std=c11 -target x86_64-unknown-none-elf -nostdlib -fno-builtin \
+  -Wall -Wpedantic -Wextra -Wno-keyword-macro \
+  -I../../src/include -I../../third_party_root/include -D__ELF__ -D_LDBL_EQ_DBL \
+  -mcmodel=large
 
 
 #LDFLAGS=-L../../third_party_root/lib -lc -static
-LDFLAGS=
+LDFLAGS=-e _start
 
 # Kernel rules
 

@@ -18,5 +18,5 @@ uint64_t syscall_read(uint64_t *args) {
 
 	error_t err = fs_read(fd->inode, buf, size);
 
-	return fd_num;
+	return err;
 }

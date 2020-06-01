@@ -24,7 +24,7 @@
 
 BootParam *g_boot_param;
 
-#include "main_test.c" // Include test source.
+#include "main_test.inc" // Include test source.
 
 static void pci_test() {
 	pci_init();
@@ -88,7 +88,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 
 	fs_init();
 
-	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	// console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// test_virtual_memory_map_();
 	// paging_test_();

@@ -29,7 +29,9 @@ AsmSyscallHandler:
 	call SyscallHandler
 	mov rsp, rbp
 
-	pop rax
+	//pop rax
+	pop rdi
+	
 	pop rdi
 	pop rsi
 	pop rdx

@@ -35,5 +35,6 @@ typedef struct INode_ {
 } INode;
 
 void fs_init();
+INode *fs_find_inode(uint64_t inode_num);
 error_t fs_open(const char *filename, uint64_t flags, INode **out_opened);
-error_t fs_read(INode *inode, char *buf, int buf_len);
+error_t fs_read(INode *inode, char *buf, size_t buf_len);

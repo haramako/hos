@@ -1,49 +1,10 @@
+hoge:
+	echo $(SRCS)
 default: KERNEL.ELF
 
 include ../common.mk
 
-SRCS= \
-	acpi.c \
-	ahci.c \
-	apic.c \
-	asm.S \
-	asm_inline.c \
-	console.c \
-	common_k.c \
-	efi.c \
-	execution_context.c \
-	font.gen.c \
-	fat.c \
-	fs.c \
-	gdt.c \
-	hpet.c \
-	interrupt.c \
-	interrupt_handler.S \
-	main.c \
-	mem.c \
-	mm.c \
-	mutex.c \
-	newlib_support.c \
-	page.c \
-	page_print.c \
-	pagefault.c \
-	pci.c \
-	physical_memory.c \
-	process.c \
-	serial.c \
-	scheduler.c \
-	sheet.c \
-	sheet_painter.c \
-	sleep_handler.S \
-	smp.c \
-	smp_trampoline.S \
-	syscall.c \
-	syscall/syscall_exit.c \
-	syscall/syscall_write.c \
-	syscall/syscall_shutdown.c \
-	syscall_handler.S \
-	timer.c 
-
+SRCS= $(wildcard *.c *.S syscall/*.c) 
 OBJS= $(addsuffix .o, $(basename $(SRCS)))
 DEPS= $(addsuffix .d, $(basename $(SRCS)))
 
@@ -86,8 +47,6 @@ LDFLAGS= \
 	$(LLVM_CC) $(CFLAGS) -c -o $*.o $*.S
 
 KERNEL.ELF : $(OBJS) kernel.ld Makefile
-	echo $(OBJS)
-	echo $(DEPS)
 	$(LLVM_LD_LLD) $(LDFLAGS) -o KERNEL.ELF -e kernel_entry -T kernel.ld $(OBJS)
 
 run:

@@ -34,6 +34,7 @@ Process *process_create(ProcessCreateParam *p) {
 
 	Process *process = process_new(ctx);
 	process->mm = mm;
+	process->fd_num = 1;
 
 	scheduler_register_process(process);
 

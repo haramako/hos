@@ -28,7 +28,7 @@ void fs_init() {
 	memset(&root_, 0, sizeof(root_));
 }
 
-INode *find_inode_(uint64_t inum) {
+INode *fs_find_inode(uint64_t inum) {
 	for (int i = 0; i < INODES_LEN; i++) {
 		if (inodes_[i].inum == inum) {
 			return &inodes_[i];
@@ -78,7 +78,7 @@ error_t fs_open(const char *filename, uint64_t flags, INode **out_opened) {
 	return ERR_OK;
 }
 
-error_t fs_read(INode *inode, char *buf, int buf_len) {
+error_t fs_read(INode *inode, char *buf, size_t buf_len) {
 	kcheck0(inode->inum != 0);
 
 	error_t err = fat_read(&g_fs, &inode->file, 0, buf, buf_len);

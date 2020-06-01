@@ -13,6 +13,13 @@ typedef enum ProcessStatus_ {
 	kKilled,
 } ProcessStatus;
 
+#define FD_MAX 16
+
+typedef struct {
+	struct INode_ *inode;
+	size_t pos;
+} FileDescriptor;
+
 typedef struct Process_ {
 	uint64_t id;
 	ProcessStatus status;
@@ -20,6 +27,9 @@ typedef struct Process_ {
 	ExecutionContext *ctx;
 	MemoryMap *mm;
 	int exit_code;
+
+	int fd_num;
+	FileDescriptor fds[FD_MAX];
 
 	uint64_t number_of_ctx_switch;
 	uint64_t proc_time_femto_sec;

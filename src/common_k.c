@@ -40,9 +40,9 @@ char to_hex(char n) {
 }
 
 char *dump_bytes(void *p_, size_t size) {
-	assert(size < 0x10000);
+	assert(size < 0x1000);
 
-	static char buf[8000];
+	static char buf[1000];
 	char *s = buf;
 	uint8_t *p = (uint8_t *)p_;
 

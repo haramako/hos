@@ -43,10 +43,9 @@ void kpanic(const char *fmt, ...) NORETURN;
 		kpanic("%s:%d: %s", __FILE__, __LINE__, __VA_ARGS__); \
 	};
 
-#define kcheck0(must_true) \
-	if (!(must_true)) { \
-		kpanic("%s:%d: Check failed.", __FILE__, __LINE__); \
-	};
+#define kcheck0(must_true) kcheck(must_true, "Check failed")
+
+#define kcheck_ok(must_ok) kcheck0(must_ok == ERR_OK)
 
 const char *humanize_size(uint64_t size);
 

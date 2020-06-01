@@ -208,6 +208,33 @@ static struct fat_dirent *lookup(struct fat *fs, const char *path) {
 	}
 }
 
+static struct fat_dirent *fat_lookup_one(struct fat *fs, struct fat_dir *dir, const char *path) {
+	char *p = (char *)path;
+
+	char name[9];
+	char ext[4];
+	p = get_next_filename(p, (char *)name, (char *)ext);
+	while (1) {
+		struct fat_dirent *e = fat_readdir(fs, dir);
+		if (!e) {
+			// No such a file.
+			return NULL;
+		}
+
+		if (filename_equals(e, (const char *)name, (const char *)ext)) {
+			if (!p) {
+				// Found the file!
+				return e;
+			}
+
+			// Enter the next directory level.
+			opendir_from_dirent(fs, dir, e);
+			break;
+		}
+	}
+	return NULL;
+}
+
 error_t fat_open(struct fat *fs, struct fat_file *file, const char *path) {
 	struct fat_dirent *e = lookup(fs, path);
 	if (!e) {

@@ -24,7 +24,7 @@ static void print_pml4_(PMEDisplayConfig *conf, PageMapEntry *pml4) {
 	for (int i = 0; i < PAGE_MAP_TABLE_LEN; i++) {
 		PageMapEntry p4 = pml4[i];
 		uint64_t addr = canonical_addr(((uint64_t)i) << 39);
-		if (i < 1 || i >= 511) continue; // Fixed area.
+		if (!conf->show_fixed && (i < 1 || i >= 511)) continue; // Fixed area.
 		if (!p4.x.present) continue;
 		if (conf->show_nonleaf)
 			klog("L4   : %018p~                                  %s %018p", addr, pme_flag_str(p4), pme_addr(p4));
@@ -131,6 +131,6 @@ static void print_pml1_(PMEDisplayConfig *conf, PageMapEntry *pml1, uint64_t bas
 }
 
 void pme_print(PageMapEntry *pml4) {
-	PMEDisplayConfig conf = {.mask = ~0x60, .show_nonleaf = true, .show_fixed = false};
+	PMEDisplayConfig conf = {.mask = ~0x60, .show_nonleaf = true, .show_fixed = true};
 	print_pml4_(&conf, pml4);
 }

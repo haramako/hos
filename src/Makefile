@@ -14,6 +14,7 @@ SRCS= \
 	execution_context.c \
 	font.gen.c \
 	fat.c \
+	fs.c \
 	gdt.c \
 	hpet.c \
 	interrupt.c \

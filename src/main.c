@@ -4,6 +4,7 @@
 #include "ahci.h"
 #include "apic.h"
 #include "asm.h"
+#include "fs.h"
 #include "gdt.h"
 #include "hpet.h"
 #include "interrupt.h"
@@ -85,9 +86,9 @@ void kernel_entry(BootParam *boot_param_passed) {
 	kinfo("Kernel Ready!");
 	// kinfo("Time %lld", hpet_read_main_counter_value());
 
-	bootfs_init();
+	fs_init();
 
-	// console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// test_virtual_memory_map_();
 	// paging_test_();
@@ -101,6 +102,8 @@ void kernel_entry(BootParam *boot_param_passed) {
 	// sheet_test_();
 	kbreakpoint();
 	// shutdown_test_();
+
+	// fs_test_();
 
 	kinfo("Finish.");
 	StoreIntFlag(); // Start interrupt.

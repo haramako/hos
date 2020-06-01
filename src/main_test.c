@@ -36,51 +36,44 @@ static void timer_test_() {
 }
 
 // FAT test
-typedef struct {
-	uint8_t *fs_bin;
-	uint64_t fs_size;
-} FAT_UserData;
-
-#define FAT_SECTOR_SIZE 512
-
-static void blk_read_(void *data, size_t sector, void *buf, size_t num_sectors) {
-	FAT_UserData *d = (FAT_UserData *)data;
-	memcpy(buf, d->fs_bin + sector * FAT_SECTOR_SIZE, num_sectors * FAT_SECTOR_SIZE);
-}
-
-static void blk_write_(void *data, size_t offset, const void *buf, size_t len) { kpanic("NYI"); }
-
-static struct fat fs;
-
-static void bootfs_init() {
-	FAT_UserData *data = malloc(sizeof(FAT_UserData));
-	data->fs_bin = g_boot_param->bootfs_buf;
-	data->fs_size = g_boot_param->bootfs_size;
-
-	error_t err = fat_probe(&fs, blk_read_, blk_write_, data);
-	assert(err == OK);
-}
-
 static void fat_test_() {
 	error_t err;
 	struct fat_dir dir;
 	struct fat_dirent *e;
 	char tmp[12];
-	kcheck(fat_opendir(&fs, &dir, "/") == OK, "fat_opendir failed!");
-	while ((e = fat_readdir(&fs, &dir)) != NULL) {
+	kcheck(fat_opendir(&g_fs, &dir, "/") == OK, "fat_opendir failed!");
+	while ((e = fat_readdir(&g_fs, &dir)) != NULL) {
 		strncpy(tmp, (const char *)e->name, sizeof(tmp));
 		tmp[11] = '\0';
 		klog("/%s", tmp);
 
 		char buf[512];
 		struct fat_file file;
-		err = fat_open(&fs, &file, tmp);
+		err = fat_open(&g_fs, &file, tmp);
 		kcheck(err == OK, "fat_open failed!");
-		err = fat_read(&fs, &file, 0, buf, MIN(file.size, 8));
+		err = fat_read(&g_fs, &file, 0, buf, MIN(file.size, 8));
 		kcheck(err == OK, "fat_read failed!");
 		buf[8] = '\0';
 		klog("%s", buf);
 	}
+}
+
+// fs test.
+static void fs_test_() {
+	error_t err;
+	INode *inode;
+
+	err = fs_open("HELLO.ELF", 0, &inode);
+	kcheck0(err == ERR_OK);
+
+	klog("size %ld", inode->file.size);
+
+	char buf[8];
+	err = fs_read(inode, buf, sizeof(buf));
+	kcheck0(err == ERR_OK);
+	klog(dump_bytes(buf, sizeof(buf)));
+
+	klog("hoge");
 }
 
 // Process test 2
@@ -98,9 +91,9 @@ static void process_test_one_() {
 	char *buf = (char *)physical_memory_alloc(10);
 
 	struct fat_file file;
-	error_t err = fat_open(&fs, &file, "HELLO   ELF");
+	error_t err = fat_open(&g_fs, &file, "HELLO   ELF");
 	kcheck(err == OK, "fat_open failed!");
-	err = fat_read(&fs, &file, 0, buf, file.size);
+	err = fat_read(&g_fs, &file, 0, buf, file.size);
 	kcheck(err == OK, "fat_read failed!");
 	Elf64_Ehdr *elf = (Elf64_Ehdr *)buf;
 

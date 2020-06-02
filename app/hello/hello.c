@@ -9,11 +9,6 @@ void _sys_shutdown();
 int _sys_open(const char *path, int flag);
 int _sys_read(int fd, void *buf, size_t size);
 
-int n;
-
-void print_int(uint64_t n);
-
-
 void print_int(uint64_t n){
 	char buf[16];
 	buf[0] = '0' + n;
@@ -23,12 +18,7 @@ void print_int(uint64_t n){
 
 void _start(){
 	_sys_write(1, "Hello, world!\n", 14);
-	n++;
 	
-	//_sys_exit(0);
-	//write(1, "exited!\n", 8);
-	//_sys_shutdown();
-
 	int fd = _sys_open("hoge.txt", 0);
 	print_int(fd);
 	
@@ -40,6 +30,10 @@ void _start(){
 		_sys_write(1, buf, len);
 	}
 	
+	_sys_exit(0);
+
+	_sys_shutdown();
+
 	for(;;);
 }
 

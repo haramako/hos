@@ -88,7 +88,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 
 	fs_init();
 
-	// console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
+	console_set_log_level(CONSOLE_LOG_LEVEL_TRACE);
 
 	// test_virtual_memory_map_();
 	// paging_test_();

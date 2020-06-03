@@ -85,13 +85,15 @@ static void process_test_one_() {
 	char *bin = (char *)0x0000100000000000ULL;
 	PageMapEntry *new_pml4 = page_copy_page_map_table(page_current_pml4());
 	MemoryMap *mm = mm_new();
-	MemoryBlock *block = mm_map(mm, bin, 4, MM_ATTR_USER);
+	MemoryBlock *block = mm_map(mm, bin, 200, MM_ATTR_USER);
 	kcheck0(mem_alloc_memory_block(new_pml4, block) == ERR_OK);
+	klog("b");
 
-	char *buf = (char *)physical_memory_alloc(10);
+	char *buf = (char *)physical_memory_alloc(200);
 
 	struct fat_file file;
 	error_t err = fat_open(&g_fs, &file, "HELLO   ELF");
+	klog("c %d", file.size);
 	kcheck(err == OK, "fat_open failed!");
 	err = fat_read(&g_fs, &file, 0, buf, file.size);
 	kcheck(err == OK, "fat_read failed!");

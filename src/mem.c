@@ -30,7 +30,7 @@ static void page_alloc_addr(void *addr, int num_page) {
 
 void mem_init() {
 	ktrace("Initialize kernel heap.");
-	const int num = 128;
+	const int num = 512;
 	uintptr_t block = canonical_addr(0xffff800000000000);
 	page_alloc_addr((void *)block, num);
 

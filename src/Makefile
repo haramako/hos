@@ -34,8 +34,9 @@ CFLAGS= \
 	$(CLANG_WARNINGS) $(C_STD)
 
 LDFLAGS= \
-	-L$(NEWLIB_LIB_PATH) -lm \
-	-L../third_party_root/lib -lc \
+	-L$(NEWLIB_LIB_PATH) \
+	-lm \
+	-lc \
 	-static # --verbose
 
 # Kernel rules

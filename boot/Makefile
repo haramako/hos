@@ -18,7 +18,7 @@ CFLAGS= \
 	$(CLANG_WARNINGS) \
 	-I. \
 	-I./include \
-	-I../third_party_root/include
+	-I../vendor/newlib/include
 
 LDFLAGS= \
     -nodefaultlib \

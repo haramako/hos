@@ -16,8 +16,8 @@ CLANG_WARNINGS = \
 	-Wno-char-subscripts \
     -Wno-gnu-binary-literal
 
-NEWLIB_INC_PATH=../third_party_root/include
-NEWLIB_LIB_PATH=../third_party_root/lib
+NEWLIB_INC_PATH=../vendor/newlib/include
+NEWLIB_LIB_PATH=../vendor/newlib/lib
 
 CFLAGS= \
 	-g \

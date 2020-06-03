@@ -1,4 +1,6 @@
-mnt/
+/mnt
+/tmp
+/vendor
 *.EFI
 .DS_Store
 *.img

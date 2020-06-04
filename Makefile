@@ -5,6 +5,7 @@ include common.mk
 BOOTFS=mnt/BOOTFS.IMG
 OVMF=vendor/ovmf/bios64.bin
 QEMU=qemu-system-x86_64
+SUBMAKE=cstd/src app/hello app/stdlib
 
 QEMU_ARGS=\
 	-bios $(OVMF) \
@@ -34,8 +35,7 @@ boot/BOOTX64.EFI: .FORCE
 
 $(BOOTFS): .FORCE
 	mkdir -p mnt
-	$(MAKE) -C app/hello
-	$(MAKE) -C app/stdlib
+	for d in $(SUBMAKE) ; do $(MAKE) -C $$d ; done
 	rm -f $(BOOTFS)
 	mformat -t 256 -h 1 -s 64 -C -i $(BOOTFS) ::
 	mcopy -i $(BOOTFS) app/hello/hello.elf app/stdlib/stdlib.elf bootfs_data/* ::
@@ -50,6 +50,10 @@ clean :
 	rm -rf mnt
 	$(MAKE) -C src clean
 	$(MAKE) -C boot clean
+
+# Clean all files exclude tmp and vendor.
+distclean:
+	git clean --exclude tmp --exclude vendor -dqfx
 
 # Format files exclude tmp and vendor directory. And create Global tags.
 format :

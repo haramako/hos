@@ -11,7 +11,8 @@
 cc_cache.gen.mk
 *.o
 *.d
-
+*.a
+*.elf
 
 /fd
 /.vscode

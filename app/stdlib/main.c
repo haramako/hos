@@ -19,7 +19,7 @@ void _start(){
 	char *x2 = malloc(8);
 	printf("malloc %p %p\n", (void*)x1, (void*)x2);
 
-	// exit(0);
+	exit(0);
 
 	__shutdown();
 

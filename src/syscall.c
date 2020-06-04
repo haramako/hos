@@ -56,23 +56,9 @@ void syscall_init() {
 }
 
 __attribute__((ms_abi)) uint64_t SyscallHandler(uint64_t *args) {
-#if 0
-	uint64_t rdi;
-	uint64_t rsi;
-	klog("HOGE");
-	__asm__ volatile("mov %%rdi, %0" : "=r"(rdi));
-	__asm__ volatile("mov %%rsi, %0" : "=r"(rsi));
-#endif
-
 	uint64_t idx = args[0];
 
-#if 0
-	klog("syscall %lld %lld %lld %lld %lld", args[0], args[1], args[2], args[3], args[4]);
-	klog("%s", dump_bytes(args, 128));
-	klog("args %p", args);
-	klog("rdi %p", rdi);
-	klog("rsi %p", rsi);
-#endif
+	// klog("syscall %lld, %lld, %lld, %lld, %lld", args[0], args[1], args[2], args[3], args[4]);
 
 	if (idx > SYS_MAX) {
 		kpanic("Unknown syscall!");

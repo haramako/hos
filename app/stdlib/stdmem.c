@@ -13,7 +13,6 @@ void *sbrk (intptr_t __delta){
 }
 
 void _exit (int __status){
-	puts("ZZZ\n");
-	__exit(__status);
-	printf("b\n");
+	__shutdown();
+	//__exit(__status);
 }

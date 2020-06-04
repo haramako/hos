@@ -28,7 +28,6 @@ int kill (__pid_t __pid, int __sig){ return 0; }
 __pid_t getpid (void){ return 0; }
 __off_t lseek (int __fd, __off_t __offset, int __whence){ return 0; }
 int mkdirat (int __fd, const char *__path, __mode_t __mode){ return 0; }
-void _exit (int __status){}
 //ssize_t read (int __fd, void *__buf, size_t __nbytes){}
 int symlinkat (const char *__from, int __tofd, const char *__to){ return 0; }
 __mode_t umask (__mode_t __mask){ return 0;}

@@ -4,6 +4,11 @@
 #include "process.h"
 #include "scheduler.h"
 
+#define RETURN_IF_ERROR(err) \
+	if ((err) != ERR_OK) { \
+		return (err); \
+	}
+
 uint64_t syscall_read(uint64_t *args) {
 	int fd_num = (int)args[1];
 	char *buf = (char *)args[2];
@@ -16,7 +21,15 @@ uint64_t syscall_read(uint64_t *args) {
 
 	kcheck0(fd->inode);
 
-	error_t err = fs_read(fd->inode, buf, size);
+	size_t rest = fd->inode->file.size - fd->pos;
+	if (size > rest) {
+		size = rest;
+	}
 
-	return err;
+	error_t err = fs_read(fd->inode, buf, fd->pos, &size);
+	RETURN_IF_ERROR(err);
+
+	fd->pos += size;
+
+	return size;
 }

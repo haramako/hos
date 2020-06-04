@@ -78,10 +78,13 @@ error_t fs_open(const char *filename, uint64_t flags, INode **out_opened) {
 	return ERR_OK;
 }
 
-error_t fs_read(INode *inode, char *buf, size_t buf_len) {
+error_t fs_read(INode *inode, char *buf, size_t offset, size_t *io_buf_len) {
+	kcheck0(io_buf_len);
 	kcheck0(inode->inum != 0);
 
-	error_t err = fat_read(&g_fs, &inode->file, 0, buf, buf_len);
-	kcheck0(err == OK);
-	return (error_t)inode->file.size;
+	error_t err = fat_read(&g_fs, &inode->file, offset, buf, *io_buf_len);
+	if (err != OK) {
+		ERR_UNKNOWN;
+	}
+	return ERR_OK;
 }

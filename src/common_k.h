@@ -5,6 +5,7 @@
 typedef int error_t;
 
 #define ERR_OK 0
+#define ERR_UNKNOWN 10000
 #define ERR_MM_NOT_FOUND 10000
 
 /// Page size by byte.

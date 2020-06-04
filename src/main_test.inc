@@ -69,7 +69,8 @@ static void fs_test_() {
 	klog("size %ld", inode->file.size);
 
 	char buf[8];
-	err = fs_read(inode, buf, sizeof(buf));
+	size_t size = sizeof(buf);
+	err = fs_read(inode, buf, 0, &size);
 	kcheck0(err >= 0);
 	klog(dump_bytes(buf, sizeof(buf)));
 
@@ -96,7 +97,8 @@ static void process_test_one_() {
 	//err = fs_open("HELLO.ELF", 0, &inode);
 	kcheck_ok(err);
 
-	err = fs_read(inode, (char*)buf, inode->file.size);
+	size_t file_size = inode->file.size;
+	err = fs_read(inode, (char*)buf, 0, &file_size);
 	kcheck(err >= 0, "Read failed.");
 
 	ELFImage elf_image;

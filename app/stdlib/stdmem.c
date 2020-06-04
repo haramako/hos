@@ -1,11 +1,19 @@
 #include <stdint.h>
+#include <stdio.h>
 
-char sbrk_buf[1024];
+#include <syscall_func.h>
+
+char sbrk_buf[4096];
+char *sbrk_cur = sbrk_buf;
+
 void *sbrk (intptr_t __delta){
-	if( __delta == 0){
-		return sbrk_buf;
-	}else{
-		return sbrk_buf + 1024;
-	}
+	char *old = sbrk_cur;
+	sbrk_cur += __delta;
+	return old;
 }
 
+void _exit (int __status){
+	puts("ZZZ\n");
+	__exit(__status);
+	printf("b\n");
+}

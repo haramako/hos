@@ -7,4 +7,3 @@
 #if 0
 typedef short wint_t;
 #endif
-

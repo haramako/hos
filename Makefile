@@ -51,9 +51,11 @@ clean :
 	$(MAKE) -C src clean
 	$(MAKE) -C boot clean
 
+# Format files exclude tmp and vendor directory. And create Global tags.
 format :
-	cd src && clang-format -i *.c *.h **/*.h **/*.c && gtags
-	cd boot && clang-format -i *.c *.h **/*.h && gtags
+	find . \( -name vendor -o -name tmp \) -prune -o -name '*.[ch]' -print > gtags.files
+	cat gtags.files | xargs clang-format -i
+	-gtags
 
 gdb:
 	gdb -x debug_kernel.gdb

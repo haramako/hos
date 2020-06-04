@@ -9,9 +9,13 @@
 *.dSYM
 *.vdi
 cc_cache.gen.mk
+*.o
+*.d
+
 
 /fd
 /.vscode
 GPATH
 GRTAGS
 GTAGS
+gtags.files

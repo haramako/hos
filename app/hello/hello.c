@@ -7,9 +7,10 @@ void _sys_shutdown();
 int _sys_open(const char *path, int flag);
 int _sys_read(int fd, void *buf, size_t size);
 
-void _start(){
+void _start() {
 	_sys_write(1, "Hello, world!\n", 14);
 	_sys_shutdown();
 
-	for(;;);
+	for (;;)
+		;
 }

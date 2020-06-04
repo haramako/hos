@@ -1,8 +1,8 @@
-default: stdlib.elf
+default: libstd.a
 
 include ../../common.mk
 
-TARGET = stdlib.elf
+TARGET = libstd.a
 SRCS = $(wildcard *.c *.S) 
 
 CFLAGS= -O2 -std=c11 -target x86_64-unknown-none-elf -fno-builtin \
@@ -11,13 +11,10 @@ CFLAGS= -O2 -std=c11 -target x86_64-unknown-none-elf -fno-builtin \
   -D__ELF__ -D_LDBL_EQ_DBL -DUSE_INCLUDE_NEXT \
   -mcmodel=large
 
-LDFLAGS=-nostdlib -e _start -L../../vendor/newlib/lib -L../../cstd/src -lc -lstd -static
-
-# Kernel rules
-
-$(TARGET): $(SRCS) Makefile kernel.ld
-	$(LLVM_CC) $(CFLAGS) -o $@ -T kernel.ld $(SRCS) $(LDFLAGS)
+$(TARGET): $(SRCS) Makefile
+	$(LLVM_CC) $(CFLAGS) -c $(SRCS)
+	$(LLVM_AR) -crsv $@ *.o 
 
 clean :
-	-rm -rf $(TARGET)
+	-rm -rf *.o $(TARGET)
 

@@ -31,7 +31,7 @@ static void timer_test_() {
 	timer_print();
 	for (;;) {
 		hpet_busy_wait(1000);
-		console_write(".");
+		console_putc('.');
 	}
 }
 
@@ -93,7 +93,8 @@ static void process_test_one_() {
 	klog("buf %p", buf);
 
 	INode *inode;
-	err = fs_open("HELLO.ELF", 0, &inode);
+	err = fs_open("STDLIB.ELF", 0, &inode);
+	//err = fs_open("HELLO.ELF", 0, &inode);
 	kcheck_ok(err);
 
 	klog("size %ld", inode->file.size);
@@ -108,7 +109,7 @@ static void process_test_one_() {
 
 	// pme_print(new_pml4);
 	page_memcpy(new_pml4, bin, buf, inode->file.size);
-	klog("buf mem %s", dump_bytes(buf, 256));
+	// klog("buf mem %s", dump_bytes(buf, 256));
 
 	{
 		EntryPoint entry_point = (EntryPoint)elf->e_entry;

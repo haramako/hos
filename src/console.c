@@ -38,37 +38,45 @@ void console_init(Serial *console_serial, BootParam_Graphics *g) {
 	if (sh_) sheet_draw_rect(sh_, 0, 0, sh_->xsize, sh_->ysize, 0, true);
 }
 
-void console_write(const char *msg) {
-	for (const char *c = msg; *c != '\0'; c++) {
-		serial_send_char(com_, *c);
-	}
+void console_putc(char c) {
+	serial_send_char(com_, c);
 	if (sh_) {
-		for (const char *c = msg; *c != '\0'; c++) {
-			if (*c == '\n') {
-				x_ = 0;
+		if (c == '\n') {
+			x_ = 0;
+			++y_;
+		} else {
+			sheet_draw_character(sh_, c, x_ * FONT_WIDTH, y_ * FONT_HEIGHT, true);
+			++x_;
+			if (x_ >= FONT_COLS) {
 				++y_;
-			} else {
-				sheet_draw_character(sh_, *c, x_ * FONT_WIDTH, y_ * FONT_HEIGHT, true);
-				++x_;
-				if (x_ >= FONT_COLS) {
-					++y_;
-					x_ = 0;
-				}
-			}
-
-			// Scroll.
-			if (y_ >= FONT_LINE_LEN) {
-				sheet_scroll(sh_, FONT_HEIGHT, true);
-				--y_;
+				x_ = 0;
 			}
 		}
+
+		// Scroll.
+		if (y_ >= FONT_LINE_LEN) {
+			sheet_scroll(sh_, FONT_HEIGHT, true);
+			--y_;
+		}
+	}
+}
+
+void console_write(const char *msg, size_t size) {
+	for (size_t i = 0; i < size; i++) {
+		console_putc(msg[i]);
+	}
+}
+
+void console_puts(const char *msg) {
+	for (const char *c = msg; *c != '\0'; c++) {
+		console_putc(*c);
 	}
 }
 
 void console_vprintf(const char *fmt, va_list vargs) {
 	char buf[CONSOLE_BUF_SIZE];
 	vsnprintf(buf, sizeof(buf), fmt, vargs);
-	console_write(buf);
+	console_puts(buf);
 }
 
 void console_printf(const char *fmt, ...) {
@@ -82,7 +90,7 @@ void console_printfn(const char *fmt, ...) {
 	va_list vargs;
 	va_start(vargs, fmt);
 	console_vprintf(fmt, vargs);
-	console_write("\n");
+	console_putc('\n');
 	va_end(vargs);
 }
 
@@ -91,9 +99,9 @@ void console_log(int log_level, const char *fmt, ...) {
 	if (log_level >= g_console_log_level_) {
 		va_list vargs;
 		va_start(vargs, fmt);
-		console_write(LOG_LEVEL_NAMES[log_level]);
+		console_puts(LOG_LEVEL_NAMES[log_level]);
 		console_vprintf(fmt, vargs);
-		console_write("\n");
+		console_putc('\n');
 		va_end(vargs);
 	}
 	if (log_level == CONSOLE_LOG_LEVEL_FATAL) {

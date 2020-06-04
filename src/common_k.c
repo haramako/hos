@@ -10,7 +10,7 @@ void kpanic(const char *msg, ...) {
 	va_list vargs;
 	va_start(vargs, msg);
 	console_vprintf(msg, vargs);
-	console_write("\n");
+	console_putc('\n');
 	va_end(vargs);
 	while (1) {
 	}

@@ -64,13 +64,13 @@ static void fs_test_() {
 	INode *inode;
 
 	err = fs_open("HELLO.ELF", 0, &inode);
-	kcheck0(err == ERR_OK);
+	kcheck_ok(err);
 
 	klog("size %ld", inode->file.size);
 
 	char buf[8];
 	err = fs_read(inode, buf, sizeof(buf));
-	kcheck0(err == ERR_OK);
+	kcheck0(err >= 0);
 	klog(dump_bytes(buf, sizeof(buf)));
 
 	klog("hoge");
@@ -81,30 +81,38 @@ static void fs_test_() {
 typedef void (*EntryPoint)();
 
 static void process_test_one_() {
+	error_t err;
 
 	char *bin = (char *)0x0000100000000000ULL;
 	PageMapEntry *new_pml4 = page_copy_page_map_table(page_current_pml4());
 	MemoryMap *mm = mm_new();
-	MemoryBlock *block = mm_map(mm, bin, 200, MM_ATTR_USER);
-	kcheck0(mem_alloc_memory_block(new_pml4, block) == ERR_OK);
-	klog("b");
+	MemoryBlock *block = mm_map(mm, bin, 256, MM_ATTR_USER);
+	kcheck_ok(mem_alloc_memory_block(new_pml4, block));
 
-	char *buf = (char *)physical_memory_alloc(200);
+	uint8_t *buf = (uint8_t *)physical_memory_alloc(256);
+	klog("buf %p", buf);
 
-	struct fat_file file;
-	error_t err = fat_open(&g_fs, &file, "HELLO   ELF");
-	klog("c %d", file.size);
-	kcheck(err == OK, "fat_open failed!");
-	err = fat_read(&g_fs, &file, 0, buf, file.size);
-	kcheck(err == OK, "fat_read failed!");
+	INode *inode;
+	err = fs_open("HELLO.ELF", 0, &inode);
+	kcheck_ok(err);
+
+	klog("size %ld", inode->file.size);
+
+	err = fs_read(inode, (char*)buf, inode->file.size);
+	kcheck(err >= 0, "Read failed.");
+
+	ELFImage elf_image;
+	elf_load_exec((uint8_t*)buf, &elf_image);
+
 	Elf64_Ehdr *elf = (Elf64_Ehdr *)buf;
 
 	// pme_print(new_pml4);
-	page_memcpy(new_pml4, bin, buf, file.size);
+	page_memcpy(new_pml4, bin, buf, inode->file.size);
+	klog("buf mem %s", dump_bytes(buf, 256));
 
 	{
 		EntryPoint entry_point = (EntryPoint)elf->e_entry;
-		// klog("size %lld, ep = %p, entry_point = %p", bin_size, elf->e_entry, entry_point);
+		klog("size %lld, ep = %p, entry_point = %p", inode->file.size, elf->e_entry, entry_point);
 
 		ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
 		Process *p = process_create(&param);
@@ -141,8 +149,6 @@ static void paging_test_() {
 
 	void *p = (void *)(7 * 1024 * 1024 + 123);
 	klog("v2p %p => %p", p, page_v2p(pml4, p));
-
-	pme_print(pml4);
 
 	PageMapEntry *new_pml4 = page_copy_page_map_table(pml4);
 

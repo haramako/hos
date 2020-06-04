@@ -16,7 +16,10 @@ void print_int(uint64_t n){
 	_sys_write(1, buf, 2);
 }
 
+int n = 1;
+
 void _start(){
+	n++;
 	_sys_write(1, "Hello, world!\n", 14);
 	
 	int fd = _sys_open("hoge.txt", 0);
@@ -32,7 +35,8 @@ void _start(){
 
 	//int n = strlen(buf);
 
-	snprintf(buf, sizeof(buf), "%d %d", 1, 1);
+	snprintf(buf, sizeof(buf), "%s %d\n", "STR", 1);
+	_sys_write(1, buf, strlen(buf));
 	
 	_sys_exit(0);
 

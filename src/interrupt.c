@@ -17,7 +17,7 @@ __attribute__((ms_abi)) void IntHandler(uint64_t intcode, InterruptInfo *info) {
 	if (intcode <= 0xFF && handler_list_[intcode]) {
 		handler_list_[intcode](intcode, info);
 	} else {
-		kinfo("Int handler not implemented intcode=%d", intcode);
+		kpanic("Int handler not implemented intcode=%d at %018p", intcode, info->int_ctx.rip);
 	}
 }
 
@@ -76,8 +76,8 @@ void interrupt_init() {
 
 	WriteIDTR(&idtr);
 
-	interrupt_set_int_handler(0x0d, handler_general_protection_fault_);
 	interrupt_set_int_handler(0x06, handler_undefined_operation_);
+	interrupt_set_int_handler(0x0d, handler_general_protection_fault_);
 }
 
 void interrupt_set_int_handler(uint64_t intcode, InterruptHandler handler) {

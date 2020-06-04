@@ -1,6 +1,6 @@
 /mnt
 /tmp
-/vendor
+/vendor/newlib
 *.EFI
 .DS_Store
 *.img

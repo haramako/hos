@@ -38,7 +38,7 @@ static const Elf64_Ehdr *parse_elf_(uint8_t *buf, Elf64_Phdr **out_code, Elf64_P
 
 	for (int i = 0; i < ehdr->e_phnum; i++) {
 		Elf64_Phdr *phdr = (Elf64_Phdr *)(buf + ehdr->e_phoff + ehdr->e_phentsize * i);
-		klog("H %d %d %p %p %p", i, phdr->p_flags, phdr->p_memsz, phdr->p_vaddr, phdr->p_offset);
+		// klog("H %d %d %p %p %p", i, phdr->p_flags, phdr->p_memsz, phdr->p_vaddr, phdr->p_offset);
 		if (phdr->p_type != PT_LOAD) continue;
 
 		if (phdr->p_flags & PF_X) {
@@ -60,8 +60,8 @@ void elf_load_exec(uint8_t *buf, ELFImage *out_image) {
 		kpanic("Can't load ELF.");
 	}
 
-	klog("code %p %lld %p", code->p_vaddr, code->p_memsz, code->p_offset);
-	klog("data %p %lld %p", data->p_vaddr, data->p_memsz, data->p_offset);
+	// klog("code %p %lld %p", code->p_vaddr, code->p_memsz, code->p_offset);
+	// klog("data %p %lld %p", data->p_vaddr, data->p_memsz, data->p_offset);
 
 #if 0
 	uint8_t *code_buf = efi_allocate_pages_addr(code->p_vaddr, byte_size_to_page_size(code->p_memsz));

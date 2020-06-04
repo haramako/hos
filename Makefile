@@ -3,7 +3,7 @@ default: files
 include common.mk
 
 BOOTFS=mnt/BOOTFS.IMG
-OVMF=ovmf/bios64.bin
+OVMF=vendor/ovmf/bios64.bin
 QEMU=qemu-system-x86_64
 
 QEMU_ARGS=\

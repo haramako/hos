@@ -90,14 +90,11 @@ static void process_test_one_() {
 	kcheck_ok(mem_alloc_memory_block(new_pml4, block));
 
 	uint8_t *buf = (uint8_t *)physical_memory_alloc(256);
-	klog("buf %p", buf);
 
 	INode *inode;
 	err = fs_open("STDLIB.ELF", 0, &inode);
 	//err = fs_open("HELLO.ELF", 0, &inode);
 	kcheck_ok(err);
-
-	klog("size %ld", inode->file.size);
 
 	err = fs_read(inode, (char*)buf, inode->file.size);
 	kcheck(err >= 0, "Read failed.");
@@ -113,7 +110,7 @@ static void process_test_one_() {
 
 	{
 		EntryPoint entry_point = (EntryPoint)elf->e_entry;
-		klog("size %lld, ep = %p, entry_point = %p", inode->file.size, elf->e_entry, entry_point);
+		//klog("size %lld, ep = %p, entry_point = %p", inode->file.size, elf->e_entry, entry_point);
 
 		ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
 		Process *p = process_create(&param);

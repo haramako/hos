@@ -1,5 +1,4 @@
-file src/KERNEL.ELF
-file app/stdlib/stdlib.elf
+file bootfs_data/toybox
 target remote :1192
 break kbreakpoint
 

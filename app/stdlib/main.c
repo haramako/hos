@@ -5,7 +5,7 @@
 
 #include "syscall_func.h"
 
-void _start() {
+int main(int argc, char **argv) {
 
 	char buf[16];
 	FILE *fd = fopen("hoge.txt", "r");
@@ -19,10 +19,5 @@ void _start() {
 	char *x2 = malloc(8);
 	printf("malloc %p %p\n", (void *)x1, (void *)x2);
 
-	exit(0);
-
-	__shutdown();
-
-	for (;;)
-		;
+	return 0;
 }

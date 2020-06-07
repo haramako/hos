@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,5 +47,3 @@ int fstat(int __fd, struct stat *__buf) { return 0; }
 int fstatat(int __fd, const char *__restrict __file, struct stat *__restrict __buf, int __flag) { return 0; }
 int openat(int __fd, const char *__file, int __oflag, ...) { return 0; }
 int close(int __fd) { return 0; }
-
-char *basename(char *__filename) { return 0; }

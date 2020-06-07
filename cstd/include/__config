@@ -1,0 +1,186 @@
+#pragma once
+
+#include <stdint.h>
+
+typedef uintptr_t size_t;
+
+#if 0 // in termios.h
+struct termios {
+	int c_iflag;
+	int c_lflag;
+	int c_oflag;
+};
+#endif
+
+#if 0 // in bits/statfs.h
+struct statfs {
+	int f_type;
+};
+#endif
+
+extern int errno;
+
+#if 0
+#define ENOENT 0
+#define EPIPE 0
+#define EEXIST 0
+#define ERANGE 0
+#define EINTR 0
+#define ELOOP 0
+#define EXDEV 0
+#define EINVAL 0
+#define ESRCH 0
+#define EAGAIN 0
+#define E2BIG 0
+#define ENOMEDIUM 0
+#define EBUSY 0
+#define EACCES 0
+#define EROFS 0
+#define ENOSYS 0
+#define EOPNOTSUPP 0
+#define ENXIO 0
+#define ENOTBLK 0
+#define ENOTEMPTY 0
+#endif
+
+#define _PATH_DEFPATH 16
+#define IXANY 0
+#define TCIFLUSH 0
+#define ICRNL 0
+#define INLCR 0
+#define IUTF8 0
+#define ONLCR 0
+#define TCSANOW 0
+#define OPOST 0
+#define MAP_FAILED 0
+#define MAP_SHARED 0
+#define ICANON 0
+#define ISIG 0
+#define ECHO 0
+#define ECHOE 0
+#define ECHOK 0
+#define ECHOCTL 0
+#define ECHOKE 0
+#define UTIME_NOW 0
+#define UTIME_OMIT 0
+
+#define IEXTEN 0
+#define CLOCK_MONOTONIC 0
+#define TCSAFLUSH 0
+#define POLLIN 0
+#define BLKGETSIZE64 0
+#define BLKFLSBUF 0
+#define BLKRRPART 0
+#define BLKROSET 0
+#define O_NDELAY 0
+#define O_BINARY 8
+#define PROT_READ 0
+#define PROT_WRITE 0
+
+#if 0 // in sys/mount.h
+#define MS_RDONLY 0
+#define MS_NOEXEC 0
+#define MS_NOSUID 0
+#define MS_NODEV 0
+#define MS_SYNCHRONOUS 0
+#define MS_NOATIME 0
+#define MS_SILENT 0
+#define MS_SHARED 0
+#define MS_RELATIME 0
+#define MS_NODIRATIME 0
+#define MS_REC 0
+#define MS_SLAVE 0
+#define MS_PRIVATE 0
+#define MS_UNBINDABLE 0
+#define MS_REMOUNT 0
+#define MS_MOVE 0
+#define MS_BIND 0
+#endif
+
+struct mtab_list {
+	int *type;
+	int stat;
+	int statvfs;
+	int dir;
+	int device;
+	int opts;
+	struct mtab_list *next;
+	void *f_blocks;
+};
+
+#define offsetof(...) 1
+
+struct addrinfo {
+	int ai_family;
+};
+
+struct pollfd {
+	int fd;
+	int events;
+	int revents;
+};
+
+	
+//typedef void* sigjmp_buf;
+
+//typedef size_t socklen_t;
+
+struct spwd {
+	char *sp_pwdp;
+};
+
+struct ifreq {
+	int n;
+};
+
+extern int h_errno;
+
+
+#if 0 // in linux/sysinfo.h
+struct sysinfo {
+	int n;
+	int mem_unit;
+	int totalram;
+	int freeram;
+	int sharedram;
+	int bufferram;
+	int totalswap;
+	int freeswap;
+	int uptime;
+};
+#endif
+
+extern int daylight;
+
+struct hostent {
+	char *h_name;
+};
+
+//extern int timezone;
+
+#define lstat stat
+
+struct itimerval {
+	int n;
+};
+
+struct sockaddr_in6{};
+struct sockaddr_storage{};
+
+#if 0
+typedef struct DIR {
+} DIR;
+#endif
+
+#if 0
+struct dirent {
+	char *d_name;
+	int d_type;
+};
+#endif
+
+typedef intptr_t ssize_t;
+
+typedef int32_t pid_t;
+typedef intptr_t ptrdiff_t;
+//#define NULL 0

@@ -93,7 +93,8 @@ static void process_test_one_() {
 	uint8_t *buf = (uint8_t *)physical_memory_alloc(256);
 
 	INode *inode;
-	err = fs_open("STDLIB.ELF", 0, &inode);
+	err = fs_open("toybox", 0, &inode);
+	//err = fs_open("STDLIB.ELF", 0, &inode);
 	//err = fs_open("HELLO.ELF", 0, &inode);
 	kcheck_ok(err);
 

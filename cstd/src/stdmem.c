@@ -5,12 +5,12 @@
 
 #include <syscall_func.h>
 
-char sbrk_buf[4096*4];
+char sbrk_buf[4096 * 4];
 char *sbrk_cur = sbrk_buf;
 
 int main(int argc, char **argv);
 
-void _start(){
+void _start() {
 	int exitcode = main(0, NULL);
 	__shutdown();
 	exit(exitcode);

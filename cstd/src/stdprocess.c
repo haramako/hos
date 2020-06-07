@@ -1,3 +1,1 @@
-int kill(int pid){
-	return 0;
-}
+int kill(int pid) { return 0; }

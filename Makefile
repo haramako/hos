@@ -57,7 +57,7 @@ distclean:
 
 # Format files exclude tmp and vendor directory. And create Global tags.
 format :
-	find . \( -name vendor -o -name tmp \) -prune -o -name '*.[ch]' -print > gtags.files
+	find . \( -name vendor -o -name tmp -o -name sh \) -prune -o -name '*.[ch]' -print > gtags.files
 	cat gtags.files | xargs clang-format -i
 	-gtags
 

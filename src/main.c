@@ -23,8 +23,6 @@
 #include "syscall.h"
 #include "timer.h"
 
-BootParam *g_boot_param;
-
 #include "main_test.inc" // Include test source.
 
 static void pci_test() {

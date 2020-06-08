@@ -73,3 +73,5 @@ void kshutdown();
 	if ((err) != ERR_OK) { \
 		return (err); \
 	}
+
+extern struct BootParam_ *g_boot_param;

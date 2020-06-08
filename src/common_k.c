@@ -3,9 +3,11 @@
 #include <stdio.h>
 
 #include "asm.h"
+#include "boot_param.h"
 #include "console.h"
 #include "efi/runtime_services.h" // for shutdown
-#include "global.h"
+
+BootParam *g_boot_param;
 
 void kpanic_(const char *file, const int line, const char *msg, ...) {
 	console_printf("%s:%d: ", file, line);

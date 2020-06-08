@@ -20,7 +20,7 @@ typedef struct BootParam_Graphics_ {
 	uint32_t pixels_per_scan_line;
 } BootParam_Graphics;
 
-typedef struct {
+typedef struct BootParam_ {
 	struct ACPI_RSDT_ *rsdt;
 	EFI_MemoryMap *efi_memory_map;
 	BootParam_Graphics graphics;

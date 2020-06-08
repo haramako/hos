@@ -1,7 +1,7 @@
 #include "acpi.h"
 
 #include "acpi/rsdt.h"
-#include "global.h"
+#include "boot_param.h"
 
 void *acpi_find_rsdt(const char *signature) {
 	ACPI_XSDT *xsdt = g_boot_param->rsdt->xsdt;

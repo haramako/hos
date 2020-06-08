@@ -1,7 +1,7 @@
 #include "fs.h"
 
+#include "boot_param.h"
 #include "fat.h"
-#include "global.h"
 
 struct fat g_fs;
 

@@ -45,6 +45,8 @@ Process *process_create(ProcessCreateParam *p) {
 	return process;
 }
 
+Process *process_current() { return scheduler_current_process(); }
+
 void process_notify_contextsaving(Process *p) { p->number_of_ctx_switch++; }
 
 void process_print(Process *p) {

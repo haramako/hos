@@ -2,7 +2,6 @@
 
 #include "fs.h"
 #include "process.h"
-#include "scheduler.h"
 
 uint64_t syscall_open(uint64_t *args) {
 	char *path = (char *)args[1];
@@ -10,7 +9,7 @@ uint64_t syscall_open(uint64_t *args) {
 
 	ktrace("syscall_open %s %d", path, flag);
 
-	Process *proc = scheduler_current_process();
+	Process *proc = process_current();
 	int fd_num = proc->fd_num++;
 	FileDescriptor *fd = &proc->fds[fd_num];
 	memset(fd, 0, sizeof(FileDescriptor));

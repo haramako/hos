@@ -3,7 +3,6 @@
 #include "fs.h"
 #include "pipe.h"
 #include "process.h"
-#include "scheduler.h"
 
 uint64_t syscall_read(uint64_t *args) {
 	int fd_num = (int)args[1];
@@ -12,7 +11,7 @@ uint64_t syscall_read(uint64_t *args) {
 
 	klog("syscall_read %d %p %ld", fd_num, buf, size);
 
-	Process *proc = scheduler_current_process();
+	Process *proc = process_current();
 	FileDescriptor *fd = &proc->fds[fd_num];
 
 	switch (fd->type) {

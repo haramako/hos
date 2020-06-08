@@ -59,6 +59,7 @@ typedef struct ProcessCreateParam_ {
 Process *process_new(ExecutionContext *ctx);
 Process *process_create(ProcessCreateParam *p);
 void process_exit(Process *p, int exit_code);
+Process *process_current();
 
 void process_notify_contextsaving(Process *p);
 void process_print(Process *p);

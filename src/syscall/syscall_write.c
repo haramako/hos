@@ -3,7 +3,6 @@
 #include "console.h"
 #include "pipe.h"
 #include "process.h"
-#include "scheduler.h"
 
 uint64_t syscall_write(uint64_t *args) {
 	const uint64_t fd_num = args[1];
@@ -12,7 +11,7 @@ uint64_t syscall_write(uint64_t *args) {
 
 	ktrace("write %ld, %p, %ld", fd_num, buf, size);
 
-	Process *proc = scheduler_current_process();
+	Process *proc = process_current();
 	FileDescriptor *fd = &proc->fds[fd_num];
 
 #if 0

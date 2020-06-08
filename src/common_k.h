@@ -36,19 +36,20 @@ void console_printfn(const char *fmt, ...);
 #define kwarn(...) console_log(CONSOLE_LOG_LEVEL_WARN, __VA_ARGS__)
 #define kerror(...) console_log(CONSOLE_LOG_LEVEL_ERROR, __VA_ARGS__)
 #define kfatal(...) console_log(CONSOLE_LOG_LEVEL_TRACE, __VA_ARGS__)
+#define kpanic(...) kpanic_(__FILE__, __LINE__, __VA_ARGS__)
 
-void kpanic(const char *fmt, ...) NORETURN;
+void kpanic_(const char *file, const int line, const char *fmt, ...) NORETURN;
 
 #define kcheck(must_true, ...) \
 	if (!(must_true)) { \
-		kpanic("%s:%d: %s", __FILE__, __LINE__, __VA_ARGS__); \
+		kpanic("%s", __VA_ARGS__); \
 	};
 
 #define kcheck0(must_true) kcheck(must_true, "Check failed")
 
 #define kcheck_ok(err) \
 	if (err != ERR_OK) { \
-		kpanic("%s:%d: Not ok, but %lld", __FILE__, __LINE__, err); \
+		kpanic("Not ok, but %lld", err); \
 	};
 
 const char *humanize_size(uint64_t size);
@@ -64,3 +65,11 @@ inline uint32_t uint64_low(uint64_t n) { return (uint32_t)n; }
 
 void kbreakpoint();
 void kshutdown();
+
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#define TRY(err) \
+	if ((err) != ERR_OK) { \
+		return (err); \
+	}

@@ -19,5 +19,8 @@ int main(int argc, char **argv) {
 	char *x2 = malloc(8);
 	printf("malloc %p %p\n", (void *)x1, (void *)x2);
 
+	len = fread(buf, 1, 1, stdin);
+	printf("len %d", len);
+
 	return 0;
 }

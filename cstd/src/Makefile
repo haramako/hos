@@ -12,7 +12,7 @@ CFLAGS= -O2 -std=c11 -target x86_64-unknown-none-elf -fno-builtin \
   -mcmodel=large
 
 $(TARGET): $(SRCS) Makefile
-	$(LLVM_CC) -H $(CFLAGS) -c $(SRCS)
+	$(LLVM_CC) $(CFLAGS) -c $(SRCS)
 	$(LLVM_AR) -crsv $@ *.o 
 
 clean :

@@ -2,16 +2,21 @@
 
 #include <stdio.h>
 
+#include "asm.h"
 #include "console.h"
 #include "efi/runtime_services.h" // for shutdown
 #include "global.h"
 
-void kpanic(const char *msg, ...) {
+void kpanic_(const char *file, const int line, const char *msg, ...) {
+	console_printf("%s:%d: ", file, line);
+
 	va_list vargs;
 	va_start(vargs, msg);
 	console_vprintf(msg, vargs);
 	console_putc('\n');
 	va_end(vargs);
+
+	ClearIntFlag();
 	while (1) {
 	}
 }

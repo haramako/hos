@@ -1,18 +1,42 @@
 #include "common.h"
 
 #include "console.h"
+#include "pipe.h"
+#include "process.h"
+#include "scheduler.h"
 
 uint64_t syscall_write(uint64_t *args) {
-	const uint64_t fd = args[1];
+	const uint64_t fd_num = args[1];
 	const char *buf = (char *)args[2];
-	uint64_t nbyte = args[3];
+	uint64_t size = args[3];
 
-	// klog("write %ld, %p, %ld", fd, buf, nbyte);
+	ktrace("write %ld, %p, %ld", fd_num, buf, size);
 
+	Process *proc = scheduler_current_process();
+	FileDescriptor *fd = &proc->fds[fd_num];
+
+#if 0
 	if (fd != 1) {
 		kpanic("Only stdout is supported for now.");
 	}
-	console_write(buf, nbyte);
+#endif
 
-	return 0;
+	switch (fd->type) {
+	case FD_TYPE_INODE: {
+		// console_write(buf, size);
+		return 0;
+	} break;
+	case FD_TYPE_PIPE: {
+		error_t err = pipe_write(fd->pipe, buf, size);
+		TRY(err);
+
+		return size;
+	}
+	case FD_TYPE_CONSOLE: {
+		console_write(buf, size);
+		return 0;
+	}
+	default:
+		kpanic("Invalid fd type %d.", fd->type);
+	}
 }

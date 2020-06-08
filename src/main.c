@@ -103,6 +103,7 @@ void kernel_entry(BootParam *boot_param_passed) {
 	// sheet_test_();
 	// kbreakpoint();
 	// shutdown_test_();
+	// pipe_test_();
 
 	// fs_test_();
 

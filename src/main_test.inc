@@ -93,7 +93,7 @@ static void process_test_one_() {
 	uint8_t *buf = (uint8_t *)physical_memory_alloc(256);
 
 	INode *inode;
-	err = fs_open("toybox", 0, &inode);
+	err = fs_open("stdlib.elf", 0, &inode);
 	//err = fs_open("STDLIB.ELF", 0, &inode);
 	//err = fs_open("HELLO.ELF", 0, &inode);
 	kcheck_ok(err);
@@ -264,4 +264,54 @@ void shutdown_test0_() {
 	klog("x_dsdt %p", fadt->x_dsdt);
 
 	acpi_dsdt_find((ACPI_DSDT *)((uintptr_t)fadt->dsdt), NULL);
+}
+
+// Pipe test.
+#include "pipe.h"
+
+void pipe_test_(){
+	error_t err;
+	uint8_t buf[PIPE_BUF_LEN];
+	
+	Pipe *p = pipe_new();
+	
+	err = pipe_write(p, "HOGE", 4);
+	kcheck_ok(err);
+	klog("%ld", pipe_used(p));
+	klog("%ld", pipe_rest(p));
+
+	err = pipe_read(p, buf, 1);
+	kcheck_ok(err);
+	klog("%d", buf[0]);
+
+	err = pipe_read(p, buf, 3);
+	kcheck_ok(err);
+	
+	uint8_t w = 0;
+	uint8_t r = 0;
+	for( size_t i=0; i<100000;i++){
+		size_t size = rand() % 1024;
+		if( i % 1000 == 0 ){
+			klog("i=%8lld, used=%4lld, size=%4lld, head=%4lld, tail=%4lld", i, pipe_used(p), (int)size, p->head, p->tail);
+		}
+
+		for( size_t j=0; j<size; j++){
+			buf[j] = w++;
+		}
+		
+		err = pipe_write(p, buf, size);
+		kcheck_ok(err);
+
+		if( i == 0 ) continue;
+		
+		pipe_read(p, buf, size);
+		kcheck_ok(err);
+		
+		for( size_t j=0; j<size; j++){
+			if( buf[j] != r++){
+				kpanic("Invalid data");
+			}
+		}
+		
+	}
 }

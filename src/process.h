@@ -15,8 +15,17 @@ typedef enum ProcessStatus_ {
 
 #define FD_MAX 16
 
+typedef enum {
+	FD_TYPE_NONE,
+	FD_TYPE_INODE,
+	FD_TYPE_PIPE,
+	FD_TYPE_CONSOLE,
+} FileDesciptorType;
+
 typedef struct {
+	FileDesciptorType type;
 	struct INode_ *inode;
+	struct Pipe_ *pipe;
 	size_t pos;
 } FileDescriptor;
 

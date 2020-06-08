@@ -34,7 +34,11 @@ Process *process_create(ProcessCreateParam *p) {
 
 	Process *process = process_new(ctx);
 	process->mm = mm;
-	process->fd_num = 1;
+	process->fd_num = 2;
+
+	process->fds[0].type = FD_TYPE_CONSOLE;
+	process->fds[1].type = FD_TYPE_CONSOLE;
+	process->fds[2].type = FD_TYPE_CONSOLE;
 
 	scheduler_register_process(process);
 

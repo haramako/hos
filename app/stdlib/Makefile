@@ -14,7 +14,7 @@ CFLAGS= -O2 -std=c11 -target x86_64-unknown-none-elf -fno-builtin \
 LDFLAGS=-nostdlib -e _start -L../../vendor/newlib/lib -L../../cstd/src -lc -lstd -lc -static
 
 $(TARGET): $(SRCS) Makefile ../app.ld
-	$(LLVM_CC) $(CFLAGS) -H -o $@ -T ../app.ld $(SRCS) $(LDFLAGS)
+	$(LLVM_CC) $(CFLAGS) -o $@ -T ../app.ld $(SRCS) $(LDFLAGS)
 
 clean :
 	-rm -rf $(TARGET)

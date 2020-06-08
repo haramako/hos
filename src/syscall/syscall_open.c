@@ -21,6 +21,7 @@ uint64_t syscall_open(uint64_t *args) {
 	kcheck_ok(err);
 	kcheck0(inode);
 
+	fd->type = FD_TYPE_INODE;
 	fd->inode = inode;
 
 	return fd_num;

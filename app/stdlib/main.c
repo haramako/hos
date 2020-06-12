@@ -22,5 +22,7 @@ int main(int argc, char **argv) {
 	len = fread(buf, 1, 1, stdin);
 	printf("len %d", len);
 
+	for (;;)
+		;
 	return 0;
 }

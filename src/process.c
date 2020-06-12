@@ -81,11 +81,14 @@ void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process
 	CPUContext *to = &to_proc->ctx->cpu_context;
 	int_info->greg = to->greg;
 	int_info->int_ctx = to->int_ctx;
+	klog("a %p", &t0);
 	if (from->cr3 != to->cr3) {
+		klog("b %p", to->cr3);
 		WriteCR3(to->cr3);
 		// proc_last_time_count = liumos->hpet->ReadMainCounterValue();
 	}
-	// klog("3 %p", int_info->int_ctx.rip);
+	klog("c");
+	klog("3 %p", int_info->int_ctx.rip);
 }
 
 void process_timer_handler(uint64_t intcode, InterruptInfo *info) {
@@ -99,14 +102,12 @@ void process_timer_handler(uint64_t intcode, InterruptInfo *info) {
 	process_switch_context(info, proc, next_proc);
 }
 
-#if 0
 __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {
 	assert(info);
 	Process *proc = g_scheduler.current;
 	Process *next_proc = scheduler_switch_process();
+	klog("sleep %p %p", proc, next_proc);
 	if (!next_proc) return; // no need to switching context.
 	process_switch_context(info, proc, next_proc);
+	// klog("rip=%p, rsp=%p", info->int_ctx.rip, info->int_ctx.rsp);
 }
-#else
-__attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info) {}
-#endif

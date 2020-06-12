@@ -14,6 +14,8 @@ uint64_t syscall_read(uint64_t *args) {
 	Process *proc = process_current();
 	FileDescriptor *fd = &proc->fds[fd_num];
 
+	Sleep();
+
 	switch (fd->type) {
 	case FD_TYPE_INODE: {
 

@@ -200,6 +200,7 @@ __attribute__((ms_abi)) uint64_t CompareAndSwap(uint64_t *, uint64_t);
 __attribute__((ms_abi)) void SwapGS(void);
 __attribute__((ms_abi)) uint64_t ReadRSP(void);
 __attribute__((ms_abi)) void ChangeRSP(uint64_t);
+void switch_rsp(uint64_t new_sp, void (*func)(void *data), void *data);
 __attribute__((ms_abi)) void RepeatMoveBytes(size_t count, const void *dst, const void *src);
 __attribute__((ms_abi)) void RepeatMove4Bytes(size_t count, const void *dst, const void *src);
 __attribute__((ms_abi)) void RepeatStore4Bytes(size_t count, const void *dst, uint32_t data);

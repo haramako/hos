@@ -217,6 +217,23 @@ ChangeRSP:
 	push rax
 	ret
 
+	// void switch_rsp(uint64_t new_sp, void (*func)(void *data), void *data);
+	// Switch rsp and call function.
+	.global switch_rsp
+switch_rsp:
+	push r15
+	mov r15, rsp // Save old rsp.
+	
+	mov rsp, rdi // Switch to new rsp.
+	
+	mov rdi, rdx
+	call rsi
+
+	mov rsp, r15 // Restore old rsp.
+	
+	pop r15
+	ret
+
 .global cdecl(RepeatMoveBytes)
 cdecl(RepeatMoveBytes):
 	// rcx: count

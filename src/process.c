@@ -34,7 +34,7 @@ Process *process_create(ProcessCreateParam *p) {
 
 	Process *process = process_new(ctx);
 	process->mm = mm;
-	process->fd_num = 2;
+	process->fd_num = 3;
 
 	process->fds[0].type = FD_TYPE_CONSOLE;
 	process->fds[1].type = FD_TYPE_CONSOLE;
@@ -81,14 +81,10 @@ void process_switch_context(InterruptInfo *int_info, Process *from_proc, Process
 	CPUContext *to = &to_proc->ctx->cpu_context;
 	int_info->greg = to->greg;
 	int_info->int_ctx = to->int_ctx;
-	klog("a %p", &t0);
 	if (from->cr3 != to->cr3) {
-		klog("b %p", to->cr3);
 		WriteCR3(to->cr3);
 		// proc_last_time_count = liumos->hpet->ReadMainCounterValue();
 	}
-	klog("c");
-	klog("3 %p", int_info->int_ctx.rip);
 }
 
 void process_timer_handler(uint64_t intcode, InterruptInfo *info) {
@@ -106,7 +102,7 @@ __attribute__((ms_abi)) void SleepHandler(uint64_t intcode, InterruptInfo *info)
 	assert(info);
 	Process *proc = g_scheduler.current;
 	Process *next_proc = scheduler_switch_process();
-	klog("sleep %p %p", proc, next_proc);
+	// klog("sleep %p %p", proc, next_proc);
 	if (!next_proc) return; // no need to switching context.
 	process_switch_context(info, proc, next_proc);
 	// klog("rip=%p, rsp=%p", info->int_ctx.rip, info->int_ctx.rsp);

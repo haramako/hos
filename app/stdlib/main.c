@@ -20,7 +20,8 @@ int main(int argc, char **argv) {
 	printf("malloc %p %p\n", (void *)x1, (void *)x2);
 
 	len = fread(buf, 1, 1, stdin);
-	printf("len %d", len);
+	buf[1] = '\0';
+	printf("len %d %s\n", len, buf);
 
 	for (;;)
 		;

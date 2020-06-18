@@ -12,3 +12,5 @@ Serial *serial_get_port(int serial_num);
 void serial_new(Serial *s, uint16_t port);
 bool serial_is_transmit_empty(Serial *s);
 void serial_send_char(Serial *s, char c);
+bool serial_is_received(Serial *s);
+char serial_read_char_received(Serial *s);

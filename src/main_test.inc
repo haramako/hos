@@ -117,7 +117,7 @@ static void process_test_one_() {
 
 		ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
 		Process *p = process_create(&param);
-		klog("process %p", p);
+		//klog("process %p", p);
 		//process_print(p);
 		// pme_print(new_pml4);
 	}
@@ -127,6 +127,49 @@ static void process_test_(int n) {
 	for (int i = 0; i < n; i++) {
 		process_test_one_();
 	}
+}
+
+// Process test 3
+
+Process* create_process(const char *file)
+{
+	error_t err;
+
+	char *bin = (char *)0x0000100000000000ULL;
+	PageMapEntry *new_pml4 = page_copy_page_map_table(page_current_pml4());
+	MemoryMap *mm = mm_new();
+	MemoryBlock *block = mm_map(mm, bin, 256, MM_ATTR_USER);
+	kcheck_ok(mem_alloc_memory_block(new_pml4, block));
+
+	uint8_t *buf = (uint8_t *)physical_memory_alloc(256);
+
+	INode *inode;
+	err = fs_open(file, 0, &inode);
+	//err = fs_open("STDLIB.ELF", 0, &inode);
+	//err = fs_open("HELLO.ELF", 0, &inode);
+	kcheck_ok(err);
+
+	size_t file_size = inode->file.size;
+	err = fs_read(inode, (char*)buf, 0, &file_size);
+	kcheck(err >= 0, "Read failed.");
+
+	ELFImage elf_image;
+	elf_load_exec((uint8_t*)buf, &elf_image);
+
+	Elf64_Ehdr *elf = (Elf64_Ehdr *)buf;
+
+	page_memcpy(new_pml4, bin, buf, inode->file.size);
+
+	EntryPoint entry_point = (EntryPoint)elf->e_entry;
+
+	ProcessCreateParam param = {.entry_point = entry_point, .pml4 = new_pml4};
+	Process *p = process_create(&param);
+
+	return p;
+}
+
+static void process_test3_() {
+	Process *p = create_process("stdlib.elf");
 }
 
 // Paging test.

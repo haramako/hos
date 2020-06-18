@@ -32,3 +32,16 @@ void serial_send_char(Serial *s, char c) {
 		;
 	WriteIOPort8(s->port, c);
 }
+
+void serial_get_char(Serial *s, char c) {
+	while (!serial_is_transmit_empty(s))
+		;
+	WriteIOPort8(s->port, c);
+}
+
+bool serial_is_received(Serial *s) { return ReadIOPort8(s->port + 5) & 1; }
+
+char serial_read_char_received(Serial *s) {
+	if (!serial_is_received(s)) return 0;
+	return ReadIOPort8(s->port);
+}

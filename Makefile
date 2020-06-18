@@ -63,3 +63,6 @@ format :
 
 gdb:
 	gdb -x debug_kernel.gdb
+
+setup:
+	CC=$(LLVM_CC) AR=$(LLVM_AR) RANLIB=$(LLVM_RANLIB) scripts/build_newlib.sh

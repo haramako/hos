@@ -18,9 +18,12 @@ tar -xf ${NEWLIB_TAR} -C ${TMP}
 
 mkdir -p ${NEWLIB_BUILD_DIR}
 
+echo $CC
+
 cd ${NEWLIB_BUILD_DIR}
 ${NEWLIB_SRC_DIR}/newlib/configure \
   --target=x86_64-elf --disable-multilib \
   --prefix=${NEWLIB_OUT} \
   CFLAGS="-g -nostdlibinc -O2 -target x86_64-unknown-none-elf -mcmodel=large"
-make -j4 install
+make -j1
+make install
